@@ -11,14 +11,17 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "available_time")
-public class AvailableTimeSlot {
+@Table(name = "time_slot")
+public class TimeSlot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "time_slot", nullable = false)
-    private LocalDateTime timeSlot;
+    @Column(name = "time", nullable = false)
+    private LocalDateTime time;
+
+    @Column(name = "available")
+    private boolean available;
 
     @ManyToOne
     @JoinColumn(name = "specialist_id", nullable = false)

@@ -26,5 +26,5 @@ public class Specialist extends User {
     private List<Order> orders;
 
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AvailableTimeSlot> availableTime;
+    private List<TimeSlot> schedule;
 }

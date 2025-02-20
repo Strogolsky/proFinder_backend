@@ -1,6 +1,7 @@
-package fit.biejk.model;
+package fit.biejk.entity;
 
 
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @MappedSuperclass
-public class User {
+public class User extends PanacheEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;

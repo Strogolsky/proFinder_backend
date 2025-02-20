@@ -1,4 +1,4 @@
-package fit.biejk.model;
+package fit.biejk.entity;
 
 public enum Specialization {
     LAWYER

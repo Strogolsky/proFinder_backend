@@ -1,4 +1,4 @@
-package fit.biejk.model;
+package fit.biejk.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

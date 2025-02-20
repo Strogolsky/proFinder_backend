@@ -4,6 +4,7 @@ import fit.biejk.entity.Client;
 import fit.biejk.repository.ClientRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class ClientService {
     @Inject
     ClientRepository clientRepository;
 
+    @Transactional
     public Client create(Client client) {
         clientRepository.persist(client);
         return client;

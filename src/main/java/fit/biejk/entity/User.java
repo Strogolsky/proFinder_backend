@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class User extends PanacheEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(name = "email", nullable = false, unique =true)
     private String email;

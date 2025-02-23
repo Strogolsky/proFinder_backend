@@ -36,7 +36,7 @@ public class ClientResource {
     @PUT
     @Path("/{id}")
     public Response update(@PathParam("id") Long id, Client client) {
-        Client result = clientService.update(client);
+        Client result = clientService.update(id, client);
         return Response.ok(result).build();
     }
 

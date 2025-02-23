@@ -5,6 +5,7 @@ import fit.biejk.repository.ClientRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -31,14 +32,14 @@ public class ClientService {
     }
 
     @Transactional
-    public Client update(Client client) {
-        Client old = clientRepository.findById(client.getId());
+    public Client update(Long id, Client client) {
+        Client old = clientRepository.findById(id);
         if(old == null) {
-            // todo
+            throw new NotFoundException("Client with id " + id + " not found");
         }
+        // todo add change data
         old.setFirstName(client.getFirstName());
         old.setLastName(client.getLastName());
-        clientRepository.persist(old);
         return old;
     }
 

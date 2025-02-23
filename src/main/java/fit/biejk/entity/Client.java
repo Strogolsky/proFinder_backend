@@ -1,5 +1,6 @@
 package fit.biejk.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -18,5 +19,6 @@ import java.util.List;
 @Table(name = "client")
 public class Client extends User {
     @OneToMany(mappedBy = "client")
+    @JsonbTransient
     private List<Order> orders;
 }

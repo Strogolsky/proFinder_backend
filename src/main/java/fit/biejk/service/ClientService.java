@@ -30,6 +30,7 @@ public class ClientService {
         return clientRepository.findById(id);
     }
 
+    @Transactional
     public Client update(Client client) {
         Client old = clientRepository.findById(client.getId());
         if(old == null) {
@@ -41,6 +42,7 @@ public class ClientService {
         return old;
     }
 
+    @Transactional
     public void delete(Long id) {
         Client client = clientRepository.findById(id);
         clientRepository.delete(client);

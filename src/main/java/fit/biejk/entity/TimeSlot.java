@@ -1,5 +1,6 @@
 package fit.biejk.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,5 +26,6 @@ public class TimeSlot {
 
     @ManyToOne
     @JoinColumn(name = "specialist_id", nullable = false)
+    @JsonbTransient
     private Specialist specialist;
 }

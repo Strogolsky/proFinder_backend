@@ -37,6 +37,10 @@ public class SpecialistService {
         // todo add change data
         old.setFirstName(client.getFirstName());
         old.setLastName(client.getLastName());
+
+        specialistRepository.flush();
+        old.getSchedule().size(); // todo fix when add DTO
+
         return old;
     }
 

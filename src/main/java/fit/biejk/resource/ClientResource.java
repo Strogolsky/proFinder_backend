@@ -5,6 +5,7 @@ import fit.biejk.entity.Client;
 import fit.biejk.mapper.ClientMapper;
 import fit.biejk.service.ClientService;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
@@ -34,7 +35,7 @@ public class ClientResource {
     }
 
     @POST
-    public Response create(ClientDto dto) {
+    public Response create(@Valid ClientDto dto) {
         Client entity = clientMapper.toEntity(dto);
         Client result = clientService.create(entity);
         return Response.ok(clientMapper.toDto(result)).build();
@@ -42,7 +43,7 @@ public class ClientResource {
 
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") Long id, ClientDto dto) {
+    public Response update(@PathParam("id") Long id, @Valid ClientDto dto) {
         Client entity = clientMapper.toEntity(dto);
         Client result = clientService.update(id, entity);
         return Response.ok(clientMapper.toDto(result)).build();

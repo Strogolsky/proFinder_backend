@@ -5,6 +5,7 @@ import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.SpecialistMapper;
 import fit.biejk.service.SpecialistService;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
@@ -32,7 +33,7 @@ public class SpecialistResource {
     }
 
     @POST
-    public Response create(SpecialistDto dto) {
+    public Response create(@Valid SpecialistDto dto) {
         Specialist entity = specialistMapper.toEntity(dto);
         Specialist result = specialistService.create(entity);
         return Response.ok(specialistMapper.toDto(result)).build();
@@ -40,7 +41,7 @@ public class SpecialistResource {
 
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") Long id, SpecialistDto dto) {
+    public Response update(@PathParam("id") Long id, @Valid SpecialistDto dto) {
         Specialist entity = specialistMapper.toEntity(dto);
         Specialist result = specialistService.update(id, entity);
         return Response.ok(specialistMapper.toDto(result)).build();

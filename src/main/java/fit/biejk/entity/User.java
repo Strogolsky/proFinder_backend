@@ -34,6 +34,10 @@ public class User extends PanacheEntityBase {
     @Column(name = "phone_number", unique = true, length = 20)
     private String phoneNumber;
 
+    @Column(name = "location")
+    @Enumerated(EnumType.STRING)
+    private Location location;
+
 
     @Column(name = "createAt", nullable = false, updatable = false)
     private final LocalDateTime createAt = LocalDateTime.now();

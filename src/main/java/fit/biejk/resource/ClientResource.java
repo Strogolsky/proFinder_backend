@@ -1,6 +1,8 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.ClientDto;
 import fit.biejk.entity.Client;
+import fit.biejk.mapper.ClientMapper;
 import fit.biejk.service.ClientService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -12,32 +14,38 @@ import java.util.List;
 public class ClientResource {
 
     @Inject
+    ClientMapper clientMapper;
+
+    @Inject
     ClientService clientService;
 
     @GET
     public Response getAll() {
         List<Client> result = clientService.getAll();
-        return Response.ok(result).build();
+        return Response.ok(clientMapper.toDtoList(result)).build();
     }
 
     @GET
     @Path("/{id}")
     public Response getById(@PathParam("id") Long id) {
-        return Response.ok(clientService.getById(id)).build();
+        Client result = clientService.getById(id);
+        return Response.ok(clientMapper.toDto(result)).build();
 
     }
 
     @POST
-    public Response create(Client client) {
-        Client result = clientService.create(client);
-        return Response.ok(result).build();
+    public Response create(ClientDto dto) {
+        Client entity = clientMapper.toEntity(dto);
+        Client result = clientService.create(entity);
+        return Response.ok(clientMapper.toDto(result)).build();
     }
 
     @PUT
     @Path("/{id}")
-    public Response update(@PathParam("id") Long id, Client client) {
-        Client result = clientService.update(id, client);
-        return Response.ok(result).build();
+    public Response update(@PathParam("id") Long id, ClientDto dto) {
+        Client entity = clientMapper.toEntity(dto);
+        Client result = clientService.update(id, entity);
+        return Response.ok(clientMapper.toDto(result)).build();
     }
 
     @DELETE

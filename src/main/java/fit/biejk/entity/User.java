@@ -31,7 +31,7 @@ public class User extends PanacheEntityBase {
     @Column(name = "last_name", length = 50)
     private String lastName;
 
-    @Column(name = "phone_number", unique = true, length = 20)
+    @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
     @Column(name = "location")

@@ -37,8 +37,13 @@ public class ClientResource {
     @POST
     public Response create(@Valid ClientDto dto) {
         Client entity = clientMapper.toEntity(dto);
-        Client result = clientService.create(entity);
-        return Response.ok(clientMapper.toDto(result)).build();
+        try {
+            Client result = clientService.create(entity);
+            return Response.ok(clientMapper.toDto(result)).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+
     }
 
     @PUT

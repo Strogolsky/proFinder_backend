@@ -16,9 +16,12 @@ public class ClientService {
 
     @Inject
     ClientRepository clientRepository;
+    @Inject
+    UserService userService;
 
     @Transactional
     public Client create(Client client) {
+        userService.checkUniqueEmail(client.getEmail());
         clientRepository.persist(client);
         return client;
     }
@@ -37,9 +40,7 @@ public class ClientService {
         if(old == null) {
             throw new NotFoundException("Client with id " + id + " not found");
         }
-        // todo add change data
-        old.setFirstName(client.getFirstName());
-        old.setLastName(client.getLastName());
+        userService.updateCommonFields(old, client);
         return old;
     }
 

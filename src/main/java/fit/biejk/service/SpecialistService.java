@@ -2,6 +2,7 @@ package fit.biejk.service;
 
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.SpecialistRepository;
+import fit.biejk.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -13,9 +14,12 @@ import java.util.List;
 public class SpecialistService {
     @Inject
     SpecialistRepository specialistRepository;
+    @Inject
+    UserService userService;
 
     @Transactional
-    public Specialist create(Specialist specialist) {
+    public Specialist create(Specialist specialist)  {
+        userService.checkUniqueEmail(specialist.getEmail());
         specialistRepository.persist(specialist);
         return specialist;
     }
@@ -29,15 +33,13 @@ public class SpecialistService {
     }
 
     @Transactional
-    public Specialist update(Long id, Specialist client) {
+    public Specialist update(Long id, Specialist specialist) {
         Specialist old = specialistRepository.findById(id);
         if(old == null) {
             throw new NotFoundException("Specialist with id " + id + " not found");
         }
-        // todo add change data
-        old.setFirstName(client.getFirstName());
-        old.setLastName(client.getLastName());
-
+        userService.updateCommonFields(old, specialist);
+        old.setDescription(specialist.getDescription());
         specialistRepository.flush();
         old.getSchedule().size(); // todo fix when add DTO
 

@@ -35,8 +35,13 @@ public class SpecialistResource {
     @POST
     public Response create(@Valid SpecialistDto dto) {
         Specialist entity = specialistMapper.toEntity(dto);
-        Specialist result = specialistService.create(entity);
-        return Response.ok(specialistMapper.toDto(result)).build();
+        try {
+            Specialist result = specialistService.create(entity);
+            return Response.ok(specialistMapper.toDto(result)).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        }
+
     }
 
     @PUT

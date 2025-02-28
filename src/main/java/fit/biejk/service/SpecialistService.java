@@ -40,6 +40,7 @@ public class SpecialistService {
         }
         userService.updateCommonFields(old, specialist);
         old.setDescription(specialist.getDescription());
+        old.setSpecialization(specialist.getSpecialization());
         specialistRepository.flush();
         old.getSchedule().size(); // todo fix when add DTO
 

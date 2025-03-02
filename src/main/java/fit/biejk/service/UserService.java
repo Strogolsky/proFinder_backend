@@ -5,6 +5,7 @@ import fit.biejk.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import jakarta.ws.rs.NotFoundException;
 import lombok.NoArgsConstructor;
 
 @ApplicationScoped
@@ -19,10 +20,27 @@ public class UserService {
         }
     }
     @Transactional
-    public void updateCommonFields(User existingUser, User newUser) {
+    public User update(Long userId, User newUser) {
+        User existingUser = userRepository.findById(userId);
+
+        if (existingUser == null) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+
         existingUser.setPhoneNumber(newUser.getPhoneNumber());
         existingUser.setLocation(newUser.getLocation());
         existingUser.setFirstName(newUser.getFirstName());
         existingUser.setLastName(newUser.getLastName());
+
+        return existingUser;
+    }
+
+    @Transactional
+    public void delete(Long userId) {
+        User existingUser = userRepository.findById(userId);
+        if (existingUser == null) {
+            throw new NotFoundException("User with id " + userId + " not found");
+        }
+        userRepository.delete(existingUser);
     }
 }

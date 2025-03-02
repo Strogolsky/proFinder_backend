@@ -40,14 +40,13 @@ public class ClientService {
         if(old == null) {
             throw new NotFoundException("Client with id " + id + " not found");
         }
-        userService.updateCommonFields(old, client);
+        userService.update(id, client);
         return old;
     }
 
     @Transactional
     public void delete(Long id) {
-        Client client = clientRepository.findById(id);
-        clientRepository.delete(client);
+        userService.delete(id);
     }
 
 

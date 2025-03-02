@@ -2,7 +2,6 @@ package fit.biejk.service;
 
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.SpecialistRepository;
-import fit.biejk.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -38,7 +37,7 @@ public class SpecialistService {
         if(old == null) {
             throw new NotFoundException("Specialist with id " + id + " not found");
         }
-        userService.updateCommonFields(old, specialist);
+        userService.update(id, specialist);
         old.setDescription(specialist.getDescription());
         old.setSpecialization(specialist.getSpecialization());
         specialistRepository.flush();
@@ -49,7 +48,6 @@ public class SpecialistService {
 
     @Transactional
     public void delete(Long id) {
-        Specialist specialist = specialistRepository.findById(id);
-        specialistRepository.delete(specialist);
+        userService.delete(id);
     }
 }

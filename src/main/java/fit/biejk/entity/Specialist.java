@@ -1,5 +1,6 @@
-package fit.biejk.model;
+package fit.biejk.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,7 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "specialist")
 public class Specialist extends User {
-    @Column(name = "specialization", nullable = false)
+    @Column(name = "specialization")
     @Enumerated(EnumType.STRING)
     private Specialization specialization;
 
@@ -23,6 +24,7 @@ public class Specialist extends User {
     private String description;
 
     @OneToMany(mappedBy = "specialist")
+    @JsonbTransient
     private List<Order> orders;
 
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)

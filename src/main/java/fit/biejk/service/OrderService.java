@@ -1,10 +1,8 @@
 package fit.biejk.service;
 
-import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.entity.Order;
 import fit.biejk.entity.OrderProposal;
 import fit.biejk.entity.OrderStatus;
-import fit.biejk.entity.ProposalStatus;
 import fit.biejk.repository.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -54,7 +52,16 @@ public class OrderService {
 
     public List<OrderProposal> getOrderProposals(Long orderId) {
         Order order = getById(orderId);
-        return order.getOrderProposals();
+        return orderProposalService.getByOrderId(order);
+    }
+
+    public OrderProposal getOrderProposalById(Long orderId, Long proposalId) {
+        Order order = getById(orderId);
+        OrderProposal proposal = orderProposalService.getById(proposalId);
+        if (!proposal.getOrder().equals(order)) {
+            throw new IllegalArgumentException("Proposal does not belong to this order");
+        }
+        return proposal;
     }
 
     @Transactional

@@ -85,9 +85,16 @@ public class OrderResource {
 
     @GET
     @Path("/{orderId}/proposal")
-    public Response getProposal(Long orderId) {
+    public Response getAllProposal(Long orderId) {
         List<OrderProposal> proposals = orderService.getOrderProposals(orderId);
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
+    }
+
+    @GET
+    @Path("/{orderId}/proposal/{proposalId}")
+    public Response getProposal(Long orderId, Long proposalId) {
+        OrderProposal result = orderService.getOrderProposalById(orderId, proposalId);
+        return Response.ok(orderProposalMapper.toDto(result)).build();
     }
 
     @PUT

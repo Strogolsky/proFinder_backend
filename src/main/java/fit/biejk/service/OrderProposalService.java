@@ -6,6 +6,7 @@ import fit.biejk.entity.ProposalStatus;
 import fit.biejk.repository.OrderProposalRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
@@ -25,13 +26,25 @@ public class OrderProposalService {
         approvedProposal.setStatus(ProposalStatus.APPROVED);
         orderProposalRepository.persist(approvedProposal);
 
-        List<OrderProposal> allProposals = orderProposalRepository.findByOrder(order);
+        List<OrderProposal> allProposals = getByOrderId(order);
         for (OrderProposal proposal : allProposals) {
             if (!proposal.getId().equals(approvedProposal.getId())) {
                 proposal.setStatus(ProposalStatus.REJECTED);
                 orderProposalRepository.persist(proposal);
             }
         }
+    }
+
+    public OrderProposal getById(Long proposalId) {
+        OrderProposal result = orderProposalRepository.findById(proposalId);
+        if (result == null) {
+            throw new NotFoundException("OrderProposal with id " + proposalId + " not found");
+        }
+        return result;
+    }
+
+    public List<OrderProposal> getByOrderId( Order order) {
+        return orderProposalRepository.findByOrder(order);
     }
 
 }

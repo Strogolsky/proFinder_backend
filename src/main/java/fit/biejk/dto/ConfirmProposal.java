@@ -1,28 +1,19 @@
 package fit.biejk.dto;
 
-import fit.biejk.entity.ProposalStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderProposalDto {
-
-    private Long id;
-
-    private Long orderId;
-
-    private Long specialistId;
-
+public class ConfirmProposal {
     @NotBlank
-    private String description;
-
+    private LocalDateTime finalDeadline;
     @NotNull
-    private int price;
-
-    private ProposalStatus status;
+    private int finalPrice;
 }

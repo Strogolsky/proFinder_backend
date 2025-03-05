@@ -1,14 +1,17 @@
 package fit.biejk.service;
 
+import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.entity.Order;
 import fit.biejk.entity.OrderProposal;
 import fit.biejk.entity.OrderStatus;
+import fit.biejk.entity.ProposalStatus;
 import fit.biejk.repository.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
@@ -66,6 +69,19 @@ public class OrderService {
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CLIENT_PENDING));
         orderRepository.persist(order);
         return proposal;
+    }
+    @Transactional
+    public Order confirm(Long orderId, Long proposalId, int price, LocalDateTime deadline) {
+        Order order = getById(orderId);
+
+        order.setPrice(price);
+        order.setDeadline(deadline);
+
+        orderProposalService.approveProposal(order, proposalId);
+
+        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
+        orderRepository.persist(order);
+        return order;
     }
 
 }

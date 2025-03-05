@@ -1,5 +1,6 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
 import fit.biejk.entity.Client;
@@ -68,7 +69,6 @@ public class OrderResource {
 
         return Response.ok(orderProposalMapper.toDto(result)).build();
     }
-
     @GET
     @Path("/{orderId}")
     public Response getById(Long orderId) {
@@ -82,10 +82,19 @@ public class OrderResource {
         return Response.ok(orderMapper.toDtoList(result)).build();
     }
 
+
     @GET
     @Path("/{orderId}/proposal")
     public Response getProposal(Long orderId) {
         List<OrderProposal> proposals = orderService.getOrderProposals(orderId);
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
+    }
+
+    @PUT
+    @Path("/{orderId}/proposal/{proposalId}/confirm")
+    public Response confirm(Long orderId, Long proposalId, @Valid ConfirmProposal confirm) {
+        Order result = orderService.confirm(orderId,proposalId,confirm.getFinalPrice(), confirm.getFinalDeadline());
+
+        return Response.ok(orderMapper.toDto(result)).build();
     }
 }

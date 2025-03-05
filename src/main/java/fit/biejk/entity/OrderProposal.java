@@ -29,4 +29,8 @@ public class OrderProposal {
     @Column(name = "price", nullable = false)
     private int price;
 
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private ProposalStatus status;
+
 }

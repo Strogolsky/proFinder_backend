@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 public enum OrderStatus {
-    SPECIALIST_PENDING,
+    CREATED,
     CANCELLED,
     CLIENT_PENDING,
     COMPLETED;
@@ -13,7 +13,7 @@ public enum OrderStatus {
     private static final Map<OrderStatus, Set<OrderStatus>> validTransitions = new HashMap<>();
 
     static {
-        validTransitions.put(SPECIALIST_PENDING,Set.of(CANCELLED, CLIENT_PENDING));
+        validTransitions.put(CREATED,Set.of(CANCELLED, CLIENT_PENDING));
 
         validTransitions.put(CLIENT_PENDING, Set.of(CLIENT_PENDING, CANCELLED, COMPLETED));
 
@@ -27,7 +27,7 @@ public enum OrderStatus {
     }
 
     public static OrderStatus getStartOrder() {
-        return OrderStatus.SPECIALIST_PENDING;
+        return OrderStatus.CREATED;
     }
 
     public OrderStatus transitionTo(OrderStatus newStatus) {

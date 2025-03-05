@@ -23,9 +23,9 @@ public class Specialist extends User {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "specialist")
+    @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonbTransient
-    private List<Order> orders;
+    private List<OrderProposal> orderProposals;
 
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSlot> schedule;

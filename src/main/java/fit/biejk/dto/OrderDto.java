@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class OrderDto {
     private Long id;
     private Long clientId;
-    private Long specialistId;
     private Specialization specialization;
     private OrderStatus status;
     private String description;

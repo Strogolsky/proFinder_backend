@@ -1,11 +1,13 @@
 package fit.biejk.entity;
 
+import jakarta.json.bind.annotation.JsonbTransient;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -25,13 +27,13 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private Specialization specialization;
 
-    @ManyToOne
-    @JoinColumn(name = "specialist_id")
-    private Specialist specialist;
-
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonbTransient
+    private List<OrderProposal> orderProposals;
 
     @Column(name = "description")
     private String description;

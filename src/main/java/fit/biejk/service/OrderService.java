@@ -28,6 +28,23 @@ public class OrderService {
     }
 
     @Transactional
+    public Order update(Long orderId, Order order) {
+        Order old = getById(orderId);
+
+        old.setDescription(order.getDescription());
+        old.setPrice(order.getPrice());
+        old.setDeadline(order.getDeadline());
+
+        return order;
+    }
+
+    @Transactional
+    public void delete(Long orderId) {
+        Order order = getById(orderId);
+        orderRepository.delete(order);
+    }
+
+    @Transactional
     public Order cancel(Long orderId) {
         Order order = orderRepository.findById(orderId);
         if(order == null) {

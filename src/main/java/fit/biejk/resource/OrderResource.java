@@ -14,10 +14,7 @@ import fit.biejk.service.OrderService;
 import fit.biejk.service.SpecialistService;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
@@ -47,6 +44,14 @@ public class OrderResource {
 //            order.setSpecialist(specialist);
 //        }
         Order result = orderService.create(order);
+        return Response.ok(orderMapper.toDto(result)).build();
+    }
+
+    @PUT
+    @Path("/{orderId}")
+    public Response update(Long orderId, @Valid OrderDto dto) {
+        Order order = orderMapper.toEntity(dto);
+        Order result = orderService.update(orderId, order);
         return Response.ok(orderMapper.toDto(result)).build();
     }
 
@@ -103,5 +108,12 @@ public class OrderResource {
         Order result = orderService.confirm(orderId,proposalId,confirm.getFinalPrice(), confirm.getFinalDeadline());
 
         return Response.ok(orderMapper.toDto(result)).build();
+    }
+
+    @DELETE
+    @Path("/{orderId}")
+    public Response delete(Long orderId) {
+        orderService.delete(orderId);
+        return Response.ok().build();
     }
 }

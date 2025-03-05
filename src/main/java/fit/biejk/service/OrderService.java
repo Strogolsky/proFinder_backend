@@ -67,6 +67,11 @@ public class OrderService {
     @Transactional
     public OrderProposal proposal(Long orderId, OrderProposal proposal) {
         Order order = getById(orderId);
+
+        if(haveSpecialistProposal(order, proposal)) {
+            throw new IllegalArgumentException("Order proposal already exists");
+        }
+
         proposal.setOrder(order);
 
         orderProposalService.create(proposal);
@@ -89,6 +94,17 @@ public class OrderService {
         order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
         orderRepository.persist(order);
         return order;
+    }
+
+    public boolean haveSpecialistProposal(Order order, OrderProposal proposal) {
+        List<OrderProposal> orderProposals = order.getOrderProposals();
+
+        for (OrderProposal orderProposal : orderProposals) {
+            if (orderProposal.getSpecialist().getId().equals(proposal.getSpecialist().getId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

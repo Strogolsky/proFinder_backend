@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConfirmProposal {
-    @NotBlank
+
     private LocalDateTime finalDeadline;
-    @NotNull
+
     private int finalPrice;
 }

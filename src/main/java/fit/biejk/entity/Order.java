@@ -15,15 +15,23 @@ import java.time.LocalDateTime;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
+    @Column(name = "specialization")
+    @Enumerated(EnumType.STRING)
+    private Specialization specialization;
+
     @ManyToOne
-    @JoinColumn(name = "specialist_id", nullable = false)
+    @JoinColumn(name = "specialist_id")
     private Specialist specialist;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     @Column(name = "description")
     private String description;

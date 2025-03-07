@@ -28,15 +28,16 @@ public class SpecialistService {
     }
 
     public Specialist getById(Long id) {
-        return specialistRepository.findById(id);
+        Specialist result = specialistRepository.findById(id);
+        if (result == null) {
+            throw new NotFoundException("Specialist with id " + id + " not found");
+        }
+        return result;
     }
 
     @Transactional
     public Specialist update(Long id, Specialist specialist) {
-        Specialist old = specialistRepository.findById(id);
-        if(old == null) {
-            throw new NotFoundException("Specialist with id " + id + " not found");
-        }
+        Specialist old = getById(id);
         userService.update(id, specialist);
         old.setDescription(specialist.getDescription());
         old.setSpecialization(specialist.getSpecialization());

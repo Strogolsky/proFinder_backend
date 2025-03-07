@@ -31,15 +31,16 @@ public class ClientService {
     }
 
     public Client getById(Long id) {
-        return clientRepository.findById(id);
+        Client result = clientRepository.findById(id);
+        if(result == null) {
+            throw new NotFoundException("Client with id " + id + " not found");
+        }
+        return result;
     }
 
     @Transactional
     public Client update(Long id, Client client) {
-        Client old = clientRepository.findById(id);
-        if(old == null) {
-            throw new NotFoundException("Client with id " + id + " not found");
-        }
+        Client old = getById(id);
         userService.update(id, client);
         return old;
     }

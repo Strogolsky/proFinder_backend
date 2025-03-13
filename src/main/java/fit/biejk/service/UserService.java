@@ -1,5 +1,6 @@
 package fit.biejk.service;
 
+import fit.biejk.entity.Client;
 import fit.biejk.entity.User;
 import fit.biejk.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -7,6 +8,9 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.NoArgsConstructor;
+import org.jose4j.jwk.Use;
+
+import java.util.Optional;
 
 @ApplicationScoped
 @NoArgsConstructor
@@ -19,6 +23,15 @@ public class UserService {
             throw new IllegalArgumentException("User " + email + " already exists");
         }
     }
+
+    public User getByEmail(String email) {
+        Optional<User> user = userRepository.findByEmail(email);
+        if(user.isEmpty()) {
+            throw new NotFoundException("User " + email + " not found");
+        }
+        return user.get();
+    }
+
     @Transactional
     public User update(Long userId, User newUser) {
         User existingUser = userRepository.findById(userId);

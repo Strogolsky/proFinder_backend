@@ -9,9 +9,13 @@ import fit.biejk.entity.OrderProposal;
 import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
+import fit.biejk.service.AuthService;
 import fit.biejk.service.ClientService;
 import fit.biejk.service.OrderService;
 import fit.biejk.service.SpecialistService;
+import io.quarkus.security.Authenticated;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -29,34 +33,38 @@ public class OrderResource {
     ClientService clientService;
     @Inject
     SpecialistService specialistService;
+    @Inject
+    AuthService authService;
 
     @Inject
     OrderProposalMapper orderProposalMapper;
 
     @POST
+    @RolesAllowed("CLIENT")
     public Response create(@Valid OrderDto dto) {
         Order order = orderMapper.toEntity(dto);
 
-        Client client = clientService.getById(dto.getClientId());
+        Long clientId = authService.getCurrentUserId();
+        Client client = clientService.getById(clientId);
         order.setClient(client);
-//        if (dto.getSpecialistId() != null) {
-//            Specialist specialist = specialistService.getById(dto.getSpecialistId());
-//            order.setSpecialist(specialist);
-//        }
+
         Order result = orderService.create(order);
         return Response.ok(orderMapper.toDto(result)).build();
     }
 
     @PUT
     @Path("/{orderId}")
+    @RolesAllowed("CLIENT")
     public Response update(Long orderId, @Valid OrderDto dto) {
         Order order = orderMapper.toEntity(dto);
+
         Order result = orderService.update(orderId, order);
         return Response.ok(orderMapper.toDto(result)).build();
     }
 
     @PUT
     @Path("/{orderId}/cancel")
+    @RolesAllowed("CLIENT")
     public Response cancel(Long orderId) {
         Order result = orderService.cancel(orderId);
         return Response.ok(orderMapper.toDto(result)).build();
@@ -64,11 +72,13 @@ public class OrderResource {
 
     @PUT
     @Path("/{orderId}/proposal")
+    @RolesAllowed("SPECIALIST")
     public Response proposal(Long orderId, @Valid OrderProposalDto proposalDto) {
         OrderProposal proposal = orderProposalMapper.toEntity(proposalDto);
-        Specialist specialist = specialistService.getById(proposalDto.getSpecialistId());
-        proposal.setSpecialist(specialist);
 
+        Long specialistId = authService.getCurrentUserId();
+        Specialist specialist = specialistService.getById(specialistId);
+        proposal.setSpecialist(specialist);
 
         OrderProposal result = orderService.proposal(orderId, proposal);
 
@@ -76,12 +86,14 @@ public class OrderResource {
     }
     @GET
     @Path("/{orderId}")
+    @PermitAll
     public Response getById(Long orderId) {
         Order result = orderService.getById(orderId);
         return Response.ok(orderMapper.toDto(result)).build();
     }
 
     @GET
+    @PermitAll
     public Response getAll() {
         List<Order> result = orderService.getAll();
         return Response.ok(orderMapper.toDtoList(result)).build();
@@ -90,6 +102,7 @@ public class OrderResource {
 
     @GET
     @Path("/{orderId}/proposal")
+    @RolesAllowed("CLIENT")
     public Response getAllProposal(Long orderId) {
         List<OrderProposal> proposals = orderService.getOrderProposals(orderId);
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
@@ -97,6 +110,7 @@ public class OrderResource {
 
     @GET
     @Path("/{orderId}/proposal/{proposalId}")
+    @RolesAllowed({"CLIENT", "SPECIALIST"})
     public Response getProposal(Long orderId, Long proposalId) {
         OrderProposal result = orderService.getOrderProposalById(orderId, proposalId);
         return Response.ok(orderProposalMapper.toDto(result)).build();
@@ -104,6 +118,7 @@ public class OrderResource {
 
     @PUT
     @Path("/{orderId}/proposal/{proposalId}/confirm")
+    @RolesAllowed("CLIENT")
     public Response confirm(Long orderId, Long proposalId, @Valid ConfirmProposal confirm) {
         Order result = orderService.confirm(orderId,proposalId,confirm.getFinalPrice(), confirm.getFinalDeadline());
 
@@ -112,6 +127,7 @@ public class OrderResource {
 
     @DELETE
     @Path("/{orderId}")
+    @RolesAllowed("CLIENT")
     public Response delete(Long orderId) {
         orderService.delete(orderId);
         return Response.ok().build();

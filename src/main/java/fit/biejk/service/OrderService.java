@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
+import jakarta.ws.rs.core.Response;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +21,9 @@ public class OrderService {
     @Inject
     OrderProposalService orderProposalService;
 
+    @Inject
+    AuthService authService;
+
     @Transactional
     public Order create(Order order) {
         order.setStatus(OrderStatus.getStartOrder());
@@ -31,6 +35,10 @@ public class OrderService {
     public Order update(Long orderId, Order order) {
         Order old = getById(orderId);
 
+        if (!authService.isCurrentUser(old.getClient().getId())) {
+            throw new IllegalArgumentException();
+        }
+
         old.setDescription(order.getDescription());
         old.setPrice(order.getPrice());
         old.setDeadline(order.getDeadline());
@@ -41,15 +49,22 @@ public class OrderService {
     @Transactional
     public void delete(Long orderId) {
         Order order = getById(orderId);
+
+        if (!authService.isCurrentUser(order.getClient().getId())) {
+            throw new IllegalArgumentException();
+        }
+
         orderRepository.delete(order);
     }
 
     @Transactional
     public Order cancel(Long orderId) {
-        Order order = orderRepository.findById(orderId);
-        if(order == null) {
-            throw new NotFoundException("Order not found");
+        Order order = getById(orderId);
+
+        if (!authService.isCurrentUser(order.getClient().getId())) {
+            throw new IllegalArgumentException();
         }
+
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CANCELLED));
         orderRepository.persist(order);
         return order;
@@ -57,6 +72,7 @@ public class OrderService {
 
     public Order getById(Long orderId) {
         Order order = orderRepository.findById(orderId);
+
         if(order == null) {
             throw new NotFoundException("Order not found");
         }
@@ -102,6 +118,10 @@ public class OrderService {
     @Transactional
     public Order confirm(Long orderId, Long proposalId, int price, LocalDateTime deadline) {
         Order order = getById(orderId);
+
+        if (!authService.isCurrentUser(order.getClient().getId())) {
+            throw new IllegalArgumentException();
+        }
 
         order.setPrice(price);
         order.setDeadline(deadline);

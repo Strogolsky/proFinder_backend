@@ -19,7 +19,7 @@ public class SpecialistDto {
     private Long id;
 
     @Email
-    private String email; // todo delete, when security added
+    private String email;
 
     @Length(max = 50)
     private String firstName;
@@ -27,7 +27,7 @@ public class SpecialistDto {
     @Length(max = 50)
     private String lastName;
 
-    private String password; // todo delete, when security added
+    private String password; // todo delete, when create response
 
     @Length(max = 20)
     private String phoneNumber;

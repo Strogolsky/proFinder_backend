@@ -5,11 +5,13 @@ import fit.biejk.entity.Client;
 import fit.biejk.entity.Specialist;
 import fit.biejk.entity.User;
 import fit.biejk.entity.UserRole;
+import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.Duration;
+import java.util.List;
 
 @ApplicationScoped
 public class AuthService {
@@ -21,6 +23,9 @@ public class AuthService {
 
     @Inject
     UserService userService;
+
+    @Inject
+    SecurityIdentity securityIdentity;
 
     public String signUp(String email, String password, UserRole role) {
         String jwtToken = "";
@@ -59,14 +64,19 @@ public class AuthService {
 
     private String generateJWT(User user, UserRole role) {
         return Jwt.issuer("quarkus-app")
-                .subject(user.getEmail())
-                .claim("role", role)
+                .subject(user.getId().toString())
+                .claim("groups", List.of(user.getRole().name()))
                 .expiresIn(Duration.ofHours(24))
                 .sign();
     }
 
     private boolean verifyPassword(String password, String hashed) {
         return BCrypt.verifyer().verify(password.toCharArray(), hashed).verified;
+    }
+
+    public Long getCurrentUserId() {
+        System.out.println(securityIdentity.getPrincipal().getName());
+        return Long.parseLong(securityIdentity.getPrincipal().getName());
     }
 
     private String hashPassword(String password) {

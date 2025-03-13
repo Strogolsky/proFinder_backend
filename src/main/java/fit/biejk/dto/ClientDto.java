@@ -16,15 +16,13 @@ public class ClientDto {
     private Long id;
 
     @Email
-    private String email; // todo delete, when security added
+    private String email;
 
     @Length(max = 50)
     private String firstName;
 
     @Length(max = 50)
     private String lastName;
-
-    private String password; // todo delete, when security added
 
     @Length(max = 20)
     private String phoneNumber;

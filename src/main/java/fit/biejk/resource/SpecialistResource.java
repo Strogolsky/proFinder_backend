@@ -4,6 +4,8 @@ import fit.biejk.dto.SpecialistDto;
 import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.SpecialistMapper;
 import fit.biejk.service.SpecialistService;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -19,6 +21,7 @@ public class SpecialistResource {
     SpecialistMapper specialistMapper;
 
     @GET
+    @PermitAll
     public Response getAll() {
         List<Specialist> result = specialistService.getAll();
         return Response.ok(specialistMapper.toDtoList(result)).build();
@@ -26,6 +29,7 @@ public class SpecialistResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public Response getById(@PathParam("id") Long id) {
         Specialist result = specialistService.getById(id);
         return Response.ok(specialistMapper.toDto(result)).build();
@@ -33,6 +37,7 @@ public class SpecialistResource {
     }
 
     @POST
+    @DenyAll
     public Response create(@Valid SpecialistDto dto) {
         Specialist entity = specialistMapper.toEntity(dto);
         try {

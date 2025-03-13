@@ -3,6 +3,7 @@ package fit.biejk.resource;
 import fit.biejk.dto.AuthRequest;
 import fit.biejk.dto.AuthResponse;
 import fit.biejk.service.AuthService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
@@ -17,6 +18,7 @@ public class AuthResource {
 
     @POST
     @Path("/signUp")
+    @PermitAll
     public Response signUp(@Valid AuthRequest request) {
         String result = authService.signUp(request.getEmail(), request.getPassword(), request.getRole());
         AuthResponse response = new AuthResponse(result);
@@ -25,6 +27,7 @@ public class AuthResource {
 
     @POST
     @Path("/signIn")
+    @PermitAll
     public Response signIn(@Valid AuthRequest request) {
         String result = authService.signIn(request.getEmail(), request.getPassword(), request.getRole());
         AuthResponse response = new AuthResponse(result);

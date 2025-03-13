@@ -3,7 +3,11 @@ package fit.biejk.resource;
 import fit.biejk.dto.ClientDto;
 import fit.biejk.entity.Client;
 import fit.biejk.mapper.ClientMapper;
+import fit.biejk.service.AuthService;
 import fit.biejk.service.ClientService;
+import jakarta.annotation.security.DenyAll;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -19,8 +23,11 @@ public class ClientResource {
 
     @Inject
     ClientService clientService;
+    @Inject
+    AuthService authService;
 
     @GET
+    @PermitAll
     public Response getAll() {
         List<Client> result = clientService.getAll();
         return Response.ok(clientMapper.toDtoList(result)).build();
@@ -28,6 +35,7 @@ public class ClientResource {
 
     @GET
     @Path("/{id}")
+    @PermitAll
     public Response getById(@PathParam("id") Long id) {
         Client result = clientService.getById(id);
         return Response.ok(clientMapper.toDto(result)).build();
@@ -35,6 +43,7 @@ public class ClientResource {
     }
 
     @POST
+    @DenyAll
     public Response create(@Valid ClientDto dto) {
         Client entity = clientMapper.toEntity(dto);
         try {
@@ -48,6 +57,7 @@ public class ClientResource {
 
     @PUT
     @Path("/{id}")
+    @DenyAll
     public Response update(@PathParam("id") Long id, @Valid ClientDto dto) {
         Client entity = clientMapper.toEntity(dto);
         Client result = clientService.update(id, entity);
@@ -56,8 +66,19 @@ public class ClientResource {
 
     @DELETE
     @Path("/{id}")
+    @DenyAll
     public Response delete(@PathParam("id") Long id) {
         clientService.delete(id);
         return Response.ok().build();
     }
+
+    @GET
+    @Path("/me")
+    @RolesAllowed("CLIENT")
+    public Response getProfile() {
+        Long clientId = authService.getCurrentUserId();
+        Client client = clientService.getById(clientId);
+        return Response.ok(clientMapper.toDto(client)).build();
+    }
+
 }

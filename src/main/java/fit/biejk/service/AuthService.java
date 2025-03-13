@@ -79,6 +79,11 @@ public class AuthService {
         return Long.parseLong(securityIdentity.getPrincipal().getName());
     }
 
+    public boolean isCurrentUser(Long userId) {
+        Long currentUserId = getCurrentUserId();
+        return currentUserId.equals(userId);
+    }
+
     private String hashPassword(String password) {
         return BCrypt.withDefaults().hashToString(12, password.toCharArray());
     }

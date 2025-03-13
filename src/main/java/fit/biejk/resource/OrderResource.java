@@ -9,6 +9,7 @@ import fit.biejk.entity.OrderProposal;
 import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
+import fit.biejk.service.AuthService;
 import fit.biejk.service.ClientService;
 import fit.biejk.service.OrderService;
 import fit.biejk.service.SpecialistService;
@@ -32,6 +33,8 @@ public class OrderResource {
     ClientService clientService;
     @Inject
     SpecialistService specialistService;
+    @Inject
+    AuthService authService;
 
     @Inject
     OrderProposalMapper orderProposalMapper;
@@ -41,12 +44,10 @@ public class OrderResource {
     public Response create(@Valid OrderDto dto) {
         Order order = orderMapper.toEntity(dto);
 
-        Client client = clientService.getById(dto.getClientId());
+        Long clientId = authService.getCurrentUserId();
+        Client client = clientService.getById(clientId);
         order.setClient(client);
-//        if (dto.getSpecialistId() != null) {
-//            Specialist specialist = specialistService.getById(dto.getSpecialistId());
-//            order.setSpecialist(specialist);
-//        }
+
         Order result = orderService.create(order);
         return Response.ok(orderMapper.toDto(result)).build();
     }
@@ -56,6 +57,7 @@ public class OrderResource {
     @RolesAllowed("CLIENT")
     public Response update(Long orderId, @Valid OrderDto dto) {
         Order order = orderMapper.toEntity(dto);
+
         Order result = orderService.update(orderId, order);
         return Response.ok(orderMapper.toDto(result)).build();
     }
@@ -73,9 +75,10 @@ public class OrderResource {
     @RolesAllowed("SPECIALIST")
     public Response proposal(Long orderId, @Valid OrderProposalDto proposalDto) {
         OrderProposal proposal = orderProposalMapper.toEntity(proposalDto);
-        Specialist specialist = specialistService.getById(proposalDto.getSpecialistId());
-        proposal.setSpecialist(specialist);
 
+        Long specialistId = authService.getCurrentUserId();
+        Specialist specialist = specialistService.getById(specialistId);
+        proposal.setSpecialist(specialist);
 
         OrderProposal result = orderService.proposal(orderId, proposal);
 

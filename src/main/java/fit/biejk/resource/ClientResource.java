@@ -81,4 +81,23 @@ public class ClientResource {
         return Response.ok(clientMapper.toDto(client)).build();
     }
 
+    @PUT
+    @Path("/me")
+    @RolesAllowed("CLIENT")
+    public Response updateProfile(@Valid ClientDto dto) {
+        Long id = authService.getCurrentUserId();
+        Client client = clientService.update(id, clientMapper.toEntity(dto));
+        return Response.ok(clientMapper.toDto(client)).build();
+    }
+
+    @DELETE
+    @Path("/me")
+    @RolesAllowed("CLIENT")
+    public Response deleteProfile() {
+        Long id = authService.getCurrentUserId();
+        clientService.delete(id);
+        return Response.ok().build();
+    }
+
+
 }

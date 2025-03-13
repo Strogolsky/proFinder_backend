@@ -24,6 +24,8 @@ public class ClientDto {
     @Length(max = 50)
     private String lastName;
 
+    private String password; // todo delete, when create response
+
     @Length(max = 20)
     private String phoneNumber;
 

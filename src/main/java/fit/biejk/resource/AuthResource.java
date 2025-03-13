@@ -4,6 +4,7 @@ import fit.biejk.dto.AuthRequest;
 import fit.biejk.dto.AuthResponse;
 import fit.biejk.service.AuthService;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;

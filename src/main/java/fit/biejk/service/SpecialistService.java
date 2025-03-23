@@ -10,18 +10,38 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * Service class for managing {@link Specialist} entities.
+ * <p>
+ * Handles creation, retrieval, updating, and deletion of specialists.
+ * Delegates common user-related logic to {@link UserService}.
+ * </p>
+ */
 @Slf4j
 @ApplicationScoped
 public class SpecialistService {
 
+    /**
+     * Repository for accessing specialist data.
+     */
     @Inject
-    SpecialistRepository specialistRepository;
+    private SpecialistRepository specialistRepository;
 
+    /**
+     * Service for handling common user operations (validation, update, delete).
+     */
     @Inject
-    UserService userService;
+    private UserService userService;
 
+    /**
+     * Creates and persists a new specialist.
+     * Performs email uniqueness check before creation.
+     *
+     * @param specialist specialist to be created
+     * @return created specialist
+     */
     @Transactional
-    public Specialist create(Specialist specialist) {
+    public Specialist create(final Specialist specialist) {
         log.info("Create specialist: {}", specialist.getEmail());
         userService.checkUniqueEmail(specialist.getEmail());
         specialistRepository.persist(specialist);
@@ -29,6 +49,11 @@ public class SpecialistService {
         return specialist;
     }
 
+    /**
+     * Retrieves all specialists from the database.
+     *
+     * @return list of all specialists
+     */
     public List<Specialist> getAll() {
         log.info("Get all specialists");
         List<Specialist> specialists = specialistRepository.listAll();
@@ -36,7 +61,14 @@ public class SpecialistService {
         return specialists;
     }
 
-    public Specialist getById(Long id) {
+    /**
+     * Retrieves a specialist by their ID.
+     *
+     * @param id specialist ID
+     * @return found specialist
+     * @throws NotFoundException if specialist is not found
+     */
+    public Specialist getById(final Long id) {
         log.info("Get specialist by ID={}", id);
         Specialist result = specialistRepository.findById(id);
         if (result == null) {
@@ -46,21 +78,35 @@ public class SpecialistService {
         return result;
     }
 
+    /**
+     * Updates an existing specialist.
+     * Delegates base update logic to {@link UserService}, then applies additional updates.
+     *
+     * @param id         specialist ID
+     * @param specialist updated specialist data
+     * @return updated specialist
+     */
     @Transactional
-    public Specialist update(Long id, Specialist specialist) {
+    public Specialist update(final Long id, final Specialist specialist) {
         log.info("Update specialist: ID={}, email={}", id, specialist.getEmail());
         Specialist old = getById(id);
         userService.update(id, specialist);
         old.setDescription(specialist.getDescription());
         old.setSpecialization(specialist.getSpecialization());
         specialistRepository.flush();
-        old.getSchedule().size(); // todo fix when add DTO
+        old.getSchedule().size(); // todo refactor when DTO for schedule is implemented
         log.debug("Specialist updated with ID={}", id);
         return old;
     }
 
+    /**
+     * Deletes a specialist by ID.
+     * Delegates deletion logic to {@link UserService}.
+     *
+     * @param id specialist ID
+     */
     @Transactional
-    public void delete(Long id) {
+    public void delete(final Long id) {
         log.info("Delete specialist: ID={}", id);
         userService.delete(id);
         log.debug("Specialist deleted with ID={}", id);

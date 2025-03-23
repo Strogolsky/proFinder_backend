@@ -11,15 +11,31 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.Optional;
 
+/**
+ * Service class for managing {@link User} entities.
+ * <p>
+ * Handles shared user operations such as email uniqueness check,
+ * updating profile data, and deleting users.
+ * </p>
+ */
 @Slf4j
 @NoArgsConstructor
 @ApplicationScoped
 public class UserService {
 
+    /**
+     * Repository for accessing user data.
+     */
     @Inject
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
-    public void checkUniqueEmail(String email) {
+    /**
+     * Checks if the given email is unique.
+     *
+     * @param email email to check
+     * @throws IllegalArgumentException if the email is already taken
+     */
+    public void checkUniqueEmail(final String email) {
         log.info("Check unique email: {}", email);
         if (userRepository.findByEmail(email).isPresent()) {
             log.error("User {} already exists", email);
@@ -27,7 +43,14 @@ public class UserService {
         }
     }
 
-    public User getByEmail(String email) {
+    /**
+     * Retrieves a user by their email.
+     *
+     * @param email email of the user
+     * @return found user
+     * @throws NotFoundException if user is not found
+     */
+    public User getByEmail(final String email) {
         log.info("Get user by email={}", email);
         Optional<User> user = userRepository.findByEmail(email);
         if (user.isEmpty()) {
@@ -38,8 +61,16 @@ public class UserService {
         return user.get();
     }
 
+    /**
+     * Updates the user data by ID.
+     *
+     * @param userId   ID of the user
+     * @param newUser  updated user data
+     * @return updated user
+     * @throws NotFoundException if user is not found
+     */
     @Transactional
-    public User update(Long userId, User newUser) {
+    public User update(final Long userId, final User newUser) {
         log.info("Update user: userId={}, newEmail={}", userId, newUser.getEmail());
         User existingUser = userRepository.findById(userId);
         if (existingUser == null) {
@@ -54,8 +85,14 @@ public class UserService {
         return existingUser;
     }
 
+    /**
+     * Deletes the user by ID.
+     *
+     * @param userId ID of the user
+     * @throws NotFoundException if user is not found
+     */
     @Transactional
-    public void delete(Long userId) {
+    public void delete(final Long userId) {
         log.info("Delete user: userId={}", userId);
         User existingUser = userRepository.findById(userId);
         if (existingUser == null) {

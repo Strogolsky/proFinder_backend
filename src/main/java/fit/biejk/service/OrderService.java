@@ -13,21 +13,43 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Service class for managing {@link Order} entities.
+ * <p>
+ * Handles business logic for creating, updating, deleting, and confirming orders,
+ * as well as working with related {@link OrderProposal} objects.
+ * </p>
+ */
 @Slf4j
 @ApplicationScoped
 public class OrderService {
 
+    /**
+     * Repository for accessing order data.
+     */
     @Inject
-    OrderRepository orderRepository;
+    private OrderRepository orderRepository;
 
+    /**
+     * Service for managing order proposals.
+     */
     @Inject
-    OrderProposalService orderProposalService;
+    private OrderProposalService orderProposalService;
 
+    /**
+     * Service for user identity validation.
+     */
     @Inject
-    AuthService authService;
+    private AuthService authService;
 
+    /**
+     * Creates a new order with default status.
+     *
+     * @param order order entity
+     * @return created order
+     */
     @Transactional
-    public Order create(Order order) {
+    public Order create(final Order order) {
         log.info("Create order: clientId={}, description={}", order.getClient().getId(), order.getDescription());
         order.setStatus(OrderStatus.getStartOrder());
         orderRepository.persist(order);
@@ -35,8 +57,15 @@ public class OrderService {
         return order;
     }
 
+    /**
+     * Updates the fields of an existing order.
+     *
+     * @param orderId ID of the order to update
+     * @param order   new order data
+     * @return original order (before update)
+     */
     @Transactional
-    public Order update(Long orderId, Order order) {
+    public Order update(final Long orderId, final Order order) {
         log.info("Update order: orderId={}, newDescription={}", orderId, order.getDescription());
         Order old = getById(orderId);
         if (!authService.isCurrentUser(old.getClient().getId())) {
@@ -50,8 +79,13 @@ public class OrderService {
         return order;
     }
 
+    /**
+     * Deletes an order by ID.
+     *
+     * @param orderId ID of the order
+     */
     @Transactional
-    public void delete(Long orderId) {
+    public void delete(final Long orderId) {
         log.info("Delete order: orderId={}", orderId);
         Order order = getById(orderId);
         if (!authService.isCurrentUser(order.getClient().getId())) {
@@ -62,8 +96,14 @@ public class OrderService {
         log.debug("Order deleted with ID={}", orderId);
     }
 
+    /**
+     * Cancels an order, transitioning its status to CANCELLED.
+     *
+     * @param orderId ID of the order
+     * @return updated order
+     */
     @Transactional
-    public Order cancel(Long orderId) {
+    public Order cancel(final Long orderId) {
         log.info("Cancel order: orderId={}", orderId);
         Order order = getById(orderId);
         if (!authService.isCurrentUser(order.getClient().getId())) {
@@ -76,7 +116,14 @@ public class OrderService {
         return order;
     }
 
-    public Order getById(Long orderId) {
+    /**
+     * Gets an order by ID.
+     *
+     * @param orderId ID of the order
+     * @return found order
+     * @throws NotFoundException if not found
+     */
+    public Order getById(final Long orderId) {
         log.info("Get order by ID={}", orderId);
         Order order = orderRepository.findById(orderId);
         if (order == null) {
@@ -86,6 +133,11 @@ public class OrderService {
         return order;
     }
 
+    /**
+     * Retrieves all orders.
+     *
+     * @return list of orders
+     */
     public List<Order> getAll() {
         log.info("Get all orders");
         List<Order> orders = orderRepository.listAll();
@@ -93,7 +145,13 @@ public class OrderService {
         return orders;
     }
 
-    public List<OrderProposal> getOrderProposals(Long orderId) {
+    /**
+     * Gets all proposals for a given order.
+     *
+     * @param orderId ID of the order
+     * @return list of proposals
+     */
+    public List<OrderProposal> getOrderProposals(final Long orderId) {
         log.info("Get proposals for orderId={}", orderId);
         Order order = getById(orderId);
         List<OrderProposal> proposals = orderProposalService.getByOrderId(order);
@@ -101,7 +159,14 @@ public class OrderService {
         return proposals;
     }
 
-    public OrderProposal getOrderProposalById(Long orderId, Long proposalId) {
+    /**
+     * Gets a proposal by ID and checks it belongs to the given order.
+     *
+     * @param orderId    order ID
+     * @param proposalId proposal ID
+     * @return found proposal
+     */
+    public OrderProposal getOrderProposalById(final Long orderId, final Long proposalId) {
         log.info("Get proposal by ID={}, orderId={}", proposalId, orderId);
         Order order = getById(orderId);
         OrderProposal proposal = orderProposalService.getById(proposalId);
@@ -112,12 +177,20 @@ public class OrderService {
         return proposal;
     }
 
+    /**
+     * Adds a new proposal to an order.
+     *
+     * @param orderId  ID of the order
+     * @param proposal proposal entity
+     * @return created proposal
+     */
     @Transactional
-    public OrderProposal proposal(Long orderId, OrderProposal proposal) {
+    public OrderProposal proposal(final Long orderId, final OrderProposal proposal) {
         log.info("Create proposal: orderId={}, specialistId={}", orderId, proposal.getSpecialist().getId());
         Order order = getById(orderId);
         if (haveSpecialistProposal(order, proposal)) {
-            log.error("Order proposal already exists for this specialist. orderId={}, specialistId={}", orderId, proposal.getSpecialist().getId());
+            log.error("Order proposal already exists for this specialist. orderId={}, specialistId={}",
+                    orderId, proposal.getSpecialist().getId());
             throw new IllegalArgumentException("Order proposal already exists");
         }
         proposal.setOrder(order);
@@ -129,12 +202,22 @@ public class OrderService {
         return proposal;
     }
 
+    /**
+     * Confirms a proposal, updates price and deadline, and completes the order.
+     *
+     * @param orderId    ID of the order
+     * @param proposalId ID of the approved proposal
+     * @param price      final agreed price
+     * @param deadline   final deadline
+     * @return updated order
+     */
     @Transactional
-    public Order confirm(Long orderId, Long proposalId, int price, LocalDateTime deadline) {
+    public Order confirm(final Long orderId, final Long proposalId, final int price, final LocalDateTime deadline) {
         log.info("Confirm proposal: orderId={}, proposalId={}", orderId, proposalId);
         Order order = getById(orderId);
         if (!authService.isCurrentUser(order.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}", orderId, order.getClient().getId());
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    orderId, order.getClient().getId());
             throw new IllegalArgumentException();
         }
         order.setPrice(price);
@@ -146,7 +229,14 @@ public class OrderService {
         return order;
     }
 
-    public boolean haveSpecialistProposal(Order order, OrderProposal proposal) {
+    /**
+     * Checks if the given specialist already has a proposal for the order.
+     *
+     * @param order    the order
+     * @param proposal the proposal to check
+     * @return true if proposal already exists, false otherwise
+     */
+    public boolean haveSpecialistProposal(final Order order, final OrderProposal proposal) {
         log.info("Check if specialist proposal already exists: orderId={}, specialistId={}",
                 order.getId(), proposal.getSpecialist().getId());
         List<OrderProposal> orderProposals = order.getOrderProposals();

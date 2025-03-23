@@ -11,19 +11,38 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * Service class for managing {@link Client} entities.
+ * <p>
+ * Handles creation, retrieval, updating, and deletion of clients,
+ * and delegates shared logic to {@link UserService}.
+ * </p>
+ */
 @Slf4j
 @NoArgsConstructor
 @ApplicationScoped
 public class ClientService {
 
+    /**
+     * Repository for accessing client data.
+     */
     @Inject
-    ClientRepository clientRepository;
+    private ClientRepository clientRepository;
 
+    /**
+     * Service for shared user operations (validation, deletion, etc.).
+     */
     @Inject
-    UserService userService;
+    private UserService userService;
 
+    /**
+     * Creates a new client and persists it to the database.
+     *
+     * @param client client entity to create
+     * @return the created client
+     */
     @Transactional
-    public Client create(Client client) {
+    public Client create(final Client client) {
         log.info("Create client: {}", client.getEmail());
         userService.checkUniqueEmail(client.getEmail());
         clientRepository.persist(client);
@@ -31,6 +50,11 @@ public class ClientService {
         return client;
     }
 
+    /**
+     * Retrieves a list of all clients.
+     *
+     * @return list of clients
+     */
     public List<Client> getAll() {
         log.info("Get all clients");
         List<Client> result = clientRepository.listAll();
@@ -38,7 +62,14 @@ public class ClientService {
         return result;
     }
 
-    public Client getById(Long id) {
+    /**
+     * Retrieves a client by their ID.
+     *
+     * @param id ID of the client
+     * @return found client
+     * @throws NotFoundException if the client is not found
+     */
+    public Client getById(final Long id) {
         log.info("Get client by ID={}", id);
         Client result = clientRepository.findById(id);
         if (result == null) {
@@ -48,8 +79,15 @@ public class ClientService {
         return result;
     }
 
+    /**
+     * Updates client data by ID.
+     *
+     * @param id     ID of the client to update
+     * @param client updated client data
+     * @return the original client before update
+     */
     @Transactional
-    public Client update(Long id, Client client) {
+    public Client update(final Long id, final Client client) {
         log.info("Update client: ID={}, email={}", id, client.getEmail());
         Client old = getById(id);
         userService.update(id, client);
@@ -57,8 +95,13 @@ public class ClientService {
         return old;
     }
 
+    /**
+     * Deletes a client by ID.
+     *
+     * @param id ID of the client to delete
+     */
     @Transactional
-    public void delete(Long id) {
+    public void delete(final Long id) {
         log.info("Delete client: ID={}", id);
         userService.delete(id);
         log.debug("Client deleted with ID={}", id);

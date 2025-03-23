@@ -89,7 +89,8 @@ public class OrderService {
         log.info("Delete order: orderId={}", orderId);
         Order order = getById(orderId);
         if (!authService.isCurrentUser(order.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}", orderId, order.getClient().getId());
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    orderId, order.getClient().getId());
             throw new IllegalArgumentException();
         }
         orderRepository.delete(order);
@@ -107,7 +108,8 @@ public class OrderService {
         log.info("Cancel order: orderId={}", orderId);
         Order order = getById(orderId);
         if (!authService.isCurrentUser(order.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}", orderId, order.getClient().getId());
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    orderId, order.getClient().getId());
             throw new IllegalArgumentException();
         }
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CANCELLED));

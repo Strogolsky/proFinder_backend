@@ -18,7 +18,8 @@ import java.util.List;
 /**
  * Entity representing a specialist.
  * <p>
- * Extends {@link User} and includes details specific to specialists such as specialization, description, proposals, and schedule.
+ * Extends {@link User} and includes details specific to specialists such as specialization, description, proposals,
+ * and schedule.
  * </p>
  */
 @Data

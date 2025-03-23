@@ -10,25 +10,51 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * REST resource for managing specialists.
+ * <p>
+ * Provides endpoints for retrieving, updating, and deleting specialist data,
+ * as well as accessing and modifying the current specialist's profile.
+ * </p>
+ */
 @Path("/specialist")
 @Slf4j
 public class SpecialistResource {
 
+    /**
+     * Service for handling business logic related to specialists.
+     */
     @Inject
-    SpecialistService specialistService;
+    private SpecialistService specialistService;
 
+    /**
+     * Mapper for converting between Specialist entities and DTOs.
+     */
     @Inject
-    SpecialistMapper specialistMapper;
+    private SpecialistMapper specialistMapper;
 
+    /**
+     * Service for retrieving authenticated user context and identity.
+     */
     @Inject
-    AuthService authService;
+    private AuthService authService;
 
+    /**
+     * Retrieves a list of all specialists.
+     *
+     * @return HTTP response containing a list of all specialists
+     */
     @GET
     @PermitAll
     public Response getAll() {
@@ -38,18 +64,31 @@ public class SpecialistResource {
         return Response.ok(specialistMapper.toDtoList(result)).build();
     }
 
+    /**
+     * Retrieves a specialist by their ID.
+     *
+     * @param id ID of the specialist
+     * @return HTTP response containing the specialist
+     */
     @GET
     @Path("/{id}")
     @PermitAll
-    public Response getById(@PathParam("id") Long id) {
+    public Response getById(@PathParam("id") final Long id) {
         log.info("Get specialist by ID={}", id);
         Specialist result = specialistService.getById(id);
         return Response.ok(specialistMapper.toDto(result)).build();
     }
 
+    /**
+     * Creates a new specialist.
+     * Currently disabled with {@code @DenyAll}.
+     *
+     * @param dto data for the new specialist
+     * @return HTTP response with the created specialist or error
+     */
     @POST
     @DenyAll
-    public Response create(@Valid SpecialistDto dto) {
+    public Response create(@Valid final SpecialistDto dto) {
         log.info("Create specialist request: {}", dto);
         Specialist entity = specialistMapper.toEntity(dto);
         try {
@@ -62,10 +101,18 @@ public class SpecialistResource {
         }
     }
 
+    /**
+     * Updates a specialist by ID.
+     * Currently disabled with {@code @DenyAll}.
+     *
+     * @param id  ID of the specialist to update
+     * @param dto updated data
+     * @return HTTP response with updated specialist
+     */
     @PUT
     @Path("/{id}")
     @DenyAll
-    public Response update(@PathParam("id") Long id, @Valid SpecialistDto dto) {
+    public Response update(@PathParam("id") final Long id, @Valid final SpecialistDto dto) {
         log.info("Update specialist request: ID={}, dto={}", id, dto);
         Specialist entity = specialistMapper.toEntity(dto);
         Specialist result = specialistService.update(id, entity);
@@ -73,15 +120,27 @@ public class SpecialistResource {
         return Response.ok(specialistMapper.toDto(result)).build();
     }
 
+    /**
+     * Deletes a specialist by ID.
+     * Currently disabled with {@code @DenyAll}.
+     *
+     * @param id ID of the specialist to delete
+     * @return HTTP response
+     */
     @DELETE
     @Path("/{id}")
     @DenyAll
-    public Response delete(@PathParam("id") Long id) {
+    public Response delete(@PathParam("id") final Long id) {
         log.info("Delete specialist request: ID={}", id);
         specialistService.delete(id);
         return Response.ok().build();
     }
 
+    /**
+     * Retrieves the profile of the currently authenticated specialist.
+     *
+     * @return HTTP response containing the specialist's profile
+     */
     @GET
     @Path("/me")
     @RolesAllowed("SPECIALIST")
@@ -92,10 +151,16 @@ public class SpecialistResource {
         return Response.ok(specialistMapper.toDto(specialist)).build();
     }
 
+    /**
+     * Updates the profile of the currently authenticated specialist.
+     *
+     * @param dto updated profile data
+     * @return HTTP response with updated profile
+     */
     @PUT
     @Path("/me")
     @RolesAllowed("SPECIALIST")
-    public Response updateProfile(@Valid SpecialistDto dto) {
+    public Response updateProfile(@Valid final SpecialistDto dto) {
         Long id = authService.getCurrentUserId();
         log.info("Update profile for specialist ID={} with dto={}", id, dto);
         Specialist specialist = specialistService.update(id, specialistMapper.toEntity(dto));
@@ -103,6 +168,11 @@ public class SpecialistResource {
         return Response.ok(specialistMapper.toDto(specialist)).build();
     }
 
+    /**
+     * Deletes the profile of the currently authenticated specialist.
+     *
+     * @return HTTP response
+     */
     @DELETE
     @Path("/me")
     @RolesAllowed("SPECIALIST")

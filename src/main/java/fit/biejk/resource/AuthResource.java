@@ -11,17 +11,33 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * REST resource for handling authentication-related operations such as sign-up and sign-in.
+ */
 @Path("/auth")
 @Slf4j
 public class AuthResource {
 
+    /**
+     * Service for handling authentication logic such as user registration and login.
+     * <p>
+     * Injected by the Jakarta CDI container.
+     * </p>
+     */
     @Inject
-    AuthService authService;
+    private AuthService authService;
 
+
+    /**
+     * Registers a new user account.
+     *
+     * @param request the sign-up request containing email, password, and role
+     * @return HTTP response with a generated authentication token
+     */
     @POST
     @Path("/signUp")
     @PermitAll
-    public Response signUp(@Valid AuthRequest request) {
+    public Response signUp(@Valid final AuthRequest request) {
         log.info("Sign up request: {}", request);
         String result = authService.signUp(request.getEmail(), request.getPassword(), request.getRole());
         log.debug("Sign up result: {}", result);
@@ -30,10 +46,16 @@ public class AuthResource {
         return Response.ok(response).build();
     }
 
+    /**
+     * Authenticates a user and returns a token.
+     *
+     * @param request the sign-in request containing email, password, and role
+     * @return HTTP response with a generated authentication token
+     */
     @POST
     @Path("/signIn")
     @PermitAll
-    public Response signIn(@Valid AuthRequest request) {
+    public Response signIn(@Valid final AuthRequest request) {
         log.info("Sign in request: {}", request);
         String result = authService.signIn(request.getEmail(), request.getPassword(), request.getRole());
         log.debug("Sign in result: {}", result);

@@ -7,9 +7,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.List;
 
+/**
+ * Repository class for performing CRUD operations on {@link OrderProposal} entities.
+ * <p>
+ * Provides custom query methods for accessing proposals related to a specific order.
+ * </p>
+ */
 @ApplicationScoped
 public class OrderProposalRepository implements PanacheRepository<OrderProposal> {
-    public List<OrderProposal> findByOrder(Order order) {
+
+    /**
+     * Finds all proposals associated with the given order.
+     *
+     * @param order the order to search proposals for
+     * @return list of matching OrderProposal entities
+     */
+    public List<OrderProposal> findByOrder(final Order order) {
         return find("order", order).list();
     }
 }

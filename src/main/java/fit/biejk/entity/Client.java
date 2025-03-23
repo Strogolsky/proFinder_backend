@@ -11,6 +11,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Entity representing a client.
+ * <p>
+ * Extends {@link User} and includes relationships specific to client roles.
+ * </p>
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,6 +24,11 @@ import java.util.List;
 @Entity
 @Table(name = "client")
 public class Client extends User {
+
+    /**
+     * List of orders associated with this client.
+     * This field is ignored during JSON serialization.
+     */
     @OneToMany(mappedBy = "client")
     @JsonbTransient
     private List<Order> orders;

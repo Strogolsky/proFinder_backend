@@ -10,25 +10,49 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * REST resource for managing clients.
+ * <p>
+ * Provides endpoints for retrieving and managing client data.
+ * </p>
+ */
 @Path("/client")
 @Slf4j
 public class ClientResource {
-
+    /**
+     * Mapper for converting between Client entities and DTOs.
+     */
     @Inject
-    ClientMapper clientMapper;
+    private ClientMapper clientMapper;
 
+    /**
+     * Service layer for handling client-related business logic.
+     */
     @Inject
-    ClientService clientService;
+    private ClientService clientService;
 
+    /**
+     * Service for authentication and user identity operations.
+     */
     @Inject
-    AuthService authService;
+    private AuthService authService;
 
+    /**
+     * Retrieves all clients.
+     *
+     * @return list of all clients
+     */
     @GET
     @PermitAll
     public Response getAll() {
@@ -38,19 +62,32 @@ public class ClientResource {
         return Response.ok(clientMapper.toDtoList(result)).build();
     }
 
+    /**
+     * Retrieves a client by ID.
+     *
+     * @param id the client ID
+     * @return client data
+     */
     @GET
     @Path("/{id}")
     @PermitAll
-    public Response getById(@PathParam("id") Long id) {
+    public Response getById(@PathParam("id") final Long id) {
         log.info("getById request: {}", id);
         Client result = clientService.getById(id);
         log.debug("Found client with ID={}", result.getId());
         return Response.ok(clientMapper.toDto(result)).build();
     }
 
+    /**
+     * Creates a new client.
+     * Currently disabled by @DenyAll.
+     *
+     * @param dto client data
+     * @return created client or error
+     */
     @POST
     @DenyAll
-    public Response create(@Valid ClientDto dto) {
+    public Response create(@Valid final ClientDto dto) {
         log.info("create request: {}", dto);
         Client entity = clientMapper.toEntity(dto);
         try {
@@ -63,10 +100,18 @@ public class ClientResource {
         }
     }
 
+    /**
+     * Updates a client by ID.
+     * Currently disabled by @DenyAll.
+     *
+     * @param id  client ID
+     * @param dto updated client data
+     * @return updated client
+     */
     @PUT
     @Path("/{id}")
     @DenyAll
-    public Response update(@PathParam("id") Long id, @Valid ClientDto dto) {
+    public Response update(@PathParam("id") final Long id, @Valid final ClientDto dto) {
         log.info("update request: id={}, dto={}", id, dto);
         Client entity = clientMapper.toEntity(dto);
         Client result = clientService.update(id, entity);
@@ -74,16 +119,28 @@ public class ClientResource {
         return Response.ok(clientMapper.toDto(result)).build();
     }
 
+    /**
+     * Deletes a client by ID.
+     * Currently disabled by @DenyAll.
+     *
+     * @param id client ID
+     * @return response status
+     */
     @DELETE
     @Path("/{id}")
     @DenyAll
-    public Response delete(@PathParam("id") Long id) {
+    public Response delete(@PathParam("id") final Long id) {
         log.info("delete request: {}", id);
         clientService.delete(id);
         log.debug("Deleted client with ID={}", id);
         return Response.ok().build();
     }
 
+    /**
+     * Retrieves the profile of the currently authenticated client.
+     *
+     * @return client profile
+     */
     @GET
     @Path("/me")
     @RolesAllowed("CLIENT")
@@ -95,10 +152,16 @@ public class ClientResource {
         return Response.ok(clientMapper.toDto(client)).build();
     }
 
+    /**
+     * Updates the profile of the currently authenticated client.
+     *
+     * @param dto updated client data
+     * @return updated client profile
+     */
     @PUT
     @Path("/me")
     @RolesAllowed("CLIENT")
-    public Response updateProfile(@Valid ClientDto dto) {
+    public Response updateProfile(@Valid final ClientDto dto) {
         log.info("updateProfile request: {}", dto);
         Long id = authService.getCurrentUserId();
         Client client = clientService.update(id, clientMapper.toEntity(dto));
@@ -106,6 +169,11 @@ public class ClientResource {
         return Response.ok(clientMapper.toDto(client)).build();
     }
 
+    /**
+     * Deletes the profile of the currently authenticated client.
+     *
+     * @return response status
+     */
     @DELETE
     @Path("/me")
     @RolesAllowed("CLIENT")

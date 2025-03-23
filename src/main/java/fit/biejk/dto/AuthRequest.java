@@ -8,14 +8,33 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Data Transfer Object for authentication requests.
+ * <p>
+ * Contains user's email, password, and selected user role
+ * for authorization purposes.
+ * </p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthRequest {
+
+    /**
+     * User email address, must be a valid email format.
+     */
     @Email
-    String email;
+    private String email;
+
+    /**
+     * User password, must not be blank.
+     */
     @NotBlank
-    String password;
+    private String password;
+
+    /**
+     * User role in the system, must not be null.
+     */
     @NotNull
-    UserRole role;
+    private UserRole role;
 }

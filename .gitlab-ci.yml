@@ -1,0 +1,22 @@
+stages:
+  - build
+  - test
+  - style-check
+
+build:
+  stage: build
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - ./mvnw clean compile
+
+test:
+  stage: test
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - ./mvnw test
+
+checkstyle:
+  stage: style-check
+  image: maven:3.9-eclipse-temurin-21
+  script:
+    - ./mvnw checkstyle:checkstyle

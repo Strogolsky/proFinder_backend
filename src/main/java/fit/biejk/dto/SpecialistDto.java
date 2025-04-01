@@ -38,6 +38,8 @@ public class SpecialistDto {
      */
     private Long id;
 
+    private double averageRating;
+
     /**
      * Specialist's email address, must be a valid email format.
      */

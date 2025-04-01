@@ -1,6 +1,7 @@
 package fit.biejk.entity;
 
 import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
@@ -32,4 +33,7 @@ public class Client extends User {
     @OneToMany(mappedBy = "client")
     @JsonbTransient
     private List<Order> orders;
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
 }

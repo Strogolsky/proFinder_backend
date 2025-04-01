@@ -37,6 +37,10 @@ public class Specialist extends User {
     @Enumerated(EnumType.STRING)
     private Specialization specialization;
 
+
+    @Column(name = "average_rating")
+    private Double averageRating;
+
     /**
      * Detailed description of the specialist's services or skills.
      */
@@ -56,4 +60,8 @@ public class Specialist extends User {
      */
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSlot> schedule;
+
+    @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews;
+
 }

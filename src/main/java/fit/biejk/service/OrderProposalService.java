@@ -3,6 +3,7 @@ package fit.biejk.service;
 import fit.biejk.entity.Order;
 import fit.biejk.entity.OrderProposal;
 import fit.biejk.entity.ProposalStatus;
+import fit.biejk.entity.Specialist;
 import fit.biejk.repository.OrderProposalRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Service class for managing {@link OrderProposal} entities.
  * <p>
- * Handles creation, retrieval, approval, and rejection of proposals related to orders.
+ * Responsible for creating, approving, rejecting, and retrieving proposals.
  * </p>
  */
 @Slf4j
@@ -22,81 +23,112 @@ import java.util.List;
 public class OrderProposalService {
 
     /**
-     * Repository for accessing and persisting order proposals.
+     * Repository for managing order proposal persistence.
      */
     @Inject
     private OrderProposalRepository orderProposalRepository;
 
     /**
-     * Creates a new order proposal and sets its initial status to {@link ProposalStatus#CREATED}.
+     * Creates a new proposal for an order and assigns it the {@link ProposalStatus#CREATED} status.
      *
-     * @param orderProposal proposal to create
-     * @return created proposal
+     * @param orderProposal the proposal to create
+     * @return the newly persisted proposal
      */
     public OrderProposal create(final OrderProposal orderProposal) {
-        log.info("Create orderProposal for orderId={}, specialistId={}",
+        log.info("Creating new proposal: orderId={}, specialistId={}",
                 orderProposal.getOrder().getId(),
                 orderProposal.getSpecialist().getId());
+
         orderProposal.setStatus(ProposalStatus.CREATED);
         orderProposalRepository.persist(orderProposal);
-        log.debug("OrderProposal created with ID={}", orderProposal.getId());
+
+        log.debug("Proposal created with ID={}, status={}", orderProposal.getId(), orderProposal.getStatus());
         return orderProposal;
     }
 
     /**
-     * Approves a specific proposal and rejects all others for the same order.
+     * Approves the selected proposal and rejects all others for the same order.
      *
-     * @param order      order the proposal belongs to
-     * @param proposalId ID of the proposal to approve
+     * @param order      the order to which the proposals belong
+     * @param proposalId the ID of the proposal to approve
      */
     public void approveProposal(final Order order, final Long proposalId) {
-        log.info("Approve proposal: orderId={}, proposalId={}", order.getId(), proposalId);
+        log.info("Approving proposal ID={} for order ID={}", proposalId, order.getId());
+
         OrderProposal approvedProposal = orderProposalRepository.findById(proposalId);
+        if (approvedProposal == null) {
+            log.error("Cannot approve proposal: proposal with ID={} not found", proposalId);
+            throw new NotFoundException("Proposal with ID=" + proposalId + " not found");
+        }
+
         approvedProposal.setStatus(ProposalStatus.APPROVED);
         orderProposalRepository.persist(approvedProposal);
+        log.debug("Proposal ID={} approved", approvedProposal.getId());
 
-        log.debug("Approved proposal with ID={}", approvedProposal.getId());
         List<OrderProposal> allProposals = getByOrderId(order);
-
         for (OrderProposal proposal : allProposals) {
             if (!proposal.getId().equals(approvedProposal.getId())) {
                 proposal.setStatus(ProposalStatus.REJECTED);
                 orderProposalRepository.persist(proposal);
-                log.debug("Rejected proposal with ID={}", proposal.getId());
+                log.debug("Proposal ID={} rejected", proposal.getId());
             }
         }
     }
 
     /**
-     * Retrieves a proposal by its ID.
+     * Retrieves a single proposal by its ID.
      *
-     * @param proposalId ID of the proposal
-     * @return found proposal
-     * @throws NotFoundException if no proposal with the given ID exists
+     * @param proposalId the ID of the proposal to retrieve
+     * @return the proposal if found
+     * @throws NotFoundException if no proposal exists with the given ID
      */
     public OrderProposal getById(final Long proposalId) {
-        log.info("Get proposal by ID={}", proposalId);
-        OrderProposal result = orderProposalRepository.findById(proposalId);
+        log.info("Retrieving proposal by ID={}", proposalId);
 
-        if (result == null) {
-            log.error("OrderProposal with ID={} not found", proposalId);
-            throw new NotFoundException("OrderProposal with id " + proposalId + " not found");
+        OrderProposal proposal = orderProposalRepository.findById(proposalId);
+        if (proposal == null) {
+            log.error("Proposal with ID={} not found", proposalId);
+            throw new NotFoundException("OrderProposal with ID " + proposalId + " not found");
         }
-        log.debug("Found proposal with ID={}", result.getId());
 
-        return result;
+        log.debug("Proposal found: ID={}, status={}", proposal.getId(), proposal.getStatus());
+        return proposal;
     }
 
     /**
-     * Retrieves all proposals for the given order.
+     * Retrieves all proposals associated with a specific order.
      *
-     * @param order the order
-     * @return list of proposals associated with the order
+     * @param order the order for which to fetch proposals
+     * @return a list of associated proposals
      */
     public List<OrderProposal> getByOrderId(final Order order) {
-        log.info("Get proposals for order ID={}", order.getId());
+        log.info("Fetching all proposals for order ID={}", order.getId());
+
         List<OrderProposal> proposals = orderProposalRepository.findByOrder(order);
-        log.debug("Found {} proposals for order ID={}", proposals.size(), order.getId());
+        log.debug("Found {} proposal(s) for order ID={}", proposals.size(), order.getId());
+
         return proposals;
+    }
+
+    /**
+     * Returns the specialist associated with the approved proposal for a given order.
+     *
+     * @param order the order to check
+     * @return the approved specialist, or {@code null} if no proposal is approved
+     */
+    public Specialist getConfirmedSpecialist(final Order order) {
+        log.info("Searching for confirmed specialist for order ID={}", order.getId());
+
+        List<OrderProposal> proposals = getByOrderId(order);
+        for (OrderProposal proposal : proposals) {
+            if (ProposalStatus.APPROVED.equals(proposal.getStatus())) {
+                log.debug("Confirmed specialist found: specialistId={}, proposalId={}",
+                        proposal.getSpecialist().getId(), proposal.getId());
+                return proposal.getSpecialist();
+            }
+        }
+
+        log.warn("No approved proposal found for order ID={}", order.getId());
+        return null;
     }
 }

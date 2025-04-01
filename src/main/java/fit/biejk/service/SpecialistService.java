@@ -1,5 +1,6 @@
 package fit.biejk.service;
 
+import fit.biejk.entity.Review;
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.SpecialistRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -111,4 +112,16 @@ public class SpecialistService {
         userService.delete(id);
         log.debug("Specialist deleted with ID={}", id);
     }
+
+    @Transactional
+    public void computeAverageRating(final Long specialistId) {
+        Specialist specialist = getById(specialistId);
+        double sum = 0;
+        for(Review review : specialist.getReviews()) {
+            sum += review.getRating();
+        }
+        specialist.setAverageRating(sum / specialist.getReviews().size());
+        specialistRepository.persist(specialist);
+    }
+
 }

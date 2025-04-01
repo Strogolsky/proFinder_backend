@@ -3,16 +3,12 @@ package fit.biejk.resource;
 import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
-import fit.biejk.entity.Client;
-import fit.biejk.entity.Order;
-import fit.biejk.entity.OrderProposal;
-import fit.biejk.entity.Specialist;
+import fit.biejk.dto.ReviewDto;
+import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
-import fit.biejk.service.AuthService;
-import fit.biejk.service.ClientService;
-import fit.biejk.service.OrderService;
-import fit.biejk.service.SpecialistService;
+import fit.biejk.mapper.ReviewMapper;
+import fit.biejk.service.*;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -38,6 +34,8 @@ import java.util.List;
 @Slf4j
 public class OrderResource {
 
+    @Inject
+    ReviewService reviewService;
     /**
      * Service handling order-related business logic.
      */
@@ -73,6 +71,9 @@ public class OrderResource {
      */
     @Inject
     private OrderProposalMapper orderProposalMapper;
+
+    @Inject
+    private ReviewMapper reviewMapper;
 
     /**
      * Creates a new order for the authenticated client.
@@ -244,4 +245,38 @@ public class OrderResource {
         orderService.delete(orderId);
         return Response.ok().build();
     }
+    /**
+     * Submits a review for a completed order.
+     * <p>
+     * Only the client who created the order can submit the review, and the order must have status COMPLETED.
+     * </p>
+     *
+     * @param orderId the ID of the reviewed order
+     * @param dto     the review data
+     * @return created review
+     */
+    @PUT
+    @Path("/{orderId}/review")
+    @RolesAllowed("CLIENT")
+    public Response createReview(@PathParam("orderId") final Long orderId, @Valid final ReviewDto dto) {
+        log.info("Review creation request: orderId={}, rating={}, comment={}",
+                orderId, dto.getRating(), dto.getComment());
+
+        Review review = reviewMapper.toEntity(dto);
+        Review saved = orderService.review(orderId, review);
+
+        log.debug("Review created: reviewId={}, orderId={}, rating={}",
+                saved.getId(), orderId, saved.getRating());
+
+        return Response.ok(reviewMapper.toDto(saved)).build();
+    }
+    @GET
+    @Path("/{orderId}/review")
+    @RolesAllowed("CLIENT")
+    public Response getReview(@PathParam("orderId") final Long orderId) {
+        log.info("Get review: orderId={}", orderId);
+        Review res = reviewService.getByOrderId(orderId);
+        return Response.ok(reviewMapper.toDto(res)).build();
+    }
+
 }

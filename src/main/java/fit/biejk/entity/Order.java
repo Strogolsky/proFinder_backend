@@ -1,18 +1,7 @@
 package fit.biejk.entity;
 
 import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -78,6 +67,9 @@ public class Order {
      */
     @Column(name = "price")
     private int price;
+
+    @OneToOne
+    private Review review;
 
     /**
      * Timestamp indicating when the order was created.

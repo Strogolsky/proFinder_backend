@@ -1,9 +1,12 @@
 package fit.biejk.resource;
 
 import fit.biejk.dto.SpecialistDto;
+import fit.biejk.entity.Review;
 import fit.biejk.entity.Specialist;
+import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.mapper.SpecialistMapper;
 import fit.biejk.service.AuthService;
+import fit.biejk.service.ReviewService;
 import fit.biejk.service.SpecialistService;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
@@ -32,6 +35,8 @@ import java.util.List;
 @Slf4j
 public class SpecialistResource {
 
+    @Inject
+    ReviewService reviewService;
     /**
      * Service for handling business logic related to specialists.
      */
@@ -49,6 +54,9 @@ public class SpecialistResource {
      */
     @Inject
     private AuthService authService;
+
+    @Inject
+    private ReviewMapper reviewMapper;
 
     /**
      * Retrieves a list of all specialists.
@@ -181,5 +189,14 @@ public class SpecialistResource {
         log.info("Delete profile for specialist ID={}", id);
         specialistService.delete(id);
         return Response.ok().build();
+    }
+
+    @Path("/{id}/review")
+    @PermitAll
+    public Response getReviews(@PathParam("id") final Long id) {
+        log.info("Get reviews for specialist ID={}", id);
+        List<Review> res = reviewService.getBySpecialistId(id);
+        log.debug("Found {} reviews", res.size());
+        return Response.ok(reviewMapper.toDtoList(res)).build();
     }
 }

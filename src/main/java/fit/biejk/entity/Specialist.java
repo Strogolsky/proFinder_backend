@@ -1,13 +1,7 @@
 package fit.biejk.entity;
 
 import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -18,8 +12,8 @@ import java.util.List;
 /**
  * Entity representing a specialist.
  * <p>
- * Extends {@link User} and includes details specific to specialists such as specialization, description, proposals,
- * and schedule.
+ * Inherits from {@link User} and includes domain-specific information such as specialization, description,
+ * rating, submitted proposals, schedule, and received reviews.
  * </p>
  */
 @Data
@@ -31,29 +25,47 @@ import java.util.List;
 public class Specialist extends User {
 
     /**
-     * Specialist's professional specialization.
+     * Specialist's professional area of expertise.
      */
     @Column(name = "specialization")
     @Enumerated(EnumType.STRING)
     private Specialization specialization;
 
     /**
-     * Detailed description of the specialist's services or skills.
+     * Average rating calculated from client reviews.
+     */
+    @Column(name = "average_rating")
+    private Double averageRating;
+
+    /**
+     * Short description of the specialist's services or qualifications.
      */
     @Column(name = "description")
     private String description;
 
     /**
-     * List of order proposals submitted by the specialist.
-     * Ignored during JSON serialization.
+     * List of all proposals submitted by the specialist to various orders.
+     * <p>
+     * Ignored during JSON serialization to prevent recursion and reduce payload size.
+     * </p>
      */
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonbTransient
     private List<OrderProposal> orderProposals;
 
     /**
-     * Schedule containing available time slots for the specialist.
+     * Schedule of available time slots for the specialist.
      */
     @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TimeSlot> schedule;
+
+    /**
+     * List of reviews received from clients for completed orders.
+     * <p>
+     * Ignored during JSON serialization to prevent infinite loops or heavy response objects.
+     * </p>
+     */
+    @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonbTransient
+    private List<Review> reviews;
 }

@@ -1,18 +1,7 @@
 package fit.biejk.entity;
 
 import jakarta.json.bind.annotation.JsonbTransient;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.EnumType;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +11,10 @@ import java.util.List;
 
 /**
  * Entity representing an order placed by a client.
+ * <p>
+ * Contains details about specialization, status, price, deadline,
+ * proposals from specialists, and a linked review after completion.
+ * </p>
  */
 @Data
 @AllArgsConstructor
@@ -60,27 +53,37 @@ public class Order {
 
     /**
      * List of proposals submitted for this order.
-     * Ignored during JSON serialization.
+     * <p>
+     * Ignored during JSON serialization to avoid circular references.
+     * </p>
      */
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,
-            orphanRemoval = true)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonbTransient
     private List<OrderProposal> orderProposals;
 
     /**
-     * Description provided for the order.
+     * Description provided by the client for the order.
      */
     @Column(name = "description")
     private String description;
 
     /**
-     * Price specified for the order.
+     * Price set for the order after confirmation.
      */
     @Column(name = "price")
     private int price;
 
     /**
+     * Review associated with the order after it has been completed.
+     */
+    @OneToOne
+    private Review review;
+
+    /**
      * Timestamp indicating when the order was created.
+     * <p>
+     * This field is final and set at creation time.
+     * </p>
      */
     @Column(name = "createAt", nullable = false, updatable = false)
     private final LocalDateTime createdAt = LocalDateTime.now();

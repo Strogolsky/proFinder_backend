@@ -2,9 +2,12 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.ClientDto;
 import fit.biejk.entity.Client;
+import fit.biejk.entity.Review;
 import fit.biejk.mapper.ClientMapper;
+import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.service.AuthService;
 import fit.biejk.service.ClientService;
+import fit.biejk.service.ReviewService;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -47,6 +50,14 @@ public class ClientResource {
      */
     @Inject
     private AuthService authService;
+
+    /** Maps Review entity to ReviewDto and vice versa. */
+    @Inject
+    private ReviewMapper reviewMapper;
+
+    /** Service for accessing client reviews. */
+    @Inject
+    private ReviewService reviewService;
 
     /**
      * Retrieves all clients.
@@ -184,4 +195,20 @@ public class ClientResource {
         log.debug("Deleted profile for client with ID={}", id);
         return Response.ok().build();
     }
+
+    /**
+     * Retrieves all reviews submitted by the currently authenticated client.
+     *
+     * @return list of client's reviews
+     */
+    @GET
+    @Path("/me/review")
+    @RolesAllowed("CLIENT")
+    public Response getReviews() {
+        Long clientId = authService.getCurrentUserId();
+        List<Review> res = reviewService.getByClientId(clientId);
+        return Response.ok(reviewMapper.toDtoList(res)).build();
+    }
+
+
 }

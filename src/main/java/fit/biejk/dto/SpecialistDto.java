@@ -23,6 +23,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SpecialistDto {
+
     /**
      * Maximum length for firstName and lastName fields.
      */
@@ -37,6 +38,11 @@ public class SpecialistDto {
      * Unique identifier of the specialist.
      */
     private Long id;
+
+    /**
+     * Average rating based on client reviews.
+     */
+    private double averageRating;
 
     /**
      * Specialist's email address, must be a valid email format.
@@ -57,7 +63,10 @@ public class SpecialistDto {
     private String lastName;
 
     /**
-     * Specialist's password. (Temporary field, remove when creating response.)
+     * Password of the specialist.
+     * <p>
+     * This field is only used during creation and should be excluded in responses.
+     * </p>
      */
     private String password; // todo delete, when create response
 

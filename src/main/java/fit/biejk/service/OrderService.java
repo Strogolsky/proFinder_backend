@@ -40,9 +40,13 @@ public class OrderService {
     @Inject
     private AuthService authService;
 
+    /**
+     * Service layer for handling client-related business logic.
+     */
     @Inject
     private ClientService clientService;
 
+    /** Service for accessing client reviews. */
     @Inject
     private ReviewService reviewService;
 

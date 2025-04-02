@@ -51,9 +51,11 @@ public class ClientResource {
     @Inject
     private AuthService authService;
 
+    /** Maps Review entity to ReviewDto and vice versa. */
     @Inject
     private ReviewMapper reviewMapper;
 
+    /** Service for accessing client reviews. */
     @Inject
     private ReviewService reviewService;
 
@@ -194,6 +196,11 @@ public class ClientResource {
         return Response.ok().build();
     }
 
+    /**
+     * Retrieves all reviews submitted by the currently authenticated client.
+     *
+     * @return list of client's reviews
+     */
     @GET
     @Path("/me/review")
     @RolesAllowed("CLIENT")
@@ -202,5 +209,6 @@ public class ClientResource {
         List<Review> res = reviewService.getByClientId(clientId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
     }
+
 
 }

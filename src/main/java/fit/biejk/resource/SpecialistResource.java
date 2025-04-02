@@ -35,8 +35,6 @@ import java.util.List;
 @Slf4j
 public class SpecialistResource {
 
-    @Inject
-    ReviewService reviewService;
     /**
      * Service for handling business logic related to specialists.
      */
@@ -54,9 +52,15 @@ public class SpecialistResource {
      */
     @Inject
     private AuthService authService;
+    /** Maps Review entity to ReviewDto and vice versa. */
 
     @Inject
     private ReviewMapper reviewMapper;
+
+    /** Service for accessing client reviews. */
+    @Inject
+    private ReviewService reviewService;
+
 
     /**
      * Retrieves a list of all specialists.
@@ -191,12 +195,17 @@ public class SpecialistResource {
         return Response.ok().build();
     }
 
-    @Path("/{id}/review")
+    /**
+     * Retrieves all reviews submitted by all.
+     *
+     * @return list of client's reviews
+     */
+    @GET
+    @Path("/me/review")
     @PermitAll
-    public Response getReviews(@PathParam("id") final Long id) {
-        log.info("Get reviews for specialist ID={}", id);
-        List<Review> res = reviewService.getBySpecialistId(id);
-        log.debug("Found {} reviews", res.size());
+    public Response getReviews() {
+        Long clientId = authService.getCurrentUserId();
+        List<Review> res = reviewService.getByClientId(clientId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
     }
 }

@@ -15,30 +15,35 @@ import java.util.List;
 /**
  * Service for managing {@link Review} entities.
  * <p>
- * Handles creation of reviews and triggers rating recalculation for specialists.
+ * Provides functionality for creating reviews and retrieving them by client, specialist, or order.
+ * Also updates the average rating of specialists upon new review creation.
  * </p>
  */
 @Slf4j
 @ApplicationScoped
 public class ReviewService {
 
+    /** Repository for accessing persisted reviews. */
     @Inject
     ReviewRepository reviewRepository;
 
+    /** Service for retrieving and updating specialists. */
     @Inject
     SpecialistService specialistService;
 
+    /** Service for retrieving orders. */
     @Inject
     OrderService orderService;
 
+    /** Service for retrieving clients. */
     @Inject
     ClientService clientService;
 
     /**
-     * Creates a new review and updates the average rating for the associated specialist.
+     * Persists a new review and updates the specialist's average rating.
      *
-     * @param review the review to be persisted
-     * @return the persisted review
+     * @param review the review to be saved
+     * @return the persisted {@link Review}
      */
     @Transactional
     public Review create(final Review review) {
@@ -50,25 +55,58 @@ public class ReviewService {
         reviewRepository.persist(review);
         log.debug("Review persisted: reviewId={}", review.getId());
 
-
         specialistService.computeAverageRating(review.getSpecialist().getId());
         log.debug("Average rating recalculated for specialistId={}", review.getSpecialist().getId());
 
         return review;
     }
 
+    /**
+     * Retrieves all reviews written for a specific specialist.
+     *
+     * @param specialistId the specialist's ID
+     * @return list of reviews for the specialist
+     */
     public List<Review> getBySpecialistId(final Long specialistId) {
+        log.info("Fetching reviews for specialistId={}", specialistId);
         Specialist specialist = specialistService.getById(specialistId);
-        return reviewRepository.findBySpecialist(specialist);
+        List<Review> reviews = reviewRepository.findBySpecialist(specialist);
+        log.debug("Found {} reviews for specialistId={}", reviews.size(), specialistId);
+        return reviews;
     }
 
+    /**
+     * Retrieves all reviews written by a specific client.
+     *
+     * @param clientId the client's ID
+     * @return list of reviews created by the client
+     */
     public List<Review> getByClientId(final Long clientId) {
+        log.info("Fetching reviews by clientId={}", clientId);
         Client client = clientService.getById(clientId);
-        return reviewRepository.findByClient(client);
+        List<Review> reviews = reviewRepository.findByClient(client);
+        log.debug("Found {} reviews by clientId={}", reviews.size(), clientId);
+        return reviews;
     }
 
+    /**
+     * Retrieves the review associated with a specific order.
+     *
+     * @param orderId the order ID
+     * @return the review linked to the order, or {@code null} if not found
+     */
     public Review getByOrderId(final Long orderId) {
+        log.info("Fetching review for orderId={}", orderId);
         Order order = orderService.getById(orderId);
-        return reviewRepository.findByOrder(order);
+        Review review = reviewRepository.findByOrder(order);
+
+        if (review == null) {
+            log.warn("No review found for orderId={}", orderId);
+        } else {
+            log.debug("Found review: reviewId={} for orderId={}", review.getId(), orderId);
+        }
+
+        return review;
     }
+
 }

@@ -113,15 +113,36 @@ public class SpecialistService {
         log.debug("Specialist deleted with ID={}", id);
     }
 
+    /**
+     * Recalculates and updates the average rating for a specialist.
+     * <p>
+     * Computes the arithmetic mean from all reviews linked to the specialist.
+     * If no reviews are found, the rating is set to {@code null}.
+     * </p>
+     *
+     * @param specialistId the ID of the specialist whose rating should be updated
+     */
     @Transactional
     public void computeAverageRating(final Long specialistId) {
         Specialist specialist = getById(specialistId);
-        double sum = 0;
-        for(Review review : specialist.getReviews()) {
-            sum += review.getRating();
+        List<Review> reviews = specialist.getReviews();
+
+        if (reviews == null || reviews.isEmpty()) {
+            log.warn("No reviews found for specialistId={}. Setting averageRating to null.", specialistId);
+            specialist.setAverageRating(null);
+        } else {
+            double sum = 0;
+            for (Review review : reviews) {
+                sum += review.getRating();
+            }
+            double average = sum / reviews.size();
+            specialist.setAverageRating(average);
+            log.debug("Computed new averageRating={} for specialistId={}", average, specialistId);
         }
-        specialist.setAverageRating(sum / specialist.getReviews().size());
+
         specialistRepository.persist(specialist);
+        log.info("Updated averageRating for specialistId={}", specialistId);
     }
+
 
 }

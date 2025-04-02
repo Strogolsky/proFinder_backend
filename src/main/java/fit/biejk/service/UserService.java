@@ -62,6 +62,27 @@ public class UserService {
     }
 
     /**
+     * Retrieves a user by their ID.
+     *
+     * Logs the operation, throws NotFoundException if the user does not exist.
+     *
+     * @param id the ID of the user to retrieve
+     * @return the found User entity
+     * @throws NotFoundException if no user is found with the given ID
+     */
+
+    public User getById(final Long id) {
+        log.info("Get user by id={}", id);
+        User user = userRepository.findById(id);
+        if (user == null) {
+            log.error("User {} not found", id);
+            throw new NotFoundException("User " + id + " not found");
+        }
+        log.debug("Found user with ID={}", user.getId());
+        return user;
+    }
+
+    /**
      * Updates the user data by ID.
      *
      * @param userId   ID of the user

@@ -61,6 +61,17 @@ public class UserService {
         return user.get();
     }
 
+    public User getById(final Long id) {
+        log.info("Get user by id={}", id);
+        User user = userRepository.findById(id);
+        if (user == null) {
+            log.error("User {} not found", id);
+            throw new NotFoundException("User " + id + " not found");
+        }
+        log.debug("Found user with ID={}", user.getId());
+        return user;
+    }
+
     /**
      * Updates the user data by ID.
      *

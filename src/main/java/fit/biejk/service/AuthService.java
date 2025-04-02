@@ -1,6 +1,7 @@
 package fit.biejk.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
+import fit.biejk.dto.ChangePasswordRequest;
 import fit.biejk.entity.Client;
 import fit.biejk.entity.Specialist;
 import fit.biejk.entity.User;
@@ -167,5 +168,35 @@ public class AuthService {
      */
     private String hashPassword(final String password) {
         return BCrypt.withDefaults().hashToString(BCRYPT_COST, password.toCharArray());
+    }
+    /**
+     * Changes the password of the currently authenticated user.
+     *
+     * Verifies the old password, checks the new password and confirmation,
+     * updates the password in the database, and returns a new JWT token.
+     *
+     * @param request password change data (old, new, confirm)
+     * @return new JWT token after successful password update
+     * @throws IllegalArgumentException if validation fails
+     */
+    public String changePassword(final ChangePasswordRequest request) {
+        log.info("Change password: request={}", request);
+        Long currentUserId = getCurrentUserId();
+        User user = userService.getById(currentUserId);
+        if (!verifyPassword(request.getOldPassword(), user.getPassword())) {
+            log.error("Invalid old password: expected={}, actual={}", request.getOldPassword(), user.getPassword());
+            throw new IllegalArgumentException("Invalid old password");
+        }
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            log.error("Invalid new password: expected={}, actual={}", request.getNewPassword(), user.getPassword());
+            throw new IllegalArgumentException("Invalid new password");
+        }
+        String hashPassword = hashPassword(request.getNewPassword());
+        user.setPassword(hashPassword);
+        User updatedUser = userService.update(user.getId(), user);
+        log.debug("Updated user with ID={}", updatedUser.getId());
+        String res = generateJWT(updatedUser, updatedUser.getRole());
+        log.debug("Change JWT={}", res);
+        return res;
     }
 }

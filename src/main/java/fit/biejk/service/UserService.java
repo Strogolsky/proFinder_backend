@@ -61,6 +61,16 @@ public class UserService {
         return user.get();
     }
 
+    /**
+     * Retrieves a user by their ID.
+     *
+     * Logs the operation, throws NotFoundException if the user does not exist.
+     *
+     * @param id the ID of the user to retrieve
+     * @return the found User entity
+     * @throws NotFoundException if no user is found with the given ID
+     */
+
     public User getById(final Long id) {
         log.info("Get user by id={}", id);
         User user = userRepository.findById(id);

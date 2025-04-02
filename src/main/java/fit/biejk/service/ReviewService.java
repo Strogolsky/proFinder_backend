@@ -25,19 +25,19 @@ public class ReviewService {
 
     /** Repository for accessing persisted reviews. */
     @Inject
-    ReviewRepository reviewRepository;
+    private ReviewRepository reviewRepository;
 
     /** Service for retrieving and updating specialists. */
     @Inject
-    SpecialistService specialistService;
+    private SpecialistService specialistService;
 
     /** Service for retrieving orders. */
     @Inject
-    OrderService orderService;
+    private OrderService orderService;
 
     /** Service for retrieving clients. */
     @Inject
-    ClientService clientService;
+    private ClientService clientService;
 
     /**
      * Persists a new review and updates the specialist's average rating.

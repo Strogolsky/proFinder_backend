@@ -1,21 +1,14 @@
 package fit.biejk.entity;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.EnumType;
+import jakarta.json.bind.annotation.JsonbTransient;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Base entity representing a system user.
@@ -30,6 +23,7 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User extends PanacheEntityBase {
+
     /**
      * Maximum length for firstName and lastName fields.
      */
@@ -78,22 +72,36 @@ public class User extends PanacheEntityBase {
     private String phoneNumber;
 
     /**
-     * User's location.
+     * User's geographical location.
      */
     @Column(name = "location")
     @Enumerated(EnumType.STRING)
     private Location location;
 
     /**
-     * Role assigned to the user.
+     * Role assigned to the user (e.g., CLIENT, SPECIALIST).
      */
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
     /**
-     * Timestamp when the user was created.
+     * Timestamp when the user account was created.
      */
     @Column(name = "createAt", nullable = false, updatable = false)
     private final LocalDateTime createAt = LocalDateTime.now();
+
+    /**
+     * List of chats initiated by the user.
+     */
+    @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonbTransient
+    private List<Chat> initiatedChats;
+
+    /**
+     * List of chats received by the user.
+     */
+    @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonbTransient
+    private List<Chat> receivedChats;
 }

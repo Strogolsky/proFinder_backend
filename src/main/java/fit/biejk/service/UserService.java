@@ -70,7 +70,6 @@ public class UserService {
      * @return the found User entity
      * @throws NotFoundException if no user is found with the given ID
      */
-
     public User getById(final Long id) {
         log.info("Get user by id={}", id);
         User user = userRepository.findById(id);
@@ -82,6 +81,12 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Checks if a user exists by their ID.
+     *
+     * @param id the ID of the user
+     * @return true if the user exists, false otherwise
+     */
     public boolean existById(final Long id) {
         User user = userRepository.findById(id);
         if (user == null) {

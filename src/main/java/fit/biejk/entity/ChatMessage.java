@@ -7,6 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entity representing a single message sent within a chat.
+ * <p>
+ * Each message is linked to a {@link Chat} and has a sender ({@link User}),
+ * text content, and creation timestamp.
+ * </p>
+ */
 @Entity
 @Table(name = "chat-message")
 @Data
@@ -14,19 +21,43 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ChatMessage {
 
+    /**
+     * Unique identifier for the chat message.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
+    /**
+     * User who sent the message.
+     * <p>
+     * Represented by a many-to-one relation to {@link User}.
+     * </p>
+     */
     @ManyToOne
     private User sender;
 
+    /**
+     * Content of the message.
+     */
     @Column(name = "content")
     private String content;
 
+    /**
+     * Timestamp when the message was created.
+     * <p>
+     * Initialized with the current time by default.
+     * </p>
+     */
     @Column(name = "create_at")
     private LocalDateTime createAt = LocalDateTime.now();
 
+    /**
+     * Chat to which the message belongs.
+     * <p>
+     * This is a required association.
+     * </p>
+     */
     @ManyToOne
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;

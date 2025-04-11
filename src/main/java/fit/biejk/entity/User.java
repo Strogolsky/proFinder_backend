@@ -23,6 +23,7 @@ import java.util.List;
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
 public class User extends PanacheEntityBase {
+
     /**
      * Maximum length for firstName and lastName fields.
      */
@@ -71,29 +72,35 @@ public class User extends PanacheEntityBase {
     private String phoneNumber;
 
     /**
-     * User's location.
+     * User's geographical location.
      */
     @Column(name = "location")
     @Enumerated(EnumType.STRING)
     private Location location;
 
     /**
-     * Role assigned to the user.
+     * Role assigned to the user (e.g., CLIENT, SPECIALIST).
      */
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
     /**
-     * Timestamp when the user was created.
+     * Timestamp when the user account was created.
      */
     @Column(name = "createAt", nullable = false, updatable = false)
     private final LocalDateTime createAt = LocalDateTime.now();
 
+    /**
+     * List of chats initiated by the user.
+     */
     @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonbTransient
     private List<Chat> initiatedChats;
 
+    /**
+     * List of chats received by the user.
+     */
     @OneToMany(mappedBy = "user2", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonbTransient
     private List<Chat> receivedChats;

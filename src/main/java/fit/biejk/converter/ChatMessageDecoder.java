@@ -25,9 +25,10 @@ public class ChatMessageDecoder implements Decoder.Text<ChatInputMessage> {
 
     public static ObjectMapper getJackson() {
         ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         om.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
         om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        om.registerModule(new JavaTimeModule());
         return om;
     }
 }

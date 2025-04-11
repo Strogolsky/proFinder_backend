@@ -10,7 +10,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatOutputMessage {
+    private Long id;
+    private Long chatId;
     private String content;
-    private Long fromId;
-    private LocalDateTime timestamp = LocalDateTime.now();
+    private Long senderId;
+    private LocalDateTime createAt;
 }

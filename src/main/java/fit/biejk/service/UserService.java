@@ -82,6 +82,16 @@ public class UserService {
         return user;
     }
 
+    public boolean existById(final Long id) {
+        User user = userRepository.findById(id);
+        if (user == null) {
+            log.warn("User {} not found", id);
+            return false;
+        }
+        log.info("User {} exists", id);
+        return true;
+    }
+
     /**
      * Updates the user data by ID.
      *

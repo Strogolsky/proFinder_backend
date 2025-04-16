@@ -2,7 +2,6 @@ package fit.biejk.dto;
 
 import fit.biejk.entity.Location;
 import fit.biejk.entity.Specialization;
-import fit.biejk.entity.TimeSlot;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -95,9 +94,4 @@ public class SpecialistDto {
      * Detailed description of the specialist's skills or services offered.
      */
     private String description;
-
-    /**
-     * List of available time slots for appointments.
-     */
-    private List<TimeSlot> schedule;
 }

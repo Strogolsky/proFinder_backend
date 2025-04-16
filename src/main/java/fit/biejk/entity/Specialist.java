@@ -54,12 +54,6 @@ public class Specialist extends User {
     private List<OrderProposal> orderProposals;
 
     /**
-     * Schedule of available time slots for the specialist.
-     */
-    @OneToMany(mappedBy = "specialist", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TimeSlot> schedule;
-
-    /**
      * List of reviews received from clients for completed orders.
      * <p>
      * Ignored during JSON serialization to prevent infinite loops or heavy response objects.

@@ -1,6 +1,5 @@
 package fit.biejk.resource;
 
-import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
 import fit.biejk.dto.ReviewDto;
@@ -184,59 +183,6 @@ public class OrderResource {
     }
 
     /**
-     * Retrieves all proposals for a specific order.
-     *
-     * @param orderId order ID
-     * @return list of proposals
-     */
-    @GET
-    @Path("/{orderId}/proposal")
-    @RolesAllowed("CLIENT")
-    public Response getAllProposal(@PathParam("orderId") final Long orderId) {
-        log.info("Get all proposals for orderId={}", orderId);
-        List<OrderProposal> proposals = orderService.getOrderProposals(orderId);
-        log.debug("Proposals found: {}", proposals.size());
-        return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
-    }
-
-    /**
-     * Retrieves a specific proposal for an order.
-     *
-     * @param orderId    order ID
-     * @param proposalId proposal ID
-     * @return proposal data
-     */
-    @GET
-    @Path("/{orderId}/proposal/{proposalId}")
-    @RolesAllowed({"CLIENT", "SPECIALIST"})
-    public Response getProposal(@PathParam("orderId") final Long orderId,
-                                @PathParam("proposalId") final Long proposalId) {
-        log.info("Get proposal: orderId={}, proposalId={}", orderId, proposalId);
-        OrderProposal result = orderService.getOrderProposalById(orderId, proposalId);
-        return Response.ok(orderProposalMapper.toDto(result)).build();
-    }
-
-    /**
-     * Confirms a proposal and finalizes order details.
-     *
-     * @param orderId     order ID
-     * @param proposalId  proposal ID to confirm
-     * @param confirm     confirmation data (final price and deadline)
-     * @return confirmed order
-     */
-    @PUT
-    @Path("/{orderId}/proposal/{proposalId}/confirm")
-    @RolesAllowed("CLIENT")
-    public Response confirm(@PathParam("orderId") final Long orderId,
-                            @PathParam("proposalId") final Long proposalId,
-                            @Valid final ConfirmProposal confirm) {
-        log.info("Confirm proposal: orderId={}, proposalId={}, confirm={}", orderId, proposalId, confirm);
-        Order result = orderService.confirm(orderId, proposalId, confirm.getFinalPrice(), confirm.getFinalDeadline());
-        log.debug("Order confirmed with ID={}", result.getId());
-        return Response.ok(orderMapper.toDto(result)).build();
-    }
-
-    /**
      * Deletes an order by ID.
      *
      * @param orderId order ID
@@ -297,6 +243,43 @@ public class OrderResource {
         log.debug("Review found: reviewId={}, rating={}", review.getId(), review.getRating());
         return Response.ok(reviewMapper.toDto(review)).build();
     }
+    /**
+     * Retrieves all orders created by a specific client.
+     * <p>
+     * Only accessible to authenticated users with the CLIENT role.
+     * </p>
+     *
+     * @param clientId the ID of the client whose orders are to be retrieved
+     * @return list of orders created by the client
+     */
+    @GET
+    @Path("/client/{clientId}")
+    @RolesAllowed("CLIENT")
+    public Response getByClientId(@PathParam("clientId") final Long clientId) {
+        log.info("Get client request: clientId={}", clientId);
+        List<Order> result = orderService.getByClientId(clientId);
+        return Response.ok(orderMapper.toDtoList(result)).build();
+    }
+
+    /**
+     * Retrieves all active orders assigned to a specific specialist.
+     * <p>
+     * Only accessible to authenticated users with the SPECIALIST role.
+     * </p>
+     *
+     * @param specialistId the ID of the specialist
+     * @return list of orders currently assigned to the specialist
+     */
+    @GET
+    @Path("/specialist/{specialistId}")
+    @RolesAllowed("SPECIALIST")
+    public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
+        log.info("Get assigned by specialist id: specialistId={}", specialistId);
+        List<Order> result = orderService.getBySpecialistId(specialistId);
+        return Response.ok(orderMapper.toDtoList(result)).build();
+    }
+
+
 
 
 }

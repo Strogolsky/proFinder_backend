@@ -95,7 +95,6 @@ public class SpecialistService {
         old.setDescription(specialist.getDescription());
         old.setSpecialization(specialist.getSpecialization());
         specialistRepository.flush();
-        old.getSchedule().size(); // todo refactor when DTO for schedule is implemented
         log.debug("Specialist updated with ID={}", id);
         return old;
     }

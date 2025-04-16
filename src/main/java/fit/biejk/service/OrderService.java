@@ -156,38 +156,6 @@ public class OrderService {
     }
 
     /**
-     * Gets all proposals for a given order.
-     *
-     * @param orderId ID of the order
-     * @return list of proposals
-     */
-    public List<OrderProposal> getOrderProposals(final Long orderId) {
-        log.info("Get proposals for orderId={}", orderId);
-        Order order = getById(orderId);
-        List<OrderProposal> proposals = orderProposalService.getByOrderId(order);
-        log.debug("Found {} proposals for orderId={}", proposals.size(), orderId);
-        return proposals;
-    }
-
-    /**
-     * Gets a proposal by ID and checks it belongs to the given order.
-     *
-     * @param orderId    order ID
-     * @param proposalId proposal ID
-     * @return found proposal
-     */
-    public OrderProposal getOrderProposalById(final Long orderId, final Long proposalId) {
-        log.info("Get proposal by ID={}, orderId={}", proposalId, orderId);
-        Order order = getById(orderId);
-        OrderProposal proposal = orderProposalService.getById(proposalId);
-        if (!proposal.getOrder().equals(order)) {
-            log.error("Proposal does not belong to this order. orderId={}, proposalId={}", orderId, proposalId);
-            throw new IllegalArgumentException("Proposal does not belong to this order");
-        }
-        return proposal;
-    }
-
-    /**
      * Adds a new proposal to an order.
      *
      * @param orderId  ID of the order
@@ -212,32 +180,32 @@ public class OrderService {
         return proposal;
     }
 
-    /**
-     * Confirms a proposal, updates price and deadline, and completes the order.
-     *
-     * @param orderId    ID of the order
-     * @param proposalId ID of the approved proposal
-     * @param price      final agreed price
-     * @param deadline   final deadline
-     * @return updated order
-     */
-    @Transactional
-    public Order confirm(final Long orderId, final Long proposalId, final int price, final LocalDateTime deadline) {
-        log.info("Confirm proposal: orderId={}, proposalId={}", orderId, proposalId);
-        Order order = getById(orderId);
-        if (!authService.isCurrentUser(order.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}",
-                    orderId, order.getClient().getId());
-            throw new IllegalArgumentException();
-        }
-        order.setPrice(price);
-        order.setDeadline(deadline);
-        orderProposalService.approveProposal(order, proposalId);
-        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
-        orderRepository.persist(order);
-        log.debug("Order confirmed with ID={}", orderId);
-        return order;
-    }
+//    /**
+//     * Confirms a proposal, updates price and deadline, and completes the order.
+//     *
+//     * @param orderId    ID of the order
+//     * @param proposalId ID of the approved proposal
+//     * @param price      final agreed price
+//     * @param deadline   final deadline
+//     * @return updated order
+//     */
+//    @Transactional
+//    public Order confirm(final Long orderId, final Long proposalId, final int price, final LocalDateTime deadline) {
+//        log.info("Confirm proposal: orderId={}, proposalId={}", orderId, proposalId);
+//        Order order = getById(orderId);
+//        if (!authService.isCurrentUser(order.getClient().getId())) {
+//            log.error("User is not the owner of this order. orderId={}, clientId={}",
+//                    orderId, order.getClient().getId());
+//            throw new IllegalArgumentException();
+//        }
+//        order.setPrice(price);
+//        order.setDeadline(deadline);
+//        orderProposalService.approveProposal(order.getId(), proposalId);
+//        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
+//        orderRepository.persist(order);
+//        log.debug("Order confirmed with ID={}", orderId);
+//        return order;
+//    }
 
     /**
      * Checks if the given specialist already has a proposal for the order.
@@ -295,7 +263,7 @@ public class OrderService {
         }
 
         Client client = clientService.getById(clientId);
-        Specialist specialist = orderProposalService.getConfirmedSpecialist(order);
+        Specialist specialist = orderProposalService.getConfirmedSpecialist(orderId);
         if (specialist == null) {
             log.error("Cannot review: no approved specialist found for orderId={}", orderId);
             throw new IllegalArgumentException("No specialist found for this order");

@@ -2,11 +2,14 @@ package fit.biejk.service;
 
 import fit.biejk.entity.*;
 import fit.biejk.repository.OrderProposalRepository;
+import fit.biejk.repository.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -27,6 +30,9 @@ public class OrderProposalService {
     @Inject
     private OrderProposalRepository orderProposalRepository;
 
+    @Inject
+    private OrderRepository orderRepository;
+
     /**
      * Creates a new proposal for an order and assigns it the {@link ProposalStatus#CREATED} status.
      *
@@ -45,14 +51,8 @@ public class OrderProposalService {
         return orderProposal;
     }
 
-    /**
-     * Approves the selected proposal and rejects all others for the same order.
-     *
-     * @param order      the order to which the proposals belong
-     * @param proposalId the ID of the proposal to approve
-     */
-    public void approveProposal(final Order order, final Long proposalId) {
-        log.info("Approving proposal ID={} for order ID={}", proposalId, order.getId());
+    public void approveProposal(final Long orderId, final Long proposalId) {
+        log.info("Approving proposal ID={} for order ID={}", proposalId, orderId);
 
         OrderProposal approvedProposal = orderProposalRepository.findById(proposalId);
         if (approvedProposal == null) {
@@ -64,7 +64,7 @@ public class OrderProposalService {
         orderProposalRepository.persist(approvedProposal);
         log.debug("Proposal ID={} approved", approvedProposal.getId());
 
-        List<OrderProposal> allProposals = getByOrderId(order);
+        List<OrderProposal> allProposals = getByOrderId(orderId);
         for (OrderProposal proposal : allProposals) {
             if (!proposal.getId().equals(approvedProposal.getId())) {
                 proposal.setStatus(ProposalStatus.REJECTED);
@@ -94,31 +94,20 @@ public class OrderProposalService {
         return proposal;
     }
 
-    /**
-     * Retrieves all proposals associated with a specific order.
-     *
-     * @param order the order for which to fetch proposals
-     * @return a list of associated proposals
-     */
-    public List<OrderProposal> getByOrderId(final Order order) {
-        log.info("Fetching all proposals for order ID={}", order.getId());
 
-        List<OrderProposal> proposals = orderProposalRepository.findByOrder(order);
-        log.debug("Found {} proposal(s) for order ID={}", proposals.size(), order.getId());
+    public List<OrderProposal> getByOrderId(final Long orderId) {
+        log.info("Fetching all proposals for order ID={}", orderId);
+
+        List<OrderProposal> proposals = orderProposalRepository.findByOrderId(orderId);
+        log.debug("Found {} proposal(s) for order ID={}", proposals.size(), orderId);
 
         return proposals;
     }
 
-    /**
-     * Returns the specialist associated with the approved proposal for a given order.
-     *
-     * @param order the order to check
-     * @return the approved specialist, or {@code null} if no proposal is approved
-     */
-    public Specialist getConfirmedSpecialist(final Order order) {
-        log.info("Searching for confirmed specialist for order ID={}", order.getId());
+    public Specialist getConfirmedSpecialist(final Long orderId) {
+        log.info("Searching for confirmed specialist for order ID={}", orderId);
 
-        List<OrderProposal> proposals = getByOrderId(order);
+        List<OrderProposal> proposals = getByOrderId(orderId);
         for (OrderProposal proposal : proposals) {
             if (ProposalStatus.APPROVED.equals(proposal.getStatus())) {
                 log.debug("Confirmed specialist found: specialistId={}, proposalId={}",
@@ -127,7 +116,7 @@ public class OrderProposalService {
             }
         }
 
-        log.warn("No approved proposal found for order ID={}", order.getId());
+        log.warn("No approved proposal found for order ID={}", orderId);
         return null;
     }
 
@@ -142,5 +131,23 @@ public class OrderProposalService {
     public Order getOrderById(Long orderProposalId) {
         OrderProposal orderProposal = getById(orderProposalId);
         return orderProposal.getOrder();
+    }
+
+    @Transactional
+    public Order confirm(final Long proposalId, final int price, final LocalDateTime deadline) {
+        log.info("Confirm proposal: proposalId={}", proposalId);
+        Order order = getOrderById(proposalId);
+        if (!authService.isCurrentUser(order.getClient().getId())) {
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    order.getId(), order.getClient().getId());
+            throw new IllegalArgumentException();
+        }
+        order.setPrice(price);
+        order.setDeadline(deadline);
+        approveProposal(order.getId(), proposalId);
+        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
+        orderRepository.persist(order);
+        log.debug("Order confirmed with ID={}", order.getId());
+        return order;
     }
 }

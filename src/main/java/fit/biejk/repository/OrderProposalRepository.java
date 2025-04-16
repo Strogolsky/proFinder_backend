@@ -1,6 +1,5 @@
 package fit.biejk.repository;
 
-import fit.biejk.entity.Order;
 import fit.biejk.entity.OrderProposal;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -16,14 +15,8 @@ import java.util.List;
 @ApplicationScoped
 public class OrderProposalRepository implements PanacheRepository<OrderProposal> {
 
-    /**
-     * Finds all proposals associated with the given order.
-     *
-     * @param order the order to search proposals for
-     * @return list of matching OrderProposal entities
-     */
-    public List<OrderProposal> findByOrder(final Order order) {
-        return find("order", order).list();
+    public List<OrderProposal> findByOrderId(final Long orderId) {
+        return find("order.id", orderId).list();
     }
 
     public List<OrderProposal> findBySpecialistId(final Long specialistId) {

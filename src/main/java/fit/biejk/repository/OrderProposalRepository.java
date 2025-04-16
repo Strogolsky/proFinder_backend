@@ -25,4 +25,8 @@ public class OrderProposalRepository implements PanacheRepository<OrderProposal>
     public List<OrderProposal> findByOrder(final Order order) {
         return find("order", order).list();
     }
+
+    public List<OrderProposal> findBySpecialistId(final Long specialistId) {
+        return find("specialist.id", specialistId).list();
+    }
 }

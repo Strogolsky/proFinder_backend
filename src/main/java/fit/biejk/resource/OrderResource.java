@@ -298,5 +298,24 @@ public class OrderResource {
         return Response.ok(reviewMapper.toDto(review)).build();
     }
 
+    @GET
+    @Path("/client/{clientId}")
+    @RolesAllowed("CLIENT")
+    public Response getByClientId(@PathParam("clientId") final Long clientId) {
+        log.info("Get client request: clientId={}", clientId);
+        List<Order> result = orderService.getByClientId(clientId);
+        return Response.ok(orderMapper.toDtoList(result)).build();
+    }
+
+    @GET
+    @Path("/specialist/{specialistId}")
+    @PermitAll
+    public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
+        log.info("Get assigned by specialist id: specialistId={}", specialistId);
+        List<Order> result = orderService.getBySpecialistId(specialistId);
+        return Response.ok(orderMapper.toDtoList(result)).build();
+    }
+
+
 
 }

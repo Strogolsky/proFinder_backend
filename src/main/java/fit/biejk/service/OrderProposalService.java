@@ -1,9 +1,6 @@
 package fit.biejk.service;
 
-import fit.biejk.entity.Order;
-import fit.biejk.entity.OrderProposal;
-import fit.biejk.entity.ProposalStatus;
-import fit.biejk.entity.Specialist;
+import fit.biejk.entity.*;
 import fit.biejk.repository.OrderProposalRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -22,6 +19,8 @@ import java.util.List;
 @ApplicationScoped
 public class OrderProposalService {
 
+    @Inject
+    AuthService authService;
     /**
      * Repository for managing order proposal persistence.
      */
@@ -130,5 +129,18 @@ public class OrderProposalService {
 
         log.warn("No approved proposal found for order ID={}", order.getId());
         return null;
+    }
+
+    public List<OrderProposal> getBySpecialistId(final Long specialistId) {
+        log.info("Searching for proposal by specialist ID={}", specialistId);
+        if (!authService.isCurrentUser(specialistId)) {
+            throw new IllegalArgumentException("Special ist ID " + specialistId + " not authorized");
+        }
+        return orderProposalRepository.findBySpecialistId(specialistId);
+    }
+
+    public Order getOrderById(Long orderProposalId) {
+        OrderProposal orderProposal = getById(orderProposalId);
+        return orderProposal.getOrder();
     }
 }

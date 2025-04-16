@@ -314,4 +314,20 @@ public class OrderService {
         return saved;
     }
 
+    public List<Order> getByClientId(Long userId) {
+        if (!authService.isCurrentUser(userId)) {
+            log.warn("User is not logged in");
+            throw new IllegalArgumentException("User is not logged in");
+        } // todo delete, when admin system will be created
+        return orderRepository.findByClientId(userId);
+    }
+
+    public List<Order> getBySpecialistId(Long specialistId) {
+        if (!authService.isCurrentUser(specialistId)) {
+            log.warn("User is not logged in");
+            throw new IllegalArgumentException("User is not logged in");
+        }
+        return orderRepository.findBySpecialistId(specialistId);
+    }
+
 }

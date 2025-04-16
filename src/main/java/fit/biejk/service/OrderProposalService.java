@@ -15,21 +15,29 @@ import java.util.List;
 /**
  * Service class for managing {@link OrderProposal} entities.
  * <p>
- * Responsible for creating, approving, rejecting, and retrieving proposals.
+ * Responsible for creating, approving, confirming, and retrieving proposals,
+ * as well as updating the associated {@link Order} based on proposal status.
  * </p>
  */
 @Slf4j
 @ApplicationScoped
 public class OrderProposalService {
 
+    /**
+     * Service for checking the identity of the currently authenticated user.
+     */
     @Inject
-    AuthService authService;
+    private AuthService authService;
+
     /**
      * Repository for managing order proposal persistence.
      */
     @Inject
     private OrderProposalRepository orderProposalRepository;
 
+    /**
+     * Repository for managing order persistence.
+     */
     @Inject
     private OrderRepository orderRepository;
 
@@ -51,6 +59,13 @@ public class OrderProposalService {
         return orderProposal;
     }
 
+    /**
+     * Approves a specific proposal and rejects all other proposals for the same order.
+     *
+     * @param orderId    the ID of the order
+     * @param proposalId the ID of the proposal to approve
+     * @throws NotFoundException if the proposal does not exist
+     */
     public void approveProposal(final Long orderId, final Long proposalId) {
         log.info("Approving proposal ID={} for order ID={}", proposalId, orderId);
 
@@ -94,7 +109,12 @@ public class OrderProposalService {
         return proposal;
     }
 
-
+    /**
+     * Retrieves all proposals associated with a specific order.
+     *
+     * @param orderId the ID of the order
+     * @return list of proposals for the order
+     */
     public List<OrderProposal> getByOrderId(final Long orderId) {
         log.info("Fetching all proposals for order ID={}", orderId);
 
@@ -104,6 +124,12 @@ public class OrderProposalService {
         return proposals;
     }
 
+    /**
+     * Returns the specialist whose proposal has been approved for a given order.
+     *
+     * @param orderId the ID of the order
+     * @return the approved specialist, or {@code null} if no approved proposal is found
+     */
     public Specialist getConfirmedSpecialist(final Long orderId) {
         log.info("Searching for confirmed specialist for order ID={}", orderId);
 
@@ -120,19 +146,45 @@ public class OrderProposalService {
         return null;
     }
 
+    /**
+     * Retrieves all proposals submitted by a specific specialist.
+     * <p>
+     * The caller must be the same as the specialist whose ID is provided.
+     * </p>
+     *
+     * @param specialistId the ID of the specialist
+     * @return list of proposals submitted by the specialist
+     * @throws IllegalArgumentException if the caller is not the same as the specialist
+     */
     public List<OrderProposal> getBySpecialistId(final Long specialistId) {
         log.info("Searching for proposal by specialist ID={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
-            throw new IllegalArgumentException("Special ist ID " + specialistId + " not authorized");
+            throw new IllegalArgumentException("Specialist ID " + specialistId + " not authorized");
         }
         return orderProposalRepository.findBySpecialistId(specialistId);
     }
 
-    public Order getOrderById(Long orderProposalId) {
+    /**
+     * Retrieves the order associated with a given proposal.
+     *
+     * @param orderProposalId the ID of the proposal
+     * @return the related order
+     */
+    public Order getOrderById(final Long orderProposalId) {
         OrderProposal orderProposal = getById(orderProposalId);
         return orderProposal.getOrder();
     }
 
+    /**
+     * Confirms a proposal, updates the related order with final price and deadline,
+     * changes the order status, and rejects all other proposals.
+     *
+     * @param proposalId the ID of the approved proposal
+     * @param price      the agreed final price
+     * @param deadline   the agreed final deadline
+     * @return the updated order
+     * @throws IllegalArgumentException if the current user is not the order's client
+     */
     @Transactional
     public Order confirm(final Long proposalId, final int price, final LocalDateTime deadline) {
         log.info("Confirm proposal: proposalId={}", proposalId);

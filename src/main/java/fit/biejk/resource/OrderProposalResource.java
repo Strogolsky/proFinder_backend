@@ -19,19 +19,41 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 
+/**
+ * REST resource for managing order proposals submitted by specialists.
+ * <p>
+ * This resource allows retrieval of proposals by specialist, by proposal ID, or by order ID.
+ * It also supports confirming proposals by the client and fetching related order data.
+ * </p>
+ */
 @Slf4j
 @Path("/proposal")
 public class OrderProposalResource {
 
+    /**
+     * Service responsible for handling business logic related to order proposals.
+     */
     @Inject
-    OrderProposalService orderProposalService;
+    private OrderProposalService orderProposalService;
 
+    /**
+     * Mapper for converting between OrderProposal entities and DTOs.
+     */
     @Inject
-    OrderProposalMapper orderProposalMapper;
+    private OrderProposalMapper orderProposalMapper;
 
+    /**
+     * Mapper for converting between Order entities and DTOs.
+     */
     @Inject
-    OrderMapper orderMapper;
+    private OrderMapper orderMapper;
 
+    /**
+     * Retrieves all proposals submitted by the specified specialist.
+     *
+     * @param specialistId the ID of the specialist
+     * @return list of proposals submitted by the specialist
+     */
     @GET
     @Path("/specialist/{specialistId}")
     @RolesAllowed("SPECIALIST")
@@ -40,6 +62,12 @@ public class OrderProposalResource {
         return Response.ok(orderProposalMapper.toDtoList(result)).build();
     }
 
+    /**
+     * Retrieves the order associated with a specific proposal.
+     *
+     * @param proposalId the ID of the proposal
+     * @return order associated with the proposal
+     */
     @GET
     @Path("/{proposalId}/order")
     @RolesAllowed({"CLIENT", "SPECIALIST"})
@@ -48,6 +76,12 @@ public class OrderProposalResource {
         return Response.ok(orderMapper.toDto(order)).build();
     }
 
+    /**
+     * Retrieves a specific proposal by its ID.
+     *
+     * @param proposalId the ID of the proposal
+     * @return the corresponding proposal
+     */
     @GET
     @Path("/{proposalId}")
     @RolesAllowed({"CLIENT", "SPECIALIST"})
@@ -57,6 +91,12 @@ public class OrderProposalResource {
         return Response.ok(orderProposalMapper.toDto(result)).build();
     }
 
+    /**
+     * Retrieves all proposals associated with a specific order.
+     *
+     * @param orderId the ID of the order
+     * @return list of proposals for the order
+     */
     @GET
     @Path("/order/{orderId}")
     @RolesAllowed("CLIENT")
@@ -67,6 +107,16 @@ public class OrderProposalResource {
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
     }
 
+    /**
+     * Confirms a proposal and updates the corresponding order with final price and deadline.
+     * <p>
+     * Only the client who created the order can confirm a proposal.
+     * </p>
+     *
+     * @param proposalId the ID of the proposal to confirm
+     * @param confirm the confirmation data including final price and deadline
+     * @return the updated and confirmed order
+     */
     @PUT
     @Path("/{proposalId}/confirm")
     @RolesAllowed("CLIENT")
@@ -79,7 +129,4 @@ public class OrderProposalResource {
         log.debug("Order confirmed with ID={}", result.getId());
         return Response.ok(orderMapper.toDto(result)).build();
     }
-
-
-
 }

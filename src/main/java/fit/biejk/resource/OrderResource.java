@@ -243,7 +243,15 @@ public class OrderResource {
         log.debug("Review found: reviewId={}, rating={}", review.getId(), review.getRating());
         return Response.ok(reviewMapper.toDto(review)).build();
     }
-
+    /**
+     * Retrieves all orders created by a specific client.
+     * <p>
+     * Only accessible to authenticated users with the CLIENT role.
+     * </p>
+     *
+     * @param clientId the ID of the client whose orders are to be retrieved
+     * @return list of orders created by the client
+     */
     @GET
     @Path("/client/{clientId}")
     @RolesAllowed("CLIENT")
@@ -253,6 +261,15 @@ public class OrderResource {
         return Response.ok(orderMapper.toDtoList(result)).build();
     }
 
+    /**
+     * Retrieves all active orders assigned to a specific specialist.
+     * <p>
+     * Only accessible to authenticated users with the SPECIALIST role.
+     * </p>
+     *
+     * @param specialistId the ID of the specialist
+     * @return list of orders currently assigned to the specialist
+     */
     @GET
     @Path("/specialist/{specialistId}")
     @RolesAllowed("SPECIALIST")
@@ -261,6 +278,7 @@ public class OrderResource {
         List<Order> result = orderService.getBySpecialistId(specialistId);
         return Response.ok(orderMapper.toDtoList(result)).build();
     }
+
 
 
 

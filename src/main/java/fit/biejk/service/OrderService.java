@@ -8,7 +8,6 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -180,33 +179,6 @@ public class OrderService {
         return proposal;
     }
 
-//    /**
-//     * Confirms a proposal, updates price and deadline, and completes the order.
-//     *
-//     * @param orderId    ID of the order
-//     * @param proposalId ID of the approved proposal
-//     * @param price      final agreed price
-//     * @param deadline   final deadline
-//     * @return updated order
-//     */
-//    @Transactional
-//    public Order confirm(final Long orderId, final Long proposalId, final int price, final LocalDateTime deadline) {
-//        log.info("Confirm proposal: orderId={}, proposalId={}", orderId, proposalId);
-//        Order order = getById(orderId);
-//        if (!authService.isCurrentUser(order.getClient().getId())) {
-//            log.error("User is not the owner of this order. orderId={}, clientId={}",
-//                    orderId, order.getClient().getId());
-//            throw new IllegalArgumentException();
-//        }
-//        order.setPrice(price);
-//        order.setDeadline(deadline);
-//        orderProposalService.approveProposal(order.getId(), proposalId);
-//        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
-//        orderRepository.persist(order);
-//        log.debug("Order confirmed with ID={}", orderId);
-//        return order;
-//    }
-
     /**
      * Checks if the given specialist already has a proposal for the order.
      *
@@ -282,7 +254,18 @@ public class OrderService {
         return saved;
     }
 
-    public List<Order> getByClientId(Long userId) {
+    /**
+     * Retrieves all orders created by the specified client.
+     * <p>
+     * Ensures that the requesting user is the same as the target client.
+     * </p>
+     *
+     * @param userId ID of the client
+     * @return list of orders belonging to the client
+     * @throws IllegalArgumentException if the current user is not the same as the client
+     */
+    public List<Order> getByClientId(final Long userId) {
+        log.info("Get orders by clientId={}", userId);
         if (!authService.isCurrentUser(userId)) {
             log.warn("User is not logged in");
             throw new IllegalArgumentException("User is not logged in");
@@ -290,7 +273,18 @@ public class OrderService {
         return orderRepository.findByClientId(userId);
     }
 
-    public List<Order> getBySpecialistId(Long specialistId) {
+    /**
+     * Retrieves all orders assigned to the specified specialist.
+     * <p>
+     * Ensures that the requesting user is the same as the target specialist.
+     * </p>
+     *
+     * @param specialistId ID of the specialist
+     * @return list of orders currently assigned to the specialist
+     * @throws IllegalArgumentException if the current user is not the same as the specialist
+     */
+    public List<Order> getBySpecialistId(final Long specialistId) {
+        log.info("Get orders by specialistId={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
             log.warn("User is not logged in");
             throw new IllegalArgumentException("User is not logged in");

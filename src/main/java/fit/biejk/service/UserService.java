@@ -1,5 +1,6 @@
 package fit.biejk.service;
 
+import fit.biejk.entity.Location;
 import fit.biejk.entity.User;
 import fit.biejk.repository.UserRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,6 +29,13 @@ public class UserService {
      */
     @Inject
     private UserRepository userRepository;
+
+
+    /**
+     * Service for managing locations.
+     */
+    @Inject
+    private LocationService locationService;
 
     /**
      * Checks if the given email is unique.
@@ -114,7 +122,8 @@ public class UserService {
             throw new NotFoundException("User with id " + userId + " not found");
         }
         existingUser.setPhoneNumber(newUser.getPhoneNumber());
-        existingUser.setLocation(newUser.getLocation());
+        Location location = locationService.getById(newUser.getLocation().getId());
+        existingUser.setLocation(location);
         existingUser.setFirstName(newUser.getFirstName());
         existingUser.setLastName(newUser.getLastName());
         log.debug("User updated with ID={}", existingUser.getId());

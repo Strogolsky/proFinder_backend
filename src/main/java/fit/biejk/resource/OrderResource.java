@@ -93,6 +93,7 @@ public class OrderResource {
         Long clientId = authService.getCurrentUserId();
         Client client = clientService.getById(clientId);
         order.setClient(client);
+        order.setLocation(client.getLocation());
         Order result = orderService.create(order);
         log.debug("Order created with ID={}", result.getId());
         return Response.ok(orderMapper.toDto(result)).build();

@@ -1,5 +1,6 @@
 package fit.biejk.dto;
 
+import fit.biejk.entity.Location;
 import fit.biejk.entity.OrderStatus;
 import fit.biejk.entity.Specialization;
 import jakarta.validation.constraints.Positive;
@@ -62,4 +63,9 @@ public class OrderDto {
      * Deadline for the order completion.
      */
     private LocalDateTime deadline;
+
+    /**
+     * Order's geographical location.
+     */
+    private Location location;
 }

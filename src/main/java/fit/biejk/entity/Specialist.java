@@ -35,7 +35,7 @@ public class Specialist extends User {
      * Average rating calculated from client reviews.
      */
     @Column(name = "average_rating")
-    private Double averageRating;
+    private Double averageRating = 0.0;
 
     /**
      * Short description of the specialist's services or qualifications.

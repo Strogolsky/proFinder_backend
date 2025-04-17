@@ -79,6 +79,7 @@ public class OrderService {
             log.error("User is not the owner of this order. orderId={}, clientId={}", orderId, old.getClient().getId());
             throw new IllegalArgumentException();
         }
+        // todo maybe add update location
         old.setDescription(order.getDescription());
         old.setPrice(order.getPrice());
         old.setDeadline(order.getDeadline());

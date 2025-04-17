@@ -93,4 +93,8 @@ public class Order {
      */
     @Column(name = "deadline")
     private LocalDateTime deadline;
+
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
+    private Location location;
 }

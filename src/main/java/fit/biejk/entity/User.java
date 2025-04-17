@@ -74,8 +74,8 @@ public class User extends PanacheEntityBase {
     /**
      * User's geographical location.
      */
-    @Column(name = "location")
-    @Enumerated(EnumType.STRING)
+    @ManyToOne
+    @JoinColumn(name = "location_id", nullable = false)
     private Location location;
 
     /**

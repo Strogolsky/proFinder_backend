@@ -34,6 +34,8 @@ public class AuthService {
      * Higher value increases security but also computation time.
      */
     private static final int BCRYPT_COST = 12;
+    @Inject
+    private LocationService locationService;
 
     /**
      * Service for managing specialists.
@@ -75,6 +77,7 @@ public class AuthService {
             specialist.setEmail(email);
             specialist.setPassword(hashPassword(password));
             specialist.setRole(role);
+            specialist.setLocation(locationService.getDefault());
             Specialist newSpecialist = specialistService.create(specialist);
             log.debug("Created specialist with ID={}", newSpecialist.getId());
             jwtToken = generateJWT(newSpecialist, role);
@@ -83,6 +86,7 @@ public class AuthService {
             client.setEmail(email);
             client.setPassword(hashPassword(password));
             client.setRole(role);
+            client.setLocation(locationService.getDefault());
             Client newClient = clientService.create(client);
             log.debug("Created client with ID={}", newClient.getId());
             jwtToken = generateJWT(newClient, role);

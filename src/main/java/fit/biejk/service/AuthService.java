@@ -34,6 +34,10 @@ public class AuthService {
      * Higher value increases security but also computation time.
      */
     private static final int BCRYPT_COST = 12;
+
+    /**
+     * Service for managing locations.
+     */
     @Inject
     private LocationService locationService;
 

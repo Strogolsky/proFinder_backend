@@ -9,11 +9,32 @@ import jakarta.ws.rs.Path;
 
 import java.util.List;
 
+/**
+ * REST endpoint for accessing location-related data.
+ * <p>
+ * Provides public access to the list of all available {@link Location} entities.
+ * </p>
+ */
 @Path("/location")
 public class LocationResource {
-    @Inject
-    LocationService locationService;
 
+    /**
+     * Service used for retrieving location data from the database.
+     * <p>
+     * Injected via CDI and used to delegate business logic.
+     * </p>
+     */
+    @Inject
+    private LocationService locationService;
+
+    /**
+     * Retrieves a list of all available locations.
+     * <p>
+     * This endpoint is accessible by all users without authentication.
+     * </p>
+     *
+     * @return list of {@link Location} entities
+     */
     @GET
     @PermitAll
     public List<Location> getAll() {

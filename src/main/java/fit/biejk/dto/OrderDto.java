@@ -64,5 +64,8 @@ public class OrderDto {
      */
     private LocalDateTime deadline;
 
+    /**
+     * Order's geographical location.
+     */
     private Location location;
 }

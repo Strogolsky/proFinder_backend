@@ -94,6 +94,9 @@ public class Order {
     @Column(name = "deadline")
     private LocalDateTime deadline;
 
+    /**
+     * Order's geographical location.
+     */
     @ManyToOne
     @JoinColumn(name = "location_id", nullable = false)
     private Location location;

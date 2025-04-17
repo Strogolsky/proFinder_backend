@@ -30,6 +30,10 @@ public class UserService {
     @Inject
     private UserRepository userRepository;
 
+
+    /**
+     * Service for managing locations.
+     */
     @Inject
     private LocationService locationService;
 

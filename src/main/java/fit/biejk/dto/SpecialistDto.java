@@ -1,7 +1,7 @@
 package fit.biejk.dto;
 
 import fit.biejk.entity.Location;
-import fit.biejk.entity.Specialization;
+import fit.biejk.entity.ServiceOffering;
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Data Transfer Object representing a specialist.
@@ -84,10 +85,7 @@ public class SpecialistDto {
      */
     private LocalDateTime createAt;
 
-    /**
-     * Specialist's professional specialization.
-     */
-    private Specialization specialization;
+    private List<ServiceOffering> serviceOfferings;
 
     /**
      * Detailed description of the specialist's skills or services offered.

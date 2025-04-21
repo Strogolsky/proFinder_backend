@@ -2,6 +2,7 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.SpecialistDto;
 import fit.biejk.entity.Review;
+import fit.biejk.entity.ServiceOffering;
 import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.mapper.SpecialistMapper;
@@ -207,5 +208,15 @@ public class SpecialistResource {
         Long clientId = authService.getCurrentUserId();
         List<Review> res = reviewService.getByClientId(clientId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
+    }
+
+    @PUT
+    @Path("/me/service")
+    @RolesAllowed("SPECIALIST")
+    public Response updateServiceOffering(List<ServiceOffering> serviceOfferings) {
+        Long id = authService.getCurrentUserId();
+        log.info("Add serviceOffering for specialist ID={}", id);
+        Specialist specialist = specialistService.updateServiceOfferings(id, serviceOfferings);
+        return Response.ok(specialistMapper.toDto(specialist)).build();
     }
 }

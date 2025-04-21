@@ -27,9 +27,9 @@ public class Specialist extends User {
     /**
      * Specialist's professional area of expertise.
      */
-    @Column(name = "specialization")
-    @Enumerated(EnumType.STRING)
-    private Specialization specialization;
+    @Column(name = "services")
+    @ManyToMany
+    private List<ServiceOffering> serviceOfferings;
 
     /**
      * Average rating calculated from client reviews.

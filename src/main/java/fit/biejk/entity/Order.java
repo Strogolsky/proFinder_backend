@@ -40,9 +40,8 @@ public class Order {
     /**
      * Specialization required for fulfilling the order.
      */
-    @Column(name = "specialization")
-    @Enumerated(EnumType.STRING)
-    private Specialization specialization;
+    @ManyToMany
+    private List<ServiceOffering> serviceOfferings;
 
     /**
      * Current status of the order.

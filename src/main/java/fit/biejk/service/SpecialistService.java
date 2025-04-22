@@ -1,6 +1,7 @@
 package fit.biejk.service;
 
 import fit.biejk.entity.Review;
+import fit.biejk.entity.ServiceOffering;
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.SpecialistRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -93,7 +94,6 @@ public class SpecialistService {
         Specialist old = getById(id);
         userService.update(id, specialist);
         old.setDescription(specialist.getDescription());
-        old.setSpecialization(specialist.getSpecialization());
         specialistRepository.flush();
         log.debug("Specialist updated with ID={}", id);
         return old;
@@ -142,6 +142,26 @@ public class SpecialistService {
         specialistRepository.persist(specialist);
         log.info("Updated averageRating for specialistId={}", specialistId);
     }
+
+    /**
+     * Updates the list of service offerings associated with the specialist.
+     *
+     * @param specialistId ID of the specialist to update
+     * @param serviceOfferings new list of service offerings to associate
+     * @return updated specialist
+     */
+    @Transactional
+    public Specialist updateServiceOfferings(final Long specialistId,
+                                             final List<ServiceOffering> serviceOfferings) {
+        log.info("Update serviceOfferings: specialistId={}", specialistId);
+        Specialist specialist = getById(specialistId);
+        specialist.setServiceOfferings(serviceOfferings);
+
+        specialistRepository.persist(specialist);
+        log.debug("Updated serviceOfferings with ID={}", specialistId);
+        return specialist;
+    }
+
 
 
 }

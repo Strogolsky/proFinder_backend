@@ -2,6 +2,7 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.SpecialistDto;
 import fit.biejk.entity.Review;
+import fit.biejk.entity.ServiceOffering;
 import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.mapper.SpecialistMapper;
@@ -13,12 +14,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,32 +31,25 @@ import java.util.List;
 @Slf4j
 public class SpecialistResource {
 
-    /**
-     * Service for handling business logic related to specialists.
-     */
+    /** Service for handling business logic related to specialists. */
     @Inject
     private SpecialistService specialistService;
 
-    /**
-     * Mapper for converting between Specialist entities and DTOs.
-     */
+    /** Mapper for converting between Specialist entities and DTOs. */
     @Inject
     private SpecialistMapper specialistMapper;
 
-    /**
-     * Service for retrieving authenticated user context and identity.
-     */
+    /** Service for retrieving authenticated user context and identity. */
     @Inject
     private AuthService authService;
-    /** Maps Review entity to ReviewDto and vice versa. */
 
+    /** Mapper for converting between Review and ReviewDto. */
     @Inject
     private ReviewMapper reviewMapper;
 
     /** Service for accessing client reviews. */
     @Inject
     private ReviewService reviewService;
-
 
     /**
      * Retrieves a list of all specialists.
@@ -196,9 +185,9 @@ public class SpecialistResource {
     }
 
     /**
-     * Retrieves all reviews submitted by all.
+     * Retrieves all reviews submitted by the currently authenticated client.
      *
-     * @return list of client's reviews
+     * @return HTTP response containing list of reviews
      */
     @GET
     @Path("/me/review")
@@ -207,5 +196,21 @@ public class SpecialistResource {
         Long clientId = authService.getCurrentUserId();
         List<Review> res = reviewService.getByClientId(clientId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
+    }
+
+    /**
+     * Updates the list of service offerings for the currently authenticated specialist.
+     *
+     * @param serviceOfferings list of updated service offerings
+     * @return HTTP response with updated specialist data
+     */
+    @PUT
+    @Path("/me/service")
+    @RolesAllowed("SPECIALIST")
+    public Response updateServiceOffering(final List<ServiceOffering> serviceOfferings) {
+        Long id = authService.getCurrentUserId();
+        log.info("Add serviceOffering for specialist ID={}", id);
+        Specialist specialist = specialistService.updateServiceOfferings(id, serviceOfferings);
+        return Response.ok(specialistMapper.toDto(specialist)).build();
     }
 }

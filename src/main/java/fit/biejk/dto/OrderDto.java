@@ -2,19 +2,20 @@ package fit.biejk.dto;
 
 import fit.biejk.entity.Location;
 import fit.biejk.entity.OrderStatus;
-import fit.biejk.entity.Specialization;
+import fit.biejk.entity.ServiceOffering;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Data Transfer Object representing an order.
  * <p>
- * Contains information about the order, including client ID, specialization,
- * status, description, price, creation date, and deadline.
+ * Contains information about the order, including client ID, services,
+ * status, description, price, creation date, deadline, and location.
  * </p>
  */
 @Data
@@ -33,9 +34,9 @@ public class OrderDto {
     private Long clientId;
 
     /**
-     * Specialization required for the order.
+     * List of services included in this order.
      */
-    private Specialization specialization;
+    private List<ServiceOffering> serviceOfferings;
 
     /**
      * Current status of the order.

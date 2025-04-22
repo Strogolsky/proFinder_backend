@@ -3,7 +3,6 @@ package fit.biejk.service;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.ServiceOffering;
 import fit.biejk.entity.Specialist;
-import fit.biejk.entity.User;
 import fit.biejk.repository.SpecialistRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -11,7 +10,6 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -145,15 +143,25 @@ public class SpecialistService {
         log.info("Updated averageRating for specialistId={}", specialistId);
     }
 
+    /**
+     * Updates the list of service offerings associated with the specialist.
+     *
+     * @param specialistId ID of the specialist to update
+     * @param serviceOfferings new list of service offerings to associate
+     * @return updated specialist
+     */
     @Transactional
     public Specialist updateServiceOfferings(final Long specialistId,
-                                          final List<ServiceOffering> serviceOfferings) {
+                                             final List<ServiceOffering> serviceOfferings) {
+        log.info("Update serviceOfferings: specialistId={}", specialistId);
         Specialist specialist = getById(specialistId);
         specialist.setServiceOfferings(serviceOfferings);
 
         specialistRepository.persist(specialist);
+        log.debug("Updated serviceOfferings with ID={}", specialistId);
         return specialist;
     }
+
 
 
 }

@@ -85,6 +85,9 @@ public class SpecialistDto {
      */
     private LocalDateTime createAt;
 
+    /**
+     * List of services that the specialist offers.
+     */
     private List<ServiceOffering> serviceOfferings;
 
     /**

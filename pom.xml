@@ -121,6 +121,12 @@
             <artifactId>quarkus-smallrye-openapi</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-elasticsearch-java-client</artifactId>
+        </dependency>
+
+
 
     </dependencies>
 

@@ -122,8 +122,10 @@ public class UserService {
             throw new NotFoundException("User with id " + userId + " not found");
         }
         existingUser.setPhoneNumber(newUser.getPhoneNumber());
-        Location location = locationService.getById(newUser.getLocation().getId());
-        existingUser.setLocation(location);
+        if(newUser.getLocation() != null) {
+            Location location = locationService.getById(newUser.getLocation().getId());
+            existingUser.setLocation(location);
+        }
         existingUser.setFirstName(newUser.getFirstName());
         existingUser.setLastName(newUser.getLastName());
         log.debug("User updated with ID={}", existingUser.getId());

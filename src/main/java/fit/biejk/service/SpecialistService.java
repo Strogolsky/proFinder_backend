@@ -4,6 +4,8 @@ import fit.biejk.entity.Review;
 import fit.biejk.entity.ServiceOffering;
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.SpecialistRepository;
+import fit.biejk.search.SpecialistSearchMapper;
+import fit.biejk.search.SpecialistSearchService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -35,6 +37,12 @@ public class SpecialistService {
     @Inject
     private UserService userService;
 
+    @Inject
+    private SpecialistSearchService specialistSearchService;
+
+    @Inject
+    SpecialistSearchMapper specialistSearchMapper;
+
     /**
      * Creates and persists a new specialist.
      * Performs email uniqueness check before creation.
@@ -47,6 +55,9 @@ public class SpecialistService {
         log.info("Create specialist: {}", specialist.getEmail());
         userService.checkUniqueEmail(specialist.getEmail());
         specialistRepository.persist(specialist);
+
+        specialistSearchService.save(specialistSearchMapper.toDto(specialist));
+
         log.debug("Specialist created with ID={}", specialist.getId());
         return specialist;
     }
@@ -95,6 +106,11 @@ public class SpecialistService {
         userService.update(id, specialist);
         old.setDescription(specialist.getDescription());
         specialistRepository.flush();
+
+        old.getServiceOfferings().size();
+
+        specialistSearchService.save(specialistSearchMapper.toDto(old));
+
         log.debug("Specialist updated with ID={}", id);
         return old;
     }
@@ -109,6 +125,9 @@ public class SpecialistService {
     public void delete(final Long id) {
         log.info("Delete specialist: ID={}", id);
         userService.delete(id);
+
+        specialistSearchService.delete(id);
+
         log.debug("Specialist deleted with ID={}", id);
     }
 
@@ -140,6 +159,9 @@ public class SpecialistService {
         }
 
         specialistRepository.persist(specialist);
+
+        specialistSearchService.save(specialistSearchMapper.toDto(specialist));
+
         log.info("Updated averageRating for specialistId={}", specialistId);
     }
 
@@ -158,6 +180,9 @@ public class SpecialistService {
         specialist.setServiceOfferings(serviceOfferings);
 
         specialistRepository.persist(specialist);
+
+        specialistSearchService.save(specialistSearchMapper.toDto(specialist));
+
         log.debug("Updated serviceOfferings with ID={}", specialistId);
         return specialist;
     }

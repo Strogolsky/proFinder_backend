@@ -2,6 +2,7 @@ package fit.biejk.search;
 
 import fit.biejk.entity.Specialist;
 import fit.biejk.mapper.SpecialistMapper;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -23,6 +24,7 @@ public class SearchResource {
 
     @GET
     @Path("/specialist")
+    @PermitAll
     public Response search(@QueryParam("query") String query,
                            @QueryParam("location") String location) {
 

@@ -33,12 +33,14 @@ public class SpecialistSearchService {
     @Transactional
     public void save(final SpecialistSearchDto dto) {
         try {
+            log.info("Saving Specialist with id {} for search", dto.getId());
             elasticsearchClient.index(i -> i
                     .index("specialists")
                     .id(String.valueOf(dto.getId()))
                     .document(dto)
             );
         } catch (IOException e) {
+            log.warn(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -51,11 +53,13 @@ public class SpecialistSearchService {
     @Transactional
     public void delete(final Long id) {
         try {
+            log.info("Deleting Specialist with id {} for search", id);
             elasticsearchClient.delete(d -> d
                     .index("specialists")
                     .id(String.valueOf(id))
             );
         } catch (IOException e) {
+            log.warn(e.getMessage());
             e.printStackTrace();
         }
     }
@@ -71,6 +75,7 @@ public class SpecialistSearchService {
      */
     public List<SpecialistSearchDto> search(final String keyword, final String location) {
         try {
+            log.info("Searching for Specialist with keyword {} and location {}", keyword, location);
             SearchResponse<SpecialistSearchDto> response = elasticsearchClient.search(s -> s
                             .index("specialists")
                             .query(q -> q
@@ -105,6 +110,7 @@ public class SpecialistSearchService {
                     .toList();
 
         } catch (IOException e) {
+            log.warn(e.getMessage());
             e.printStackTrace();
             return List.of();
         }

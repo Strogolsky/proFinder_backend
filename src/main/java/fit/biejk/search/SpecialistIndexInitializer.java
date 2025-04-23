@@ -6,6 +6,7 @@ import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 
@@ -18,6 +19,7 @@ import java.io.IOException;
  */
 @Startup
 @Singleton
+@Slf4j
 public class SpecialistIndexInitializer {
 
     /**
@@ -58,8 +60,10 @@ public class SpecialistIndexInitializer {
         try {
             boolean exists = elasticsearchClient.indices().exists(e -> e.index(indexName)).value();
             if (exists) {
+                log.info("Deleting index " + indexName);
                 elasticsearchClient.indices().delete(d -> d.index(indexName));
             }
+            log.info("Creating index " + indexName);
             elasticsearchClient.indices().create(c -> c
                     .index(indexName)
                     .mappings(m -> m
@@ -86,6 +90,7 @@ public class SpecialistIndexInitializer {
      * Loads all specialists from the database and saves them into the Elasticsearch index.
      */
     void load() {
+        log.info("Loading specialists from database");
         specialistService.getAll()
                 .forEach(specialist ->
                         specialistSearchService.save(specialistSearchMapper.toDto(specialist))

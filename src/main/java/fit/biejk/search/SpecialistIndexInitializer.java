@@ -9,22 +9,48 @@ import jakarta.inject.Singleton;
 
 import java.io.IOException;
 
+/**
+ * Initializes the Elasticsearch index for storing specialist data.
+ * <p>
+ * This class deletes the existing index on startup, recreates it with the correct mappings,
+ * and populates it from the database using the {@link SpecialistService}.
+ * </p>
+ */
 @Startup
 @Singleton
 public class SpecialistIndexInitializer {
 
+    /**
+     * Elasticsearch client used to interact with the Elasticsearch cluster.
+     */
     @Inject
-    ElasticsearchClient elasticsearchClient;
+    private ElasticsearchClient elasticsearchClient;
 
+    /**
+     * Service used to retrieve specialist data from the PostgreSQL database.
+     */
     @Inject
-    SpecialistService specialistService;
+    private SpecialistService specialistService;
 
+    /**
+     * Service used to persist specialist data to the Elasticsearch index.
+     */
     @Inject
-    SpecialistSearchService specialistSearchService;
+    private SpecialistSearchService specialistSearchService;
 
+    /**
+     * Mapper for converting {@link fit.biejk.entity.Specialist} entities into {@link SpecialistSearchDto}.
+     */
     @Inject
-    SpecialistSearchMapper specialistSearchMapper;
+    private SpecialistSearchMapper specialistSearchMapper;
 
+    /**
+     * Called after the bean is constructed.
+     * <p>
+     * This method checks if the index already exists. If it does, it deletes the index,
+     * then creates a new one with the necessary field mappings and loads data into it.
+     * </p>
+     */
     @PostConstruct
     void init() {
         String indexName = "specialists";
@@ -48,7 +74,6 @@ public class SpecialistIndexInitializer {
                                             .fields("keyword", k -> k.keyword(kk -> kk))
                                     )
                             )
-
                     )
             );
             load();
@@ -57,6 +82,9 @@ public class SpecialistIndexInitializer {
         }
     }
 
+    /**
+     * Loads all specialists from the database and saves them into the Elasticsearch index.
+     */
     void load() {
         specialistService.getAll()
                 .forEach(specialist ->
@@ -64,4 +92,3 @@ public class SpecialistIndexInitializer {
                 );
     }
 }
-

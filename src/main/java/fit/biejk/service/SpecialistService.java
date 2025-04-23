@@ -37,11 +37,17 @@ public class SpecialistService {
     @Inject
     private UserService userService;
 
+    /**
+     * Service used to persist specialist data to the Elasticsearch index.
+     */
     @Inject
     private SpecialistSearchService specialistSearchService;
 
+    /**
+     * Mapper for converting Specialist entities into SpecialistSearchDto.
+     */
     @Inject
-    SpecialistSearchMapper specialistSearchMapper;
+    private SpecialistSearchMapper specialistSearchMapper;
 
     /**
      * Creates and persists a new specialist.

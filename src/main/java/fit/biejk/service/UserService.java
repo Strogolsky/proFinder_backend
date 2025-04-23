@@ -122,7 +122,7 @@ public class UserService {
             throw new NotFoundException("User with id " + userId + " not found");
         }
         existingUser.setPhoneNumber(newUser.getPhoneNumber());
-        if(newUser.getLocation() != null) {
+        if (newUser.getLocation() != null) {
             Location location = locationService.getById(newUser.getLocation().getId());
             existingUser.setLocation(location);
         }

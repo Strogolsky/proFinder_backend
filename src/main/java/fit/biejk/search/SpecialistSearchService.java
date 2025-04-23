@@ -12,12 +12,24 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Service for indexing, deleting, and searching specialists in Elasticsearch.
+ */
 @Slf4j
 @ApplicationScoped
 public class SpecialistSearchService {
-    @Inject
-    ElasticsearchClient elasticsearchClient;
 
+    /**
+     * Elasticsearch client used for communication with the search index.
+     */
+    @Inject
+    private ElasticsearchClient elasticsearchClient;
+
+    /**
+     * Indexes a specialist document in Elasticsearch.
+     *
+     * @param dto the specialist data to be indexed
+     */
     @Transactional
     public void save(final SpecialistSearchDto dto) {
         try {
@@ -31,6 +43,11 @@ public class SpecialistSearchService {
         }
     }
 
+    /**
+     * Deletes a specialist document from Elasticsearch by ID.
+     *
+     * @param id the ID of the specialist to delete
+     */
     @Transactional
     public void delete(final Long id) {
         try {
@@ -43,7 +60,16 @@ public class SpecialistSearchService {
         }
     }
 
-    public List<SpecialistSearchDto> search(String keyword, String location) {
+    /**
+     * Searches for specialists using keyword and location.
+     * The results are sorted by averageRating in descending order.
+     * Supports fuzzy matching for keyword.
+     *
+     * @param keyword  the search keyword (e.g., service name or description)
+     * @param location the city to filter specialists by
+     * @return a list of matching specialists
+     */
+    public List<SpecialistSearchDto> search(final String keyword, final String location) {
         try {
             SearchResponse<SpecialistSearchDto> response = elasticsearchClient.search(s -> s
                             .index("specialists")
@@ -51,7 +77,8 @@ public class SpecialistSearchService {
                                     .bool(b -> b
                                             .must(m -> m
                                                     .multiMatch(mm -> mm
-                                                            .fields("firstName", "lastName", "description", "services")
+                                                            .fields("firstName", "lastName",
+                                                                    "description", "services")
                                                             .query(keyword)
                                                             .fuzziness("AUTO")
                                                     )
@@ -82,6 +109,4 @@ public class SpecialistSearchService {
             return List.of();
         }
     }
-
-
 }

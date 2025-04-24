@@ -181,7 +181,7 @@ public class SpecialistService {
     @Transactional
     public Specialist updateServiceOfferings(final Long specialistId,
                                              final List<ServiceOffering> serviceOfferings) {
-        log.info("Update serviceOfferings: specialistId={}", specialistId);
+        log.info("Update services: specialistId={}", specialistId);
         Specialist specialist = getById(specialistId);
         specialist.setServiceOfferings(serviceOfferings);
 
@@ -189,7 +189,7 @@ public class SpecialistService {
 
         specialistSearchService.save(specialistSearchMapper.toDto(specialist));
 
-        log.debug("Updated serviceOfferings with ID={}", specialistId);
+        log.debug("Updated services with ID={}", specialistId);
         return specialist;
     }
 

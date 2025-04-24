@@ -2,6 +2,9 @@ package fit.biejk.service;
 
 import fit.biejk.entity.*;
 import fit.biejk.repository.OrderRepository;
+import fit.biejk.search.OrderSearchDto;
+import fit.biejk.search.OrderSearchMapper;
+import fit.biejk.search.OrderSearchService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -21,6 +24,17 @@ import java.util.List;
 @ApplicationScoped
 public class OrderService {
 
+    /**
+     * Service for indexing orders in Elasticsearch.
+     */
+    @Inject
+    private OrderSearchService orderSearchService;
+
+    /**
+     * Mapper responsible for converting Order to OrderSearchDto.
+     */
+    @Inject
+    private OrderSearchMapper orderSearchMapper;
     /**
      * Repository for accessing order data.
      */
@@ -61,6 +75,10 @@ public class OrderService {
         order.setStatus(OrderStatus.getStartOrder());
         orderRepository.persist(order);
         log.debug("Order created with ID={}", order.getId());
+
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
+
         return order;
     }
 
@@ -84,6 +102,10 @@ public class OrderService {
         old.setDescription(order.getDescription());
         old.setPrice(order.getPrice());
         old.setDeadline(order.getDeadline());
+
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
+
         log.debug("Order updated with ID={}", orderId);
         return order;
     }
@@ -103,6 +125,9 @@ public class OrderService {
             throw new IllegalArgumentException();
         }
         orderRepository.delete(order);
+
+        orderSearchService.delete(orderId);
+
         log.debug("Order deleted with ID={}", orderId);
     }
 
@@ -123,6 +148,10 @@ public class OrderService {
         }
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CANCELLED));
         orderRepository.persist(order);
+
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
+
         log.debug("Order canceled with ID={}", orderId);
         return order;
     }
@@ -177,6 +206,10 @@ public class OrderService {
         order.getOrderProposals().add(proposal);
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CLIENT_PENDING));
         orderRepository.persist(order);
+
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
+
         log.debug("Proposal created with ID={}", proposal.getId());
         return proposal;
     }
@@ -250,6 +283,9 @@ public class OrderService {
         review.setOrder(order);
 
         Review saved = reviewService.create(review);
+
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
 
         log.debug("Review created: reviewId={}, rating={}, orderId={}", saved.getId(), saved.getRating(), orderId);
 

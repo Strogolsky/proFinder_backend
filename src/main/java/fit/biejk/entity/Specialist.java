@@ -27,7 +27,6 @@ public class Specialist extends User {
     /**
      * Specialist's professional area of expertise.
      */
-    @Column(name = "services")
     @ManyToMany
     private List<ServiceOffering> serviceOfferings;
 

@@ -24,10 +24,17 @@ import java.util.List;
 @ApplicationScoped
 public class OrderService {
 
+    /**
+     * Service for indexing orders in Elasticsearch.
+     */
     @Inject
-    OrderSearchService orderSearchService;
+    private OrderSearchService orderSearchService;
+
+    /**
+     * Mapper responsible for converting Order to OrderSearchDto.
+     */
     @Inject
-    OrderSearchMapper orderSearchMapper;
+    private OrderSearchMapper orderSearchMapper;
     /**
      * Repository for accessing order data.
      */

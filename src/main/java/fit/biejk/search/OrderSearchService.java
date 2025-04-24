@@ -10,14 +10,26 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * Service for managing the indexing, deletion, and searching of {@link OrderSearchDto}
+ * documents in the Elasticsearch "orders" index.
+ */
 @ApplicationScoped
 @Slf4j
 public class OrderSearchService {
 
+    /**
+     * Elasticsearch client used to perform operations on the search index.
+     */
     @Inject
     private ElasticsearchClient elasticsearchClient;
 
-    public void save(OrderSearchDto dto) {
+    /**
+     * Saves or updates an {@link OrderSearchDto} document in the Elasticsearch "orders" index.
+     *
+     * @param dto the order data to be indexed
+     */
+    public void save(final OrderSearchDto dto) {
         try {
             log.info("Saving Order with id {} for search", dto.getId());
             elasticsearchClient.index(i -> i
@@ -31,6 +43,11 @@ public class OrderSearchService {
         }
     }
 
+    /**
+     * Deletes an order document from the Elasticsearch "orders" index by its ID.
+     *
+     * @param id the ID of the order to delete
+     */
     public void delete(final Long id) {
         try {
             log.info("Deleting Order with id {} for search", id);
@@ -44,6 +61,14 @@ public class OrderSearchService {
         }
     }
 
+    /**
+     * Searches for orders that match the specified service names and location.
+     * Only orders with status "CREATED" or "CLIENT_PENDING" are returned.
+     *
+     * @param services a list of service names to search for
+     * @param location the city/location to filter orders by
+     * @return a list of matching {@link OrderSearchDto} objects
+     */
     public List<OrderSearchDto> search(final List<String> services, final String location) {
         try {
             log.info("Searching for Orders with services {} and location {}", services, location);
@@ -52,29 +77,32 @@ public class OrderSearchService {
                             .index("orders")
                             .query(q -> q
                                     .bool(b -> b
-                                            .must(m -> m
-                                                    .terms(t -> t
-                                                            .field("services.keyword")
-                                                            .terms(ts -> ts
-                                                                    .value(services.stream()
-                                                                            .map(v -> co.elastic.clients.elasticsearch._types.FieldValue.of(v))
-                                                                            .toList())
+                                        .must(m -> m
+                                                .terms(t -> t
+                                                    .field("services.keyword")
+                                                        .terms(ts -> ts
+                                                            .value(services.stream()
+                                                                    .map(v -> co.elastic.clients.
+                                                                            elasticsearch._types.FieldValue.of(v))
+                                                                    .toList())
                                                             )
                                                     )
                                             )
                                             .filter(f -> f
-                                                    .term(t -> t
-                                                            .field("location.keyword")
-                                                            .value(co.elastic.clients.elasticsearch._types.FieldValue.of(location))
+                                                .term(t -> t
+                                                    .field("location.keyword")
+                                                        .value(co.elastic.clients.elasticsearch._types.
+                                                                    FieldValue.of(location))
                                                     )
                                             )
                                             .filter(f -> f
-                                                    .terms(t -> t
-                                                            .field("status.keyword")
-                                                            .terms(ts -> ts
-                                                                    .value(List.of("CREATED", "CLIENT_PENDING").stream()
-                                                                            .map(co.elastic.clients.elasticsearch._types.FieldValue::of)
-                                                                            .toList())
+                                                .terms(t -> t
+                                                    .field("status.keyword")
+                                                        .terms(ts -> ts
+                                                            .value(List.of("CREATED", "CLIENT_PENDING").stream()
+                                                                .map(co.elastic.clients.
+                                                                    elasticsearch._types.FieldValue::of)
+                                                                    .toList())
                                                             )
                                                     )
                                             )
@@ -92,5 +120,4 @@ public class OrderSearchService {
             return List.of();
         }
     }
-
 }

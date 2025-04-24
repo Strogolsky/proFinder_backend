@@ -6,15 +6,34 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Data Transfer Object for searching and returning Order information in search operations.
+ * <p>
+ * Contains minimal details needed for search indexing and results presentation.
+ * </p>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderSearchDto {
-    Long id;
 
-    String status;
+    /**
+     * Unique identifier of the order.
+     */
+    private Long id;
 
-    List<String> services;
+    /**
+     * Current status of the order, e.g. CREATED, COMPLETED.
+     */
+    private String status;
 
-    String location;
+    /**
+     * List of service names associated with the order.
+     */
+    private List<String> services;
+
+    /**
+     * Name of the location where the order is to be performed.
+     */
+    private String location;
 }

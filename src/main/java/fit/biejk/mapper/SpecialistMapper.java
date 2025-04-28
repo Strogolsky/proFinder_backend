@@ -10,7 +10,7 @@ import java.util.List;
  * MapStruct mapper for converting between {@link Specialist}
  * entities and {@link SpecialistDto} data transfer objects.
  */
-@Mapper(componentModel = "jakarta")
+
 public interface SpecialistMapper {
 
     /**

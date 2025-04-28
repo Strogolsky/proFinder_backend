@@ -73,4 +73,6 @@ public class UserDto {
      * Timestamp indicating when the user account was created.
      */
     private LocalDateTime createAt;
+
+    private String avatarUrl;
 }

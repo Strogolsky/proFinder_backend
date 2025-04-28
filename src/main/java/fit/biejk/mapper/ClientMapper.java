@@ -10,7 +10,6 @@ import java.util.List;
  * MapStruct mapper for converting between {@link Client}
  * entities and {@link ClientDto} data transfer objects.
  */
-@Mapper(componentModel = "jakarta")
 public interface ClientMapper {
 
     /**

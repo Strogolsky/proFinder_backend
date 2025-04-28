@@ -74,4 +74,6 @@ public class ClientDto {
      * Timestamp indicating when the client account was created.
      */
     private LocalDateTime createAt;
+
+    private String avatarUrl;
 }

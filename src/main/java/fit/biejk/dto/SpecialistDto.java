@@ -21,7 +21,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SpecialistDto {
+public class SpecialistDto{
 
     /**
      * Maximum length for firstName and lastName fields.
@@ -94,4 +94,6 @@ public class SpecialistDto {
      * Detailed description of the specialist's skills or services offered.
      */
     private String description;
+
+    private String avatarUrl;
 }

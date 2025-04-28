@@ -91,6 +91,9 @@ public class User extends PanacheEntityBase {
     @Column(name = "createAt", nullable = false, updatable = false)
     private final LocalDateTime createAt = LocalDateTime.now();
 
+    @Column(name = "avatar_key")
+    private String avatarKey;
+
     /**
      * List of chats initiated by the user.
      */

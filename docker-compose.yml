@@ -1,5 +1,3 @@
-version: '3.2'
-
 services:
   elasticsearch-logs:
     image: docker.io/elastic/elasticsearch:8.15.0
@@ -89,8 +87,8 @@ services:
     image: quay.io/minio/minio:latest
     container_name: profinder-minio
     ports:
-      - "9000:9000"  # API (S3)
-      - "9001:9001"  # Web UI
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: iarylser
       MINIO_ROOT_PASSWORD: 1234567890
@@ -100,6 +98,13 @@ services:
     networks:
       - elk
 
+  redis:
+    image: redis:3.2
+    container_name: profinder-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - elk
 
 volumes:
   db_data:

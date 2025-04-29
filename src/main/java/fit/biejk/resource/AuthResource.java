@@ -3,6 +3,7 @@ package fit.biejk.resource;
 import fit.biejk.dto.AuthRequest;
 import fit.biejk.dto.AuthResponse;
 import fit.biejk.dto.ChangePasswordRequest;
+import fit.biejk.dto.ForgotPasswordRequest;
 import fit.biejk.service.AuthService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
@@ -77,10 +78,18 @@ public class AuthResource {
      * @return HTTP 200 with AuthResponse or appropriate error
      */
     @PUT
-    @Path("/change-password")
+    @Path("/password/change")
     @Authenticated
     public Response changePassword(@Valid final ChangePasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.changePassword(request));
         return Response.ok(response).build();
+    }
+
+    @PUT
+    @Path("/password/forgot")
+    @PermitAll
+    public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
+        authService.forgotPassword(request.getEmail());
+        return Response.ok().build();
     }
 }

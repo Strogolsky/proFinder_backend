@@ -6,11 +6,16 @@ import fit.biejk.entity.Client;
 import fit.biejk.entity.Specialist;
 import fit.biejk.entity.User;
 import fit.biejk.entity.UserRole;
+import io.quarkus.redis.client.RedisClient;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.jwt.build.Jwt;
+import io.vertx.redis.client.Command;
+import io.vertx.redis.client.Request;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.RandomStringGenerator;
 
 import java.time.Duration;
 import java.util.List;
@@ -64,6 +69,9 @@ public class AuthService {
      */
     @Inject
     private SecurityIdentity securityIdentity;
+
+    @Inject
+    RedisClient redisClient;
 
     /**
      * Registers a new user (client or specialist) and returns a JWT token.
@@ -206,5 +214,33 @@ public class AuthService {
         String res = generateJWT(updatedUser, updatedUser.getRole());
         log.debug("Change JWT={}", res);
         return res;
+    }
+
+    @Transactional
+    public void forgotPassword(final String email) {
+        User user = userService.getByEmail(email);
+        if (user == null) {
+            log.warn("Attempt to reset password for non-existent user: {}", email);
+            return;
+        }
+
+        String code = generateCode();
+        String hashedCode = BCrypt.withDefaults().hashToString(12, code.toCharArray());
+
+        String key = "forgot-password:" + email;
+        redisClient.setex(
+                key,
+                "600",
+                hashedCode
+        );
+
+        log.debug("Generated reset code for email={}: code={}, hashed={}", email, code, hashedCode);
+    }
+
+    private String generateCode() {
+        RandomStringGenerator generator = new RandomStringGenerator.Builder()
+                .withinRange('0', '9')
+                .build();
+        return generator.generate(6);
     }
 }

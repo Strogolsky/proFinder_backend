@@ -133,6 +133,27 @@ public class UserService {
     }
 
     /**
+     * Updates the password for the specified user.
+     * <p>
+     * Retrieves the user by ID, updates the password, and returns the updated user entity.
+     * Assumes the password is already hashed.
+     * </p>
+     *
+     * @param userId the ID of the user whose password is to be updated
+     * @param user a user object containing the new hashed password
+     * @return the updated user entity
+     */
+    @Transactional
+    public User updatePassword(final Long userId, final User user) {
+        log.info("Update user: userId={}, newPassword={}", user.getId(), user.getPassword());
+        User existingUser = getById(userId);
+        existingUser.setPassword(user.getPassword());
+        log.debug("User updated with ID={}", existingUser.getId());
+        return existingUser;
+    }
+
+
+    /**
      * Deletes the user by ID.
      *
      * @param userId ID of the user

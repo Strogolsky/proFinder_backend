@@ -2,15 +2,20 @@ package fit.biejk.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import fit.biejk.dto.ChangePasswordRequest;
+import fit.biejk.dto.ResetPasswordRequest;
 import fit.biejk.entity.Client;
 import fit.biejk.entity.Specialist;
 import fit.biejk.entity.User;
 import fit.biejk.entity.UserRole;
+import io.quarkus.redis.client.RedisClient;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.jwt.build.Jwt;
+import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.text.RandomStringGenerator;
 
 import java.time.Duration;
 import java.util.List;
@@ -30,10 +35,21 @@ public class AuthService {
     private static final Duration TOKEN_EXPIRATION = Duration.ofHours(24);
 
     /**
+     * Length of the verification code used for password reset (in digits).
+     */
+    private static final int PASSWORD_LENGTH = 6;
+
+    /**
      * Cost factor for BCrypt password hashing.
      * Higher value increases security but also computation time.
      */
     private static final int BCRYPT_COST = 12;
+
+    /**
+     * Service for sending emails.
+     */
+    @Inject
+    private MailService mailService;
 
     /**
      * Service for managing locations.
@@ -66,6 +82,12 @@ public class AuthService {
     private SecurityIdentity securityIdentity;
 
     /**
+     * Redis client for temporary storage (e.g., verification codes).
+     */
+    @Inject
+    private RedisClient redisClient;
+
+    /**
      * Registers a new user (client or specialist) and returns a JWT token.
      *
      * @param email    user email
@@ -79,7 +101,7 @@ public class AuthService {
         if (role == UserRole.SPECIALIST) {
             Specialist specialist = new Specialist();
             specialist.setEmail(email);
-            specialist.setPassword(hashPassword(password));
+            specialist.setPassword(createHash(password));
             specialist.setRole(role);
             specialist.setLocation(locationService.getDefault());
             Specialist newSpecialist = specialistService.create(specialist);
@@ -88,7 +110,7 @@ public class AuthService {
         } else if (role == UserRole.CLIENT) {
             Client client = new Client();
             client.setEmail(email);
-            client.setPassword(hashPassword(password));
+            client.setPassword(createHash(password));
             client.setRole(role);
             client.setLocation(locationService.getDefault());
             Client newClient = clientService.create(client);
@@ -110,7 +132,11 @@ public class AuthService {
     public String signIn(final String email, final String password, final UserRole role) {
         log.info("Sign in: email={}, role={}", email, role);
         User user = userService.getByEmail(email);
-        verifyPassword(password, user.getPassword());
+        if (!verifyHash(password, user.getPassword())) {
+            log.error("Invalid password");
+            throw new IllegalArgumentException("Invalid password");
+        }
+
         if (user.getRole() != role) {
             log.error("Invalid role: expected={}, actual={}", role, user.getRole());
             throw new IllegalArgumentException("Invalid role");
@@ -143,6 +169,111 @@ public class AuthService {
     }
 
     /**
+     * Changes the password of the currently authenticated user.
+     *
+     * Verifies the old password, checks the new password and confirmation,
+     * updates the password in the database, and returns a new JWT token.
+     *
+     * @param request password change data (old, new, confirm)
+     * @return new JWT token after successful password update
+     * @throws IllegalArgumentException if validation fails
+     */
+    public String changePassword(final ChangePasswordRequest request) {
+        log.info("Change password: request={}", request);
+        Long currentUserId = getCurrentUserId();
+        User user = userService.getById(currentUserId);
+        if (!verifyHash(request.getOldPassword(), user.getPassword())) {
+            log.error("Invalid old password: expected={}, actual={}", request.getOldPassword(), user.getPassword());
+            throw new IllegalArgumentException("Invalid old password");
+        }
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            log.error("Invalid new password: expected={}, actual={}", request.getNewPassword(), user.getPassword());
+            throw new IllegalArgumentException("Invalid new password");
+        }
+        String hashPassword = createHash(request.getNewPassword());
+        user.setPassword(hashPassword);
+        User updatedUser = userService.update(user.getId(), user);
+        log.debug("Updated user with ID={}", updatedUser.getId());
+        String res = generateJWT(updatedUser, updatedUser.getRole());
+        log.debug("Change JWT={}", res);
+        return res;
+    }
+
+    /**
+     * Initiates the forgot password process by generating and sending a verification code.
+     *
+     * @param email user's email address
+     */
+    @Transactional
+    public void forgotPassword(final String email) {
+        User user = userService.getByEmail(email);
+        if (user == null) {
+            log.warn("Attempt to reset password for non-existent user: {}", email);
+            return;
+        }
+
+        String code = generateCode();
+        String hashedCode = createHash(code);
+
+        String key = "forgot-password:" + email;
+        redisClient.setex(key, "600", hashedCode);
+
+        String message = "Your password reset code is: " + code + "\nIt is valid for 10 minutes.";
+
+        mailService.send(email, "Reset password", message);
+        log.debug("Generated reset code for email={}: code={}, hashed={}", email, code, hashedCode);
+    }
+
+    /**
+     * Resets the password using the provided verification code.
+     *
+     * @param request reset password request containing email, code, and new password
+     * @return new JWT token after successful password reset
+     * @throws IllegalArgumentException if validation fails
+     */
+    @Transactional
+    public String resetPassword(final ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            log.error("Invalid new password: expected={}, actual={}",
+                    request.getNewPassword(), request.getConfirmPassword());
+            throw new IllegalArgumentException("Invalid new password");
+        }
+
+        String key = "forgot-password:" + request.getEmail();
+        Response response = redisClient.get(key);
+        String savedHashedCode = response != null ? response.toString() : null;
+
+        if (!verifyHash(request.getVerificationCode(), savedHashedCode)) {
+            log.error("Invalid verification code");
+            throw new IllegalArgumentException("Invalid verification code");
+        }
+
+        User user = userService.getByEmail(request.getEmail());
+        user.setPassword(createHash(request.getNewPassword()));
+        User updatedUser = userService.updatePassword(user.getId(), user);
+
+        log.debug("Updated user with ID={}", updatedUser.getId());
+
+        String res = generateJWT(updatedUser, updatedUser.getRole());
+        log.debug("Change JWT={}", res);
+
+        return res;
+    }
+
+    /**
+     * Generates a random 6-digit numeric verification code.
+     *
+     * @return 6-digit numeric code as String
+     */
+    private String generateCode() {
+        RandomStringGenerator generator = new RandomStringGenerator.Builder()
+                .withinRange('0', '9')
+                .build();
+        return generator.generate(PASSWORD_LENGTH);
+    }
+
+
+    /**
      * Generates a signed JWT token for the given user and role.
      *
      * @param user user entity
@@ -158,53 +289,23 @@ public class AuthService {
     }
 
     /**
-     * Verifies that the plain text password matches the hashed password.
+     * Verifies that the plain text password matches the hashed text.
      *
-     * @param password plain text password
-     * @param hashed   hashed password
+     * @param text plain text
+     * @param hashed   hashed
      * @return true if verified
      */
-    private boolean verifyPassword(final String password, final String hashed) {
-        return BCrypt.verifyer().verify(password.toCharArray(), hashed).verified;
+    private boolean verifyHash(final String text, final String hashed) {
+        return BCrypt.verifyer().verify(text.toCharArray(), hashed).verified;
     }
 
     /**
-     * Hashes the given plain text password using BCrypt.
+     * Hashes the given plain text using BCrypt.
      *
-     * @param password plain text password
-     * @return hashed password string
+     * @param text plain text
+     * @return hashed string
      */
-    private String hashPassword(final String password) {
-        return BCrypt.withDefaults().hashToString(BCRYPT_COST, password.toCharArray());
-    }
-    /**
-     * Changes the password of the currently authenticated user.
-     *
-     * Verifies the old password, checks the new password and confirmation,
-     * updates the password in the database, and returns a new JWT token.
-     *
-     * @param request password change data (old, new, confirm)
-     * @return new JWT token after successful password update
-     * @throws IllegalArgumentException if validation fails
-     */
-    public String changePassword(final ChangePasswordRequest request) {
-        log.info("Change password: request={}", request);
-        Long currentUserId = getCurrentUserId();
-        User user = userService.getById(currentUserId);
-        if (!verifyPassword(request.getOldPassword(), user.getPassword())) {
-            log.error("Invalid old password: expected={}, actual={}", request.getOldPassword(), user.getPassword());
-            throw new IllegalArgumentException("Invalid old password");
-        }
-        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
-            log.error("Invalid new password: expected={}, actual={}", request.getNewPassword(), user.getPassword());
-            throw new IllegalArgumentException("Invalid new password");
-        }
-        String hashPassword = hashPassword(request.getNewPassword());
-        user.setPassword(hashPassword);
-        User updatedUser = userService.update(user.getId(), user);
-        log.debug("Updated user with ID={}", updatedUser.getId());
-        String res = generateJWT(updatedUser, updatedUser.getRole());
-        log.debug("Change JWT={}", res);
-        return res;
+    private String createHash(final String text) {
+        return BCrypt.withDefaults().hashToString(BCRYPT_COST, text.toCharArray());
     }
 }

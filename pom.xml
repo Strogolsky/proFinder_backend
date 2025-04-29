@@ -131,6 +131,28 @@
             <artifactId>quarkus-elasticsearch-java-client</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-redis-client</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-mailer</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.quarkiverse.mailpit</groupId>
+            <artifactId>quarkus-mailpit</artifactId>
+            <version>1.6.2</version>
+        </dependency>
+
 
 
     </dependencies>

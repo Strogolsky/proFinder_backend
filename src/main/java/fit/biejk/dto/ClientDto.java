@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 /**
  * Data Transfer Object representing a client.
  * <p>
- * Contains details about the client, such as personal information,
- * contact details, and account creation timestamp.
+ * Used to transfer client-related data such as identity,
+ * contact information, location, and avatar reference.
  * </p>
  */
 @Data
@@ -37,30 +37,33 @@ public class ClientDto {
     private Long id;
 
     /**
-     * Email address of the client, must be a valid email format.
+     * Email address of the client, must be in a valid format.
      */
     @Email
     private String email;
 
     /**
-     * First name of the client, maximum length of 50 characters.
+     * First name of the client.
      */
     @Length(max = NAME_MAX_LENGTH)
     private String firstName;
 
     /**
-     * Last name of the client, maximum length of 50 characters.
+     * Last name of the client.
      */
     @Length(max = NAME_MAX_LENGTH)
     private String lastName;
 
     /**
-     * Client's password. (Temporary field, remove when creating response.)
+     * Password of the client.
+     * <p>
+     * This field is only used during registration and is not returned in responses.
+     * </p>
      */
     private String password; // todo delete, when create response
 
     /**
-     * Phone number of the client, maximum length of 20 characters.
+     * Phone number of the client.
      */
     @Length(max = PHONE_MAX_LENGTH)
     private String phoneNumber;
@@ -71,7 +74,12 @@ public class ClientDto {
     private Location location;
 
     /**
-     * Timestamp indicating when the client account was created.
+     * Timestamp of when the client account was created.
      */
     private LocalDateTime createAt;
+
+    /**
+     * Public URL to the client's avatar image stored in object storage.
+     */
+    private String avatarUrl;
 }

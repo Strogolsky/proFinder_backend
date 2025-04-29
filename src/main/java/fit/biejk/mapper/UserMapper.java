@@ -2,15 +2,12 @@ package fit.biejk.mapper;
 
 import fit.biejk.dto.UserDto;
 import fit.biejk.entity.User;
-import org.mapstruct.Mapper;
-
 import java.util.List;
 
 /**
  * MapStruct mapper for converting between {@link User}
  * entities and {@link UserDto} data transfer objects.
  */
-@Mapper(componentModel = "jakarta")
 public interface UserMapper {
 
     /**

@@ -14,8 +14,8 @@ import java.util.List;
 /**
  * Data Transfer Object representing a specialist.
  * <p>
- * Contains details about a specialist including contact info, location,
- * specialization, description, and availability schedule.
+ * Used to transfer specialist data between layers of the application.
+ * Contains personal information, location, rating, services, and avatar link.
  * </p>
  */
 @Data
@@ -24,12 +24,12 @@ import java.util.List;
 public class SpecialistDto {
 
     /**
-     * Maximum length for firstName and lastName fields.
+     * Maximum allowed length for firstName and lastName.
      */
     public static final int NAME_MAX_LENGTH = 50;
 
     /**
-     * Maximum length for phoneNumber field.
+     * Maximum allowed length for phoneNumber.
      */
     public static final int PHONE_MAX_LENGTH = 20;
 
@@ -44,54 +44,56 @@ public class SpecialistDto {
     private double averageRating;
 
     /**
-     * Specialist's email address, must be a valid email format.
+     * Specialist's email address (must be valid format).
      */
     @Email
     private String email;
 
     /**
-     * First name of the specialist, maximum length of 50 characters.
+     * First name of the specialist.
      */
     @Length(max = NAME_MAX_LENGTH)
     private String firstName;
 
     /**
-     * Last name of the specialist, maximum length of 50 characters.
+     * Last name of the specialist.
      */
     @Length(max = NAME_MAX_LENGTH)
     private String lastName;
 
     /**
-     * Password of the specialist.
-     * <p>
-     * This field is only used during creation and should be excluded in responses.
-     * </p>
+     * Password (used only during registration, excluded in responses).
      */
     private String password; // todo delete, when create response
 
     /**
-     * Phone number of the specialist, maximum length of 20 characters.
+     * Phone number of the specialist.
      */
     @Length(max = PHONE_MAX_LENGTH)
     private String phoneNumber;
 
     /**
-     * Geographical location of the specialist.
+     * Geographic location of the specialist.
      */
     private Location location;
 
     /**
-     * Timestamp indicating when the specialist's account was created.
+     * Timestamp of account creation.
      */
     private LocalDateTime createAt;
 
     /**
-     * List of services that the specialist offers.
+     * Services offered by the specialist.
      */
     private List<ServiceOffering> serviceOfferings;
 
     /**
-     * Detailed description of the specialist's skills or services offered.
+     * Detailed description of the specialist's expertise.
      */
     private String description;
+
+    /**
+     * Publicly accessible URL to the specialist's avatar image.
+     */
+    private String avatarUrl;
 }

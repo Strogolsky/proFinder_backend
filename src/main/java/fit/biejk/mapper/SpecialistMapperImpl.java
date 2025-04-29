@@ -10,18 +10,36 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Implementation of {@link SpecialistMapper}.
+ * <p>
+ * Responsible for converting between {@link Specialist} entities and {@link SpecialistDto} DTOs.
+ * Includes logic for embedding avatar URLs from object storage.
+ * </p>
+ */
 @ApplicationScoped
 @Slf4j
 public class SpecialistMapperImpl implements SpecialistMapper {
 
+    /**
+     * Service to generate presigned URLs for avatars stored in MinIO.
+     */
     @Inject
-    UserFileService userFileService;
+    private UserFileService userFileService;
 
+    /**
+     * Converts a {@link Specialist} entity to a {@link SpecialistDto}.
+     *
+     * @param entity the Specialist entity
+     * @return the mapped DTO, or null if entity is null
+     */
     @Override
-    public SpecialistDto toDto(Specialist entity) {
+    public SpecialistDto toDto(final Specialist entity) {
         if (entity == null) {
             return null;
         }
+
+        log.debug("Mapping Specialist entity to DTO: id={}", entity.getId());
 
         SpecialistDto dto = new SpecialistDto();
         dto.setId(entity.getId());
@@ -49,11 +67,19 @@ public class SpecialistMapperImpl implements SpecialistMapper {
         return dto;
     }
 
+    /**
+     * Converts a {@link SpecialistDto} to a {@link Specialist} entity.
+     *
+     * @param dto the Specialist DTO
+     * @return the mapped entity, or null if dto is null
+     */
     @Override
-    public Specialist toEntity(SpecialistDto dto) {
+    public Specialist toEntity(final SpecialistDto dto) {
         if (dto == null) {
             return null;
         }
+
+        log.debug("Mapping SpecialistDto to entity: id={}", dto.getId());
 
         Specialist entity = new Specialist();
         entity.setId(dto.getId());
@@ -72,11 +98,19 @@ public class SpecialistMapperImpl implements SpecialistMapper {
         return entity;
     }
 
+    /**
+     * Converts a list of {@link Specialist} entities to a list of {@link SpecialistDto} DTOs.
+     *
+     * @param entityList the list of entities
+     * @return list of mapped DTOs, or null if input is null
+     */
     @Override
-    public List<SpecialistDto> toDtoList(List<Specialist> entityList) {
+    public List<SpecialistDto> toDtoList(final List<Specialist> entityList) {
         if (entityList == null) {
             return null;
         }
+
+        log.debug("Mapping list of Specialist entities to DTOs: size={}", entityList.size());
 
         List<SpecialistDto> dtoList = new ArrayList<>(entityList.size());
         for (Specialist specialist : entityList) {
@@ -86,11 +120,19 @@ public class SpecialistMapperImpl implements SpecialistMapper {
         return dtoList;
     }
 
+    /**
+     * Converts a list of {@link SpecialistDto} DTOs to a list of {@link Specialist} entities.
+     *
+     * @param dtoList the list of DTOs
+     * @return list of mapped entities, or null if input is null
+     */
     @Override
-    public List<Specialist> toEntityList(List<SpecialistDto> dtoList) {
+    public List<Specialist> toEntityList(final List<SpecialistDto> dtoList) {
         if (dtoList == null) {
             return null;
         }
+
+        log.debug("Mapping list of Specialist DTOs to entities: size={}", dtoList.size());
 
         List<Specialist> entityList = new ArrayList<>(dtoList.size());
         for (SpecialistDto dto : dtoList) {
@@ -100,4 +142,3 @@ public class SpecialistMapperImpl implements SpecialistMapper {
         return entityList;
     }
 }
-

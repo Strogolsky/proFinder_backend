@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 /**
  * Data Transfer Object representing a user.
  * <p>
- * Contains basic user details including personal information and contact details.
+ * Serves as the base user data structure for clients and specialists.
+ * Includes common user attributes such as personal details, location,
+ * contact information, and avatar image reference.
  * </p>
  */
 @Data
@@ -36,30 +38,36 @@ public class UserDto {
     private Long id;
 
     /**
-     * User's email address. (Temporary field, remove when security is implemented.)
+     * User's email address.
+     * <p>
+     * Temporary field, should be removed or hidden when full security is in place.
+     * </p>
      */
     @Email
     private String email; // todo delete, when security added
 
     /**
-     * First name of the user, maximum length of 50 characters.
+     * First name of the user.
      */
     @Length(max = NAME_MAX_LENGTH)
     private String firstName;
 
     /**
-     * Last name of the user, maximum length of 50 characters.
+     * Last name of the user.
      */
     @Length(max = NAME_MAX_LENGTH)
     private String lastName;
 
     /**
-     * User's password. (Temporary field, remove when security is implemented.)
+     * User's password.
+     * <p>
+     * Used only during authentication or registration; must not be returned in responses.
+     * </p>
      */
     private String password; // todo delete, when security added
 
     /**
-     * Phone number of the user, maximum length of 20 characters.
+     * Phone number of the user.
      */
     @Length(max = PHONE_MAX_LENGTH)
     private String phoneNumber;
@@ -74,5 +82,8 @@ public class UserDto {
      */
     private LocalDateTime createAt;
 
+    /**
+     * Publicly accessible URL to the user's avatar image in object storage.
+     */
     private String avatarUrl;
 }

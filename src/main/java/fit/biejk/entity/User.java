@@ -13,7 +13,8 @@ import java.util.List;
 /**
  * Base entity representing a system user.
  * <p>
- * Extended by other entities such as {@link Client} and {@link Specialist}.
+ * This class is extended by more specific user types, such as {@link Client} and {@link Specialist}.
+ * It stores common attributes such as contact details, role, and avatar reference.
  * </p>
  */
 @Data
@@ -91,6 +92,9 @@ public class User extends PanacheEntityBase {
     @Column(name = "createAt", nullable = false, updatable = false)
     private final LocalDateTime createAt = LocalDateTime.now();
 
+    /**
+     * Key of the user's avatar stored in object storage (e.g. MinIO/S3).
+     */
     @Column(name = "avatar_key")
     private String avatarKey;
 

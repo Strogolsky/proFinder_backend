@@ -2,8 +2,6 @@ package fit.biejk.mapper;
 
 import fit.biejk.dto.SpecialistDto;
 import fit.biejk.entity.Specialist;
-import org.mapstruct.Mapper;
-
 import java.util.List;
 
 /**

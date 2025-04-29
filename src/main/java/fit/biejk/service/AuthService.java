@@ -39,6 +39,8 @@ public class AuthService {
      * Higher value increases security but also computation time.
      */
     private static final int BCRYPT_COST = 12;
+    @Inject
+    MailService mailService;
 
     /**
      * Service for managing locations.
@@ -228,11 +230,11 @@ public class AuthService {
         String hashedCode = BCrypt.withDefaults().hashToString(12, code.toCharArray());
 
         String key = "forgot-password:" + email;
-        redisClient.setex(
-                key,
-                "600",
-                hashedCode
-        );
+        redisClient.setex(key, "600", hashedCode);
+
+        String message = "Your password reset code is: " + code + "\nIt is valid for 10 minutes.";
+
+        mailService.send(email,"Reset password", message);
 
         log.debug("Generated reset code for email={}: code={}, hashed={}", email, code, hashedCode);
     }

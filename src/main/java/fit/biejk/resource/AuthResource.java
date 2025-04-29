@@ -13,27 +13,28 @@ import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * REST resource for handling authentication-related operations such as sign-up and sign-in.
+ * REST resource for handling authentication-related operations such as sign-up, sign-in,
+ * password change, and password recovery.
+ * <p>
+ * Routes are grouped under the "/auth" path.
+ * </p>
  */
 @Path("/auth")
 @Slf4j
 public class AuthResource {
 
     /**
-     * Service for handling authentication logic such as user registration and login.
-     * <p>
-     * Injected by the Jakarta CDI container.
-     * </p>
+     * Service for handling authentication logic such as user registration, login,
+     * password reset, and password change.
      */
     @Inject
     private AuthService authService;
-
 
     /**
      * Registers a new user account.
      *
      * @param request the sign-up request containing email, password, and role
-     * @return HTTP response with a generated authentication token
+     * @return HTTP 200 response with a generated authentication token
      */
     @POST
     @Path("/signUp")
@@ -48,10 +49,10 @@ public class AuthResource {
     }
 
     /**
-     * Authenticates a user and returns a token.
+     * Authenticates a user and returns a JWT token if credentials are valid.
      *
      * @param request the sign-in request containing email, password, and role
-     * @return HTTP response with a generated authentication token
+     * @return HTTP 200 response with a generated authentication token
      */
     @POST
     @Path("/signIn")
@@ -67,12 +68,12 @@ public class AuthResource {
 
     /**
      * Changes the password of the authenticated user.
-     *
+     * <p>
      * Requires the old password, new password, and confirmation.
-     * Returns 200 OK if successful.
+     * </p>
      *
      * @param request contains old, new, and confirm passwords
-     * @return HTTP 200 with AuthResponse or appropriate error
+     * @return HTTP 200 response with a new authentication token
      */
     @PUT
     @Path("/password/change")
@@ -82,6 +83,12 @@ public class AuthResource {
         return Response.ok(response).build();
     }
 
+    /**
+     * Initiates password reset by generating and emailing a verification code to the user.
+     *
+     * @param request contains the email address of the user
+     * @return HTTP 200 response if the operation succeeds (even if user does not exist)
+     */
     @PUT
     @Path("/password/forgot")
     @PermitAll
@@ -90,6 +97,12 @@ public class AuthResource {
         return Response.ok().build();
     }
 
+    /**
+     * Resets the user's password using a verification code previously sent by email.
+     *
+     * @param request contains email, verification code, and new password with confirmation
+     * @return HTTP 200 response with a new authentication token
+     */
     @PUT
     @Path("/password/reset")
     @PermitAll

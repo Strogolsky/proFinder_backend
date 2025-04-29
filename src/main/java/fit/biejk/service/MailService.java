@@ -6,14 +6,30 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Service responsible for sending emails using Quarkus Mailer.
+ * <p>
+ * Wraps the underlying {@link Mailer} and provides a simplified interface for sending plain text emails.
+ * </p>
+ */
 @ApplicationScoped
 @Slf4j
 public class MailService {
 
+    /**
+     * Injected Quarkus Mailer used to send emails.
+     */
     @Inject
     private Mailer mailer;
 
-    public void send(String to, String subject, String body) {
+    /**
+     * Sends a plain text email to the specified recipient.
+     *
+     * @param to      recipient's email address
+     * @param subject email subject
+     * @param body    plain text email content
+     */
+    public void send(final String to, final String subject, final String body) {
         log.info("Sending mail to " + to);
         mailer.send(Mail.withText(to, subject, body));
     }

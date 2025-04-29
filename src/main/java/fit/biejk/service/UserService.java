@@ -132,6 +132,15 @@ public class UserService {
         return existingUser;
     }
 
+    @Transactional
+    public User updatePassword(final Long userId, final User user) {
+        log.info("Update user: userId={}, newPassword={}", user.getId(), user.getPassword());
+        User existingUser = getById(user.getId());
+        existingUser.setPassword(user.getPassword());
+        log.debug("User updated with ID={}", existingUser.getId());
+        return existingUser;
+    }
+
     /**
      * Deletes the user by ID.
      *

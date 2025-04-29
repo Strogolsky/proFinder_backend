@@ -1,9 +1,6 @@
 package fit.biejk.resource;
 
-import fit.biejk.dto.AuthRequest;
-import fit.biejk.dto.AuthResponse;
-import fit.biejk.dto.ChangePasswordRequest;
-import fit.biejk.dto.ForgotPasswordRequest;
+import fit.biejk.dto.*;
 import fit.biejk.service.AuthService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
@@ -91,5 +88,13 @@ public class AuthResource {
     public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
         return Response.ok().build();
+    }
+
+    @PUT
+    @Path("/password/reset")
+    @PermitAll
+    public Response resetPassword(@Valid final ResetPasswordRequest request) {
+        AuthResponse response = new AuthResponse(authService.resetPassword(request));
+        return Response.ok(response).build();
     }
 }

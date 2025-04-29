@@ -2,6 +2,7 @@ package fit.biejk.service;
 
 import at.favre.lib.crypto.bcrypt.BCrypt;
 import fit.biejk.dto.ChangePasswordRequest;
+import fit.biejk.dto.ResetPasswordRequest;
 import fit.biejk.entity.Client;
 import fit.biejk.entity.Specialist;
 import fit.biejk.entity.User;
@@ -11,6 +12,7 @@ import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.jwt.build.Jwt;
 import io.vertx.redis.client.Command;
 import io.vertx.redis.client.Request;
+import io.vertx.redis.client.Response;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -120,7 +122,11 @@ public class AuthService {
     public String signIn(final String email, final String password, final UserRole role) {
         log.info("Sign in: email={}, role={}", email, role);
         User user = userService.getByEmail(email);
-        verifyPassword(password, user.getPassword());
+        if (!verifyPassword(password, user.getPassword())) {
+            log.error("Invalid password");
+            throw new IllegalArgumentException("Invalid password");
+        }
+
         if (user.getRole() != role) {
             log.error("Invalid role: expected={}, actual={}", role, user.getRole());
             throw new IllegalArgumentException("Invalid role");
@@ -237,6 +243,34 @@ public class AuthService {
         mailService.send(email,"Reset password", message);
 
         log.debug("Generated reset code for email={}: code={}, hashed={}", email, code, hashedCode);
+    }
+
+    @Transactional
+    public String resetPassword(final ResetPasswordRequest request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            log.error("Invalid new password: expected={}, actual={}", request.getNewPassword(), request.getConfirmPassword());
+            throw new IllegalArgumentException("Invalid new password");
+        }
+
+        String key = "forgot-password:" + request.getEmail();
+        Response response = redisClient.get(key);
+        String savedHashedCode = response != null ? response.toString() : null;
+
+        if (savedHashedCode == null || !BCrypt.verifyer().verify(request.getVerificationCode().toCharArray(), savedHashedCode).verified) {
+            log.error("Invalid verification code");
+            throw new IllegalArgumentException("Invalid verification code");
+        }
+
+        User user = userService.getByEmail(request.getEmail());
+        user.setPassword(hashPassword(request.getNewPassword()));
+        User updatedUser = userService.updatePassword(user.getId(), user);
+
+        log.debug("Updated user with ID={}", updatedUser.getId());
+
+        String res = generateJWT(updatedUser, updatedUser.getRole());
+        log.debug("Change JWT={}", res);
+
+        return res;
     }
 
     private String generateCode() {

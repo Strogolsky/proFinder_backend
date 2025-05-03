@@ -260,6 +260,59 @@ public class AuthService {
         return res;
     }
 
+
+    /**
+     * Changes the email address of the currently authenticated user.
+     * <p>
+     * This method performs the following steps:
+     * <ul>
+     *     <li>Retrieves the current user by ID.</li>
+     *     <li>Checks if the new email is different from the current one.</li>
+     *     <li>Verifies the provided password against the stored password hash.</li>
+     *     <li>Updates the user's email address in the database.</li>
+     *     <li>Sends a notification email to the old email address.</li>
+     *     <li>Generates and returns a new JWT token.</li>
+     * </ul>
+     *
+     * @param newEmail the new email address to set
+     * @param password the current password of the user for verification
+     * @return a new JWT token reflecting the updated email
+     * @throws IllegalArgumentException if the new email matches the old email or if the password is invalid
+     */
+    @Transactional
+    public String changeEmail(final String newEmail, final String password) {
+        Long id = getCurrentUserId();
+
+        log.info("Change email: id={}, newEmail={}, password={}", id, newEmail, password);
+        User user = userService.getById(id);
+
+        if (user.getEmail().equals(newEmail)) {
+            log.warn("New email is same as old email");
+            throw new IllegalArgumentException("New email is same as old email");
+        }
+
+        if (!verifyHash(password, user.getPassword())) {
+            log.warn("Invalid password");
+            throw new IllegalArgumentException("Invalid password");
+        }
+
+        String oldEmail = user.getEmail();
+
+        user.setEmail(newEmail);
+        userService.updateEmail(user.getId(), user);
+
+        String message = "Your email has been changed to: " + newEmail
+                + "\nIf this wasn’t you, please contact our support team immediately.";
+
+        mailService.send(oldEmail, "Email change notification", message);
+
+        String token = generateJWT(user, user.getRole());
+        log.debug("Change JWT={}", token);
+
+        return token;
+    }
+
+
     /**
      * Generates a random 6-digit numeric verification code.
      *

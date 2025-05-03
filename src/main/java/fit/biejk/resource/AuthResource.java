@@ -110,4 +110,24 @@ public class AuthResource {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));
         return Response.ok(response).build();
     }
+
+    /**
+     * Endpoint for changing the authenticated user's email address.
+     * <p>
+     * Requires the user to provide their new email and current password.
+     * On success, returns a new authentication token.
+     *
+     * @param request the request containing the new email and current password
+     * @return the HTTP response with the new authentication token
+     */
+
+    @PUT
+    @Path("/email/change")
+    @Authenticated
+    public Response changeEmail(@Valid final ChangeEmailRequest request) {
+        String token = authService.changeEmail(request.getNewEmail(), request.getPassword());
+        AuthResponse response = new AuthResponse(token);
+        return Response.ok(response).build();
+    }
+
 }

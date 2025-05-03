@@ -152,6 +152,15 @@ public class UserService {
         return existingUser;
     }
 
+    @Transactional
+    public User updateEmail(final Long userId, final User user) {
+        log.info("Update user: userId={}, newEmail={}", userId, user.getEmail());
+        User existingUser = getById(userId);
+        existingUser.setEmail(user.getEmail());
+        log.debug("User updated with ID={}", existingUser.getId());
+        return existingUser;
+    }
+
 
     /**
      * Deletes the user by ID.

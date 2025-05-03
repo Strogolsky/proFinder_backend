@@ -110,4 +110,13 @@ public class AuthResource {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));
         return Response.ok(response).build();
     }
+
+    @PUT
+    @Path("/email/change")
+    @Authenticated
+    public Response changeEmail(@Valid final ChangeEmailRequest request) {
+        String token = authService.changeEmail(request.getNewEmail(), request.getPassword());
+        AuthResponse response = new AuthResponse(token);
+        return Response.ok(response).build();
+    }
 }

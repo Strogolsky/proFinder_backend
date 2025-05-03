@@ -7,6 +7,7 @@ import fit.biejk.entity.Client;
 import fit.biejk.entity.Specialist;
 import fit.biejk.entity.User;
 import fit.biejk.entity.UserRole;
+import fit.biejk.repository.UserRepository;
 import io.quarkus.redis.client.RedisClient;
 import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.jwt.build.Jwt;
@@ -44,6 +45,7 @@ public class AuthService {
      * Higher value increases security but also computation time.
      */
     private static final int BCRYPT_COST = 12;
+    UserRepository userRepository;
 
     /**
      * Service for sending emails.
@@ -259,6 +261,41 @@ public class AuthService {
 
         return res;
     }
+
+    @Transactional
+    public String changeEmail(final String newEmail, final String password) {
+        Long id  = getCurrentUserId();
+
+        log.info("Change email: id={}, newEmail={}, password={}", id, newEmail, password);
+        User user = userService.getById(id);
+
+        if (user.getEmail().equals(newEmail)) {
+            log.warn("New email is same as old email");
+            throw new IllegalArgumentException("New email is same as old email");
+        }
+
+        if(!verifyHash(password, user.getPassword())) {
+            log.warn("Invalid password");
+            throw new IllegalArgumentException("Invalid password");
+        }
+
+        String oldEmail = user.getEmail();
+
+        user.setEmail(newEmail);
+        userService.updateEmail(user.getId(), user);
+
+        String message = "Your email has been changed to: " + newEmail +
+                "\nIf this wasn’t you, please contact our support team immediately.";
+
+        mailService.send(oldEmail, "Email change notification", message);
+
+
+        String token = generateJWT(user, user.getRole());
+        log.debug("Change JWT={}", token);
+
+        return token;
+    }
+
 
     /**
      * Generates a random 6-digit numeric verification code.

@@ -1,5 +1,6 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.ReviewDto;
 import fit.biejk.dto.SpecialistDto;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.ServiceOffering;
@@ -190,11 +191,10 @@ public class SpecialistResource {
      * @return HTTP response containing list of reviews
      */
     @GET
-    @Path("/me/review")
+    @Path("/{specialistId}/review")
     @PermitAll
-    public Response getReviews() {
-        Long clientId = authService.getCurrentUserId();
-        List<Review> res = reviewService.getByClientId(clientId);
+    public Response getReviews(Long specialistId) {
+        List<Review> res = reviewService.getBySpecialistId(specialistId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
     }
 
@@ -212,5 +212,15 @@ public class SpecialistResource {
         log.info("Add serviceOffering for specialist ID={}", id);
         Specialist specialist = specialistService.updateServiceOfferings(id, serviceOfferings);
         return Response.ok(specialistMapper.toDto(specialist)).build();
+    }
+
+    @PUT
+    @Path("/{specialistId}/review")
+    @RolesAllowed("CLIENT")
+    public Response createReview(@PathParam("specialistId") final Long specialistId, @Valid final ReviewDto dto) {
+        Review review = reviewMapper.toEntity(dto);
+        Review saved = specialistService.review(specialistId, review);
+
+        return Response.ok(reviewMapper.toDto(saved)).build();
     }
 }

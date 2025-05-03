@@ -152,6 +152,15 @@ public class UserService {
         return existingUser;
     }
 
+    /**
+     * Updates the email address of the user with the given userId.
+     * <p>
+     * Fetches the existing user by ID, updates the email, and returns the updated user.
+     *
+     * @param userId the ID of the user whose email is to be updated
+     * @param user the user object containing the new email address
+     * @return the updated user entity with the new email address
+     */
     @Transactional
     public User updateEmail(final Long userId, final User user) {
         log.info("Update user: userId={}, newEmail={}", userId, user.getEmail());
@@ -160,6 +169,7 @@ public class UserService {
         log.debug("User updated with ID={}", existingUser.getId());
         return existingUser;
     }
+
 
 
     /**

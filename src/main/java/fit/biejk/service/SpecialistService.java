@@ -2,7 +2,6 @@ package fit.biejk.service;
 
 import fit.biejk.entity.*;
 import fit.biejk.repository.SpecialistRepository;
-import fit.biejk.search.OrderSearchDto;
 import fit.biejk.search.SpecialistSearchMapper;
 import fit.biejk.search.SpecialistSearchService;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -48,14 +47,18 @@ public class SpecialistService {
     @Inject
     private SpecialistSearchMapper specialistSearchMapper;
 
+    /** Service for managing reviews. */
     @Inject
     private ReviewService reviewService;
 
+    /** Service for authentication and user context. */
     @Inject
     private AuthService authService;
 
+    /** Service for client management. */
     @Inject
     private ClientService clientService;
+
 
     /**
      * Creates and persists a new specialist.
@@ -201,8 +204,16 @@ public class SpecialistService {
         return specialist;
     }
 
+    /**
+     * Creates and saves a review for the specified specialist.
+     *
+     * @param specialistId specialist ID
+     * @param review review entity
+     * @return saved review
+     */
+
     @Transactional
-    public Review review(Long specialistId, final Review review) {
+    public Review review(final Long specialistId, final Review review) {
 
         Long clientId = authService.getCurrentUserId();
         Client client = clientService.getById(clientId);

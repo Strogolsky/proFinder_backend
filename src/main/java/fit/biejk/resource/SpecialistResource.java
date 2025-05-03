@@ -186,14 +186,15 @@ public class SpecialistResource {
     }
 
     /**
-     * Retrieves all reviews submitted by the currently authenticated client.
+     * Retrieves all reviews submitted by id specialist.
      *
+     * @param specialistId specialist ID
      * @return HTTP response containing list of reviews
      */
     @GET
     @Path("/{specialistId}/review")
     @PermitAll
-    public Response getReviews(Long specialistId) {
+    public Response getReviews(final Long specialistId) {
         List<Review> res = reviewService.getBySpecialistId(specialistId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
     }
@@ -214,6 +215,13 @@ public class SpecialistResource {
         return Response.ok(specialistMapper.toDto(specialist)).build();
     }
 
+    /**
+     * Creates a review for the given specialist.
+     *
+     * @param specialistId specialist ID
+     * @param dto review data
+     * @return HTTP 200 with saved review
+     */
     @PUT
     @Path("/{specialistId}/review")
     @RolesAllowed("CLIENT")

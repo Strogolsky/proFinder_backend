@@ -9,7 +9,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.InputStream;
 
 /**
  * REST endpoint for handling user file uploads such as avatar images.
@@ -57,11 +56,23 @@ public class UserFileResource {
         }
     }
 
+    /**
+     * Retrieves the avatar image of the specified user.
+     * <p>
+     * This endpoint is publicly accessible and returns the user's avatar image stream.
+     * The response will have the appropriate content type (e.g., image/png, image/jpeg)
+     * depending on the stored image format.
+     * </p>
+     *
+     * @param userId the ID of the user whose avatar is to be retrieved
+     * @return a {@link Response} containing the image stream with proper content type,
+     *         or an error response with status {@code 500 Internal Server Error} if retrieval fails
+     */
     @GET
     @Path("/{userId}/avatar")
     @Produces("image/*")
     @PermitAll
-    public Response getAvatar(@PathParam("userId") Long userId) {
+    public Response getAvatar(@PathParam("userId") final Long userId) {
         try {
             AvatarData data = userFileService.getAvatar(userId);
 

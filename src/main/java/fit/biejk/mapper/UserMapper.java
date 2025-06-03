@@ -3,7 +3,6 @@ package fit.biejk.mapper;
 import fit.biejk.dto.UserDto;
 import fit.biejk.entity.User;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 

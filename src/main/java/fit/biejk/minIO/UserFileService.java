@@ -4,7 +4,6 @@ import fit.biejk.dto.AvatarData;
 import fit.biejk.entity.User;
 import fit.biejk.service.UserService;
 import io.minio.*;
-import io.minio.http.Method;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -12,11 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service for handling user file operations with MinIO,
- * including avatar uploads and presigned URL generation.
+ * including avatar uploads and downloads.
  */
 @ApplicationScoped
 @Slf4j
@@ -91,31 +89,32 @@ public class UserFileService {
         log.info("Getting avatar for userId={}", userId);
 
         User user = userService.getById(userId);
+        log.debug("Fetched user: id={}, avatarKey={}", user.getId(), user.getAvatarKey());
+
         if (user.getAvatarKey() == null) {
             log.warn("User with id={} has no avatar", userId);
             throw new IllegalStateException("User does not have an avatar");
         }
 
-        // 1) metadata first
         StatObjectResponse stat = minioClient.statObject(
                 StatObjectArgs.builder()
                         .bucket(BUCKET)
                         .object(user.getAvatarKey())
                         .build());
-
-        String contentType = stat.contentType() != null
-                ? stat.contentType()
-                : "application/octet-stream";
-
+        log.debug("Retrieved object metadata for avatarKey={}, contentType={}",
+                user.getAvatarKey(), stat.contentType());
 
         InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
                         .bucket(BUCKET)
                         .object(user.getAvatarKey())
                         .build());
+        log.info("Successfully retrieved avatar stream for userId={}", userId);
 
-        return new AvatarData(stream, contentType);
+        return new AvatarData(stream,
+                stat.contentType() != null ? stat.contentType() : "application/octet-stream");
     }
+
 
     /**
      * Ensures that the bucket used for storing user avatars exists.

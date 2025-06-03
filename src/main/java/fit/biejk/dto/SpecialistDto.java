@@ -62,11 +62,6 @@ public class SpecialistDto {
     private String lastName;
 
     /**
-     * Password (used only during registration, excluded in responses).
-     */
-    private String password; // todo delete, when create response
-
-    /**
      * Phone number of the specialist.
      */
     @Length(max = PHONE_MAX_LENGTH)
@@ -91,9 +86,4 @@ public class SpecialistDto {
      * Detailed description of the specialist's expertise.
      */
     private String description;
-
-    /**
-     * Publicly accessible URL to the specialist's avatar image.
-     */
-    private String avatarUrl;
 }

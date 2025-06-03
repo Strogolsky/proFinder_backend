@@ -1,9 +1,9 @@
 package fit.biejk.minIO;
 
+import fit.biejk.dto.AvatarData;
 import fit.biejk.entity.User;
 import fit.biejk.service.UserService;
 import io.minio.*;
-import io.minio.http.Method;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -11,11 +11,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Service for handling user file operations with MinIO,
- * including avatar uploads and presigned URL generation.
+ * including avatar uploads and downloads.
  */
 @ApplicationScoped
 @Slf4j
@@ -86,27 +85,36 @@ public class UserFileService {
      * @return presigned URL for accessing the avatar
      * @throws Exception if URL generation fails
      */
-    public String getAvatarUrl(final Long userId) throws Exception {
-        log.info("Generating avatar URL for userId={}", userId);
+    public AvatarData getAvatar(final Long userId) throws Exception {
+        log.info("Getting avatar for userId={}", userId);
 
         User user = userService.getById(userId);
+        log.debug("Fetched user: id={}, avatarKey={}", user.getId(), user.getAvatarKey());
+
         if (user.getAvatarKey() == null) {
             log.warn("User with id={} has no avatar", userId);
             throw new IllegalStateException("User does not have an avatar");
         }
 
-        String url = minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET)
+        StatObjectResponse stat = minioClient.statObject(
+                StatObjectArgs.builder()
                         .bucket(BUCKET)
                         .object(user.getAvatarKey())
-                        .expiry(7, TimeUnit.DAYS)
-                        .build()
-        );
+                        .build());
+        log.debug("Retrieved object metadata for avatarKey={}, contentType={}",
+                user.getAvatarKey(), stat.contentType());
 
-        log.debug("Generated avatar URL for userId={}", userId);
-        return url;
+        InputStream stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(BUCKET)
+                        .object(user.getAvatarKey())
+                        .build());
+        log.info("Successfully retrieved avatar stream for userId={}", userId);
+
+        return new AvatarData(stream,
+                stat.contentType() != null ? stat.contentType() : "application/octet-stream");
     }
+
 
     /**
      * Ensures that the bucket used for storing user avatars exists.

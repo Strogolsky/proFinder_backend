@@ -2,12 +2,15 @@ package fit.biejk.mapper;
 
 import fit.biejk.dto.ClientDto;
 import fit.biejk.entity.Client;
+import org.mapstruct.Mapper;
+
 import java.util.List;
 
 /**
  * MapStruct mapper for converting between {@link Client}
  * entities and {@link ClientDto} data transfer objects.
  */
+@Mapper(componentModel = "jakarta")
 public interface ClientMapper {
 
     /**

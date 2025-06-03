@@ -44,7 +44,7 @@ public class UserDto {
      * </p>
      */
     @Email
-    private String email; // todo delete, when security added
+    private String email;
 
     /**
      * First name of the user.
@@ -57,14 +57,6 @@ public class UserDto {
      */
     @Length(max = NAME_MAX_LENGTH)
     private String lastName;
-
-    /**
-     * User's password.
-     * <p>
-     * Used only during authentication or registration; must not be returned in responses.
-     * </p>
-     */
-    private String password; // todo delete, when security added
 
     /**
      * Phone number of the user.
@@ -81,9 +73,4 @@ public class UserDto {
      * Timestamp indicating when the user account was created.
      */
     private LocalDateTime createAt;
-
-    /**
-     * Publicly accessible URL to the user's avatar image in object storage.
-     */
-    private String avatarUrl;
 }

@@ -2,13 +2,15 @@ package fit.biejk.mapper;
 
 import fit.biejk.dto.SpecialistDto;
 import fit.biejk.entity.Specialist;
+import org.mapstruct.Mapper;
+
 import java.util.List;
 
 /**
  * MapStruct mapper for converting between {@link Specialist}
  * entities and {@link SpecialistDto} data transfer objects.
  */
-
+@Mapper(componentModel = "jakarta")
 public interface SpecialistMapper {
 
     /**

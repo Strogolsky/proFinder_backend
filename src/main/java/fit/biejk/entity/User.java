@@ -52,6 +52,7 @@ public class User extends PanacheEntityBase {
      * User's password.
      */
     @Column(name = "password", nullable = false)
+    @JsonbTransient
     private String password;
 
     /**

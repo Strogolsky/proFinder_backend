@@ -55,14 +55,6 @@ public class ClientDto {
     private String lastName;
 
     /**
-     * Password of the client.
-     * <p>
-     * This field is only used during registration and is not returned in responses.
-     * </p>
-     */
-    private String password; // todo delete, when create response
-
-    /**
      * Phone number of the client.
      */
     @Length(max = PHONE_MAX_LENGTH)
@@ -77,9 +69,4 @@ public class ClientDto {
      * Timestamp of when the client account was created.
      */
     private LocalDateTime createAt;
-
-    /**
-     * Public URL to the client's avatar image stored in object storage.
-     */
-    private String avatarUrl;
 }

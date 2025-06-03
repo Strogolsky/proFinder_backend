@@ -1,13 +1,15 @@
 package fit.biejk.minIO;
 
+import fit.biejk.dto.AvatarData;
 import fit.biejk.service.AuthService;
+import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+
+import java.io.InputStream;
 
 /**
  * REST endpoint for handling user file uploads such as avatar images.
@@ -53,5 +55,22 @@ public class UserFileResource {
             log.error("Failed to upload avatar for userId={}: {}", userId, e.getMessage(), e);
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
+    }
+
+    @GET
+    @Path("/{userId}/avatar")
+    @Produces("image/*")
+    @PermitAll
+    public Response getAvatar(@PathParam("userId") Long userId) {
+        try {
+            AvatarData data = userFileService.getAvatar(userId);
+
+            return Response.ok(data.stream())
+                    .type(data.contentType())
+                    .build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        }
+
     }
 }

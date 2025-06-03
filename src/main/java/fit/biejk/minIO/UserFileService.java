@@ -1,5 +1,6 @@
 package fit.biejk.minIO;
 
+import fit.biejk.dto.AvatarData;
 import fit.biejk.entity.User;
 import fit.biejk.service.UserService;
 import io.minio.*;
@@ -86,8 +87,8 @@ public class UserFileService {
      * @return presigned URL for accessing the avatar
      * @throws Exception if URL generation fails
      */
-    public String getAvatarUrl(final Long userId) throws Exception {
-        log.info("Generating avatar URL for userId={}", userId);
+    public AvatarData getAvatar(final Long userId) throws Exception {
+        log.info("Getting avatar for userId={}", userId);
 
         User user = userService.getById(userId);
         if (user.getAvatarKey() == null) {
@@ -95,17 +96,25 @@ public class UserFileService {
             throw new IllegalStateException("User does not have an avatar");
         }
 
-        String url = minioClient.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET)
+        // 1) metadata first
+        StatObjectResponse stat = minioClient.statObject(
+                StatObjectArgs.builder()
                         .bucket(BUCKET)
                         .object(user.getAvatarKey())
-                        .expiry(7, TimeUnit.DAYS)
-                        .build()
-        );
+                        .build());
 
-        log.debug("Generated avatar URL for userId={}", userId);
-        return url;
+        String contentType = stat.contentType() != null
+                ? stat.contentType()
+                : "application/octet-stream";
+
+
+        InputStream stream = minioClient.getObject(
+                GetObjectArgs.builder()
+                        .bucket(BUCKET)
+                        .object(user.getAvatarKey())
+                        .build());
+
+        return new AvatarData(stream, contentType);
     }
 
     /**

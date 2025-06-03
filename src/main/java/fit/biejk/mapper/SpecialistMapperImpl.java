@@ -56,13 +56,13 @@ public class SpecialistMapperImpl implements SpecialistMapper {
             dto.setServiceOfferings(new ArrayList<>(entity.getServiceOfferings()));
         }
 
-        if (entity.getAvatarKey() != null) {
-            try {
-                dto.setAvatarUrl(userFileService.getAvatarUrl(entity.getId()));
-            } catch (Exception e) {
-                log.warn("Failed to generate avatar URL for specialistId={}", entity.getId(), e);
-            }
-        }
+//        if (entity.getAvatarKey() != null) {
+//            try {
+//                dto.setAvatarUrl(userFileService.getAvatarUrl(entity.getId()));
+//            } catch (Exception e) {
+//                log.warn("Failed to generate avatar URL for specialistId={}", entity.getId(), e);
+//            }
+//        }
 
         return dto;
     }

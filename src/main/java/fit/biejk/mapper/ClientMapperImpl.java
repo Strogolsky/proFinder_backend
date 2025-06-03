@@ -50,13 +50,13 @@ public class ClientMapperImpl implements ClientMapper {
         dto.setCreateAt(entity.getCreateAt());
         dto.setLocation(entity.getLocation());
 
-        if (entity.getAvatarKey() != null) {
-            try {
-                dto.setAvatarUrl(userFileService.getAvatarUrl(entity.getId()));
-            } catch (Exception e) {
-                log.warn("Failed to generate avatar URL for clientId={}", entity.getId(), e);
-            }
-        }
+//        if (entity.getAvatarKey() != null) {
+//            try {
+//                dto.setAvatarUrl(userFileService.getAvatarUrl(entity.getId()));
+//            } catch (Exception e) {
+//                log.warn("Failed to generate avatar URL for clientId={}", entity.getId(), e);
+//            }
+//        }
 
         return dto;
     }

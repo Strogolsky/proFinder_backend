@@ -7,6 +7,8 @@ services:
     container_name: pro-finder-backend
     ports:
       - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       QUARKUS_PROFILE: prod
     networks:
@@ -17,6 +19,7 @@ services:
       - elasticsearch-logs
       - elasticsearch-search
       - logstash
+      - minio
 
   elasticsearch-logs:
     image: docker.io/elastic/elasticsearch:8.15.0

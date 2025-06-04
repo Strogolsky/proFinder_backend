@@ -89,8 +89,6 @@ public class UserFileService {
         log.info("Getting avatar for userId={}", userId);
 
         User user = userService.getById(userId);
-        log.debug("Fetched user: id={}, avatarKey={}", user.getId(), user.getAvatarKey());
-
         if (user.getAvatarKey() == null) {
             log.warn("User with id={} has no avatar", userId);
             throw new IllegalStateException("User does not have an avatar");
@@ -101,20 +99,21 @@ public class UserFileService {
                         .bucket(BUCKET)
                         .object(user.getAvatarKey())
                         .build());
-        log.debug("Retrieved object metadata for avatarKey={}, contentType={}",
-                user.getAvatarKey(), stat.contentType());
+
+        String contentType = stat.contentType() != null
+                ? stat.contentType()
+                : "application/octet-stream";
+
 
         InputStream stream = minioClient.getObject(
                 GetObjectArgs.builder()
                         .bucket(BUCKET)
                         .object(user.getAvatarKey())
                         .build());
+
         log.info("Successfully retrieved avatar stream for userId={}", userId);
-
-        return new AvatarData(stream,
-                stat.contentType() != null ? stat.contentType() : "application/octet-stream");
+        return new AvatarData(stream, contentType);
     }
-
 
     /**
      * Ensures that the bucket used for storing user avatars exists.

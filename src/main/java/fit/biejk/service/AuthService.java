@@ -192,7 +192,7 @@ public class AuthService {
         }
         String hashPassword = createHash(request.getNewPassword());
         user.setPassword(hashPassword);
-        User updatedUser = userService.update(user.getId(), user);
+        User updatedUser = userService.updatePassword(user.getId(), user);
         log.debug("Updated user with ID={}", updatedUser.getId());
         String res = generateJWT(updatedUser, updatedUser.getRole());
         log.debug("Change JWT={}", res);

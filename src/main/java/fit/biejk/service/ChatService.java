@@ -52,8 +52,8 @@ public class ChatService {
             throw new IllegalArgumentException("first and second are the same");
         }
         if (existByUsersId(first, second)) {
-            log.warn("Chat id {} already exists", first);
-            throw new IllegalArgumentException("Chat already exists");
+            log.info("Chat id {} already exists", first);
+            return getByUsersId(first, second);
         }
         User user1 = userService.getById(first);
         User user2 = userService.getById(second);
@@ -120,7 +120,7 @@ public class ChatService {
     public boolean existByUsersId(final Long userId1, final Long userId2) {
         Chat chat  = chatRepository.findByUsersId(userId1, userId2);
         if (chat == null) {
-            log.warn("Chat with user id {} and {} not found", userId1, userId2);
+            log.info("Chat with user id {} and {} not found", userId1, userId2);
             return false;
         }
         log.info("Chat with user id {} and {} found", userId1, userId2);
@@ -135,6 +135,10 @@ public class ChatService {
      */
     public List<Chat> getByUserId(final Long userId) {
         return chatRepository.findByUserId(userId);
+    }
+
+    public Chat getByUsersId(final Long userId1, final Long userId2) {
+        return chatRepository.findByUsersId(userId1, userId2);
     }
 
 }

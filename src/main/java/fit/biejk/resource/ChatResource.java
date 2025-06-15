@@ -56,7 +56,7 @@ public class ChatResource {
     public Response create(@Valid final CreateChatRequest request) {
         Long userId = authService.getCurrentUserId();
         Chat chat = chatService.create(userId, request.getRecipientId());
-        return Response.ok().entity(chat).build();
+        return Response.ok().entity(chatMapper.toDto(chat,userId)).build();
     }
 
     /**

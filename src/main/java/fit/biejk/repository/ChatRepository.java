@@ -4,6 +4,8 @@ import fit.biejk.entity.Chat;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.util.List;
+
 /**
  * Repository class for managing {@link Chat} entities.
  * <p>
@@ -27,5 +29,15 @@ public class ChatRepository implements PanacheRepository<Chat> {
         Long first = Math.min(userId1, userId2);
         Long second = Math.max(userId1, userId2);
         return find("user1.id = ?1 AND user2.id = ?2", first, second).firstResult();
+    }
+
+    /**
+     * Finds all chats where the given user is a participant.
+     *
+     * @param userId ID of the user
+     * @return list of {@link Chat} entities
+     */
+    public List<Chat> findByUserId(final Long userId) {
+        return find("user1.id = ?1 OR user2.id = ?1", userId).list();
     }
 }

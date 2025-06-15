@@ -127,4 +127,14 @@ public class ChatService {
         return true;
     }
 
+    /**
+     * Retrieves all chats that a user participates in.
+     *
+     * @param userId ID of the user
+     * @return list of {@link Chat} entities
+     */
+    public List<Chat> getByUserId(final Long userId) {
+        return chatRepository.findByUserId(userId);
+    }
+
 }

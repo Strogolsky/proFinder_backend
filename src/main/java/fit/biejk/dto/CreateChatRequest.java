@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatDto {
+public class CreateChatRequest {
 
     /**
      * The ID of the user with whom the chat will be created.

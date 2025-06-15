@@ -1,8 +1,9 @@
 package fit.biejk.resource;
 
-import fit.biejk.dto.ChatDto;
+import fit.biejk.dto.CreateChatRequest;
 import fit.biejk.entity.Chat;
 import fit.biejk.entity.ChatMessage;
+import fit.biejk.mapper.ChatMapper;
 import fit.biejk.mapper.ChatMessageMapper;
 import fit.biejk.service.AuthService;
 import fit.biejk.service.ChatService;
@@ -40,17 +41,21 @@ public class ChatResource {
     @Inject
     private ChatMessageMapper chatMessageMapper;
 
+    /** Mapper to convert chat entities to DTOs. */
+    @Inject
+    private ChatMapper chatMapper;
+
     /**
      * Creates a new chat between the authenticated user and the recipient.
      *
-     * @param chatDto The DTO containing the recipient's user ID.
+     * @param request The DTO containing the recipient's user ID.
      * @return A Response containing the created Chat object.
      */
     @POST
     @Authenticated
-    public Response create(@Valid final ChatDto chatDto) {
+    public Response create(@Valid final CreateChatRequest request) {
         Long userId = authService.getCurrentUserId();
-        Chat chat = chatService.create(userId, chatDto.getRecipientId());
+        Chat chat = chatService.create(userId, request.getRecipientId());
         return Response.ok().entity(chat).build();
     }
 
@@ -66,6 +71,20 @@ public class ChatResource {
     public Response getHistory(final Long chatId) {
         List<ChatMessage> result = chatService.getHistory(chatId);
         return Response.ok().entity(chatMessageMapper.toDtoList(result)).build();
+    }
+
+    /**
+     * Returns a list of chats associated with the current user.
+     *
+     * @return list of chat DTOs
+     */
+    @GET
+    @Path("/profile")
+    @Authenticated
+    public Response getChatsByProfile() {
+        Long userId = authService.getCurrentUserId();
+        List<Chat> result = chatService.getByUserId(userId);
+        return Response.ok().entity(chatMapper.toDtoList(result, userId)).build();
     }
 
 }

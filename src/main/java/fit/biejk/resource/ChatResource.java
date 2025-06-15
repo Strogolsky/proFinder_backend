@@ -41,6 +41,7 @@ public class ChatResource {
     @Inject
     private ChatMessageMapper chatMessageMapper;
 
+    /** Mapper to convert chat entities to DTOs. */
     @Inject
     private ChatMapper chatMapper;
 
@@ -72,6 +73,11 @@ public class ChatResource {
         return Response.ok().entity(chatMessageMapper.toDtoList(result)).build();
     }
 
+    /**
+     * Returns a list of chats associated with the current user.
+     *
+     * @return list of chat DTOs
+     */
     @GET
     @Path("/profile")
     @Authenticated

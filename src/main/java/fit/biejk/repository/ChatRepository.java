@@ -31,6 +31,12 @@ public class ChatRepository implements PanacheRepository<Chat> {
         return find("user1.id = ?1 AND user2.id = ?2", first, second).firstResult();
     }
 
+    /**
+     * Finds all chats where the given user is a participant.
+     *
+     * @param userId ID of the user
+     * @return list of {@link Chat} entities
+     */
     public List<Chat> findByUserId(final Long userId) {
         return find("user1.id = ?1 OR user2.id = ?1", userId).list();
     }

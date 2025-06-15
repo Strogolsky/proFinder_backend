@@ -127,4 +127,8 @@ public class ChatService {
         return true;
     }
 
+    public List<Chat> getByUserId(final Long userId) {
+        return chatRepository.findByUserId(userId);
+    }
+
 }

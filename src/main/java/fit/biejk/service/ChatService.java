@@ -136,7 +136,13 @@ public class ChatService {
     public List<Chat> getByUserId(final Long userId) {
         return chatRepository.findByUserId(userId);
     }
-
+    /**
+     * Retrieves a chat between two users if it exists.
+     *
+     * @param userId1 ID of the first user
+     * @param userId2 ID of the second user
+     * @return the {@link Chat} entity between the two users, or {@code null} if not found
+     */
     public Chat getByUsersId(final Long userId1, final Long userId2) {
         return chatRepository.findByUsersId(userId1, userId2);
     }

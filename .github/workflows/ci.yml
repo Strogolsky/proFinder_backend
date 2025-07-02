@@ -35,7 +35,7 @@ jobs:
       - name: Run tests
         run: mvn -B test
 
-  style-check:
+  checkstyle:
     runs-on: ubuntu-latest
     needs: build
     steps:

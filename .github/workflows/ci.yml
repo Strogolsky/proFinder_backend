@@ -1,0 +1,38 @@
+name: Java CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container: maven:3.9-eclipse-temurin-21
+    steps:
+      - uses: actions/checkout@v3
+      - name: Compile
+        run: ./mvnw clean compile
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    container: maven:3.9-eclipse-temurin-21
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Tests
+        run: ./mvnw test
+
+  checkstyle:
+    name: Checkstyle
+    runs-on: ubuntu-latest
+    container: maven:3.9-eclipse-temurin-21
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Checkstyle
+        run: ./mvnw checkstyle:checkstyle
+

@@ -2,37 +2,48 @@ name: Java CI
 
 on:
   push:
-    branches: [ "*" ]
+    branches: [ '**' ]
   pull_request:
-    branches: [ "*" ]
+    branches: [ '**' ]
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
-    container: maven:3.9-eclipse-temurin-21
     steps:
       - uses: actions/checkout@v3
+
+      - name: Set up JDK 21 + Maven cache
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+
       - name: Compile
-        run: ./mvnw clean compile
+        run: mvn -B clean compile
 
   test:
-    name: Test
     runs-on: ubuntu-latest
-    container: maven:3.9-eclipse-temurin-21
     needs: build
     steps:
       - uses: actions/checkout@v3
-      - name: Run Tests
-        run: ./mvnw test
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Run tests
+        run: mvn -B test
 
-  checkstyle:
-    name: Checkstyle
+  style-check:
     runs-on: ubuntu-latest
-    container: maven:3.9-eclipse-temurin-21
     needs: build
     steps:
       - uses: actions/checkout@v3
-      - name: Run Checkstyle
-        run: ./mvnw checkstyle:checkstyle
-
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: maven
+      - name: Checkstyle
+        run: mvn -B checkstyle:checkstyle

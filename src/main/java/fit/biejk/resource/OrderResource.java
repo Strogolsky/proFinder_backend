@@ -250,13 +250,13 @@ public class OrderResource {
      * Only accessible to authenticated users with the CLIENT role.
      * </p>
      *
-     * @param clientId the ID of the client whose orders are to be retrieved
      * @return list of orders created by the client
      */
     @GET
-    @Path("/client/{clientId}")
+    @Path("/client")
     @RolesAllowed("CLIENT")
-    public Response getByClientId(@PathParam("clientId") final Long clientId) {
+    public Response getByClient() {
+        Long clientId = authService.getCurrentUserId();
         log.info("Get client request: clientId={}", clientId);
         List<Order> result = orderService.getByClientId(clientId);
         return Response.ok(orderMapper.toDtoList(result)).build();
@@ -268,13 +268,13 @@ public class OrderResource {
      * Only accessible to authenticated users with the SPECIALIST role.
      * </p>
      *
-     * @param specialistId the ID of the specialist
      * @return list of orders currently assigned to the specialist
      */
     @GET
-    @Path("/specialist/{specialistId}")
+    @Path("/specialist")
     @RolesAllowed("SPECIALIST")
-    public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
+    public Response getBySpecialist() {
+        Long specialistId = authService.getCurrentUserId();
         log.info("Get assigned by specialist id: specialistId={}", specialistId);
         List<Order> result = orderService.getBySpecialistId(specialistId);
         return Response.ok(orderMapper.toDtoList(result)).build();

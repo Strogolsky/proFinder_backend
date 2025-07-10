@@ -60,6 +60,11 @@ public class Order {
     @JsonbTransient
     private List<OrderProposal> orderProposals;
 
+
+    /** Brief title summarizing the order. */
+    @Column(name = "title")
+    private String title;
+
     /**
      * Description provided by the client for the order.
      */

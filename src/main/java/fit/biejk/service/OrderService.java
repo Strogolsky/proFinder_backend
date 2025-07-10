@@ -99,6 +99,7 @@ public class OrderService {
         }
         old.setServiceOfferings(order.getServiceOfferings());
         // todo maybe add update location
+        old.setTitle(order.getTitle());
         old.setDescription(order.getDescription());
         old.setPrice(order.getPrice());
         old.setDeadline(order.getDeadline());

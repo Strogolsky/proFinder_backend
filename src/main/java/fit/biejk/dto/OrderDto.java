@@ -48,6 +48,8 @@ public class OrderDto {
      */
     private String description;
 
+    private String title;
+
     /**
      * Price of the order.
      * Must be a positive value.

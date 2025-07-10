@@ -61,6 +61,7 @@ public class Order {
     private List<OrderProposal> orderProposals;
 
 
+    /** Brief title summarizing the order. */
     @Column(name = "title")
     private String title;
 

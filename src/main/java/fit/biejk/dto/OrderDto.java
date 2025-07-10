@@ -48,6 +48,7 @@ public class OrderDto {
      */
     private String description;
 
+    /** Brief title summarizing the order. */
     private String title;
 
     /**

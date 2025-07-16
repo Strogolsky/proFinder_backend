@@ -1,7 +1,6 @@
 package fit.biejk.repository;
 
 import fit.biejk.entity.Client;
-import fit.biejk.entity.Order;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.Specialist;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
@@ -23,16 +22,6 @@ public class ReviewRepository implements PanacheRepository<Review> {
      */
     public List<Review> findBySpecialist(final Specialist specialist) {
         return find("specialist", specialist).list();
-    }
-
-    /**
-     * Finds the review associated with a specific order.
-     *
-     * @param order the order to filter by
-     * @return review linked to the order, or {@code null} if not found
-     */
-    public Review findByOrder(final Order order) {
-        return find("order", order).firstResult();
     }
 
     /**

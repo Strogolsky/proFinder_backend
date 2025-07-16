@@ -78,12 +78,6 @@ public class Order {
     private int price;
 
     /**
-     * Review associated with the order after it has been completed.
-     */
-    @OneToOne
-    private Review review;
-
-    /**
      * Timestamp indicating when the order was created.
      * <p>
      * This field is final and set at creation time.

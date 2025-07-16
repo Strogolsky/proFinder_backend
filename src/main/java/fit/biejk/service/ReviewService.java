@@ -1,7 +1,6 @@
 package fit.biejk.service;
 
 import fit.biejk.entity.Client;
-import fit.biejk.entity.Order;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.ReviewRepository;
@@ -30,10 +29,6 @@ public class ReviewService {
     /** Service for retrieving and updating specialists. */
     @Inject
     private SpecialistService specialistService;
-
-    /** Service for retrieving orders. */
-    @Inject
-    private OrderService orderService;
 
     /** Service for retrieving clients. */
     @Inject
@@ -87,26 +82,6 @@ public class ReviewService {
         List<Review> reviews = reviewRepository.findByClient(client);
         log.debug("Found {} reviews by clientId={}", reviews.size(), clientId);
         return reviews;
-    }
-
-    /**
-     * Retrieves the review associated with a specific order.
-     *
-     * @param orderId the order ID
-     * @return the review linked to the order, or {@code null} if not found
-     */
-    public Review getByOrderId(final Long orderId) {
-        log.info("Fetching review for orderId={}", orderId);
-        Order order = orderService.getById(orderId);
-        Review review = reviewRepository.findByOrder(order);
-
-        if (review == null) {
-            log.warn("No review found for orderId={}", orderId);
-        } else {
-            log.debug("Found review: reviewId={} for orderId={}", review.getId(), orderId);
-        }
-
-        return review;
     }
 
 }

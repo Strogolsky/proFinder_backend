@@ -33,12 +33,7 @@ public enum OrderStatus {
     /**
      * Status indicating the order has been fulfilled and is now completed.
      */
-    COMPLETED,
-
-    /**
-     * Status indicating that the client has left a review after completion.
-     */
-    REVIEWED;
+    COMPLETED;
 
     /**
      * Mapping of allowed transitions from one status to another.
@@ -48,8 +43,7 @@ public enum OrderStatus {
     static {
         VALID_TRANSITIONS.put(CREATED, Set.of(CANCELLED, CLIENT_PENDING));
         VALID_TRANSITIONS.put(CLIENT_PENDING, Set.of(CLIENT_PENDING, CANCELLED, COMPLETED));
-        VALID_TRANSITIONS.put(COMPLETED, Set.of(REVIEWED));
-        VALID_TRANSITIONS.put(REVIEWED, Set.of()); // final state
+        VALID_TRANSITIONS.put(COMPLETED, Set.of()); // final state
         VALID_TRANSITIONS.put(CANCELLED, Set.of()); // final state
     }
 

@@ -2,11 +2,9 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
-import fit.biejk.dto.ReviewDto;
 import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
-import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.service.*;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -32,11 +30,6 @@ import java.util.List;
 @Path("/order")
 @Slf4j
 public class OrderResource {
-    /**
-     * Service handling review-related business logic.
-     */
-    @Inject
-    private ReviewService reviewService;
 
     /**
      * Service handling order-related business logic.
@@ -73,10 +66,6 @@ public class OrderResource {
      */
     @Inject
     private OrderProposalMapper orderProposalMapper;
-
-    /** Handles mapping between Review and ReviewDto. */
-    @Inject
-    private ReviewMapper reviewMapper;
 
 
     /**
@@ -197,53 +186,7 @@ public class OrderResource {
         orderService.delete(orderId);
         return Response.ok().build();
     }
-    /**
-     * Submits a review for a completed order.
-     * <p>
-     * Only the client who created the order can submit the review, and only if the order has status COMPLETED.
-     * </p>
-     *
-     * @param orderId the ID of the reviewed order
-     * @param dto     the review data
-     * @return the created review DTO
-     */
-    @PUT
-    @Path("/{orderId}/review")
-    @RolesAllowed("CLIENT")
-    public Response createReview(@PathParam("orderId") final Long orderId, @Valid final ReviewDto dto) {
-        log.info("Review creation request: orderId={}, rating={}, comment={}",
-                orderId, dto.getRating(), dto.getComment());
 
-        Review review = reviewMapper.toEntity(dto);
-        Review saved = orderService.review(orderId, review);
-
-        log.debug("Review successfully created: reviewId={}, orderId={}, rating={}",
-                saved.getId(), orderId, saved.getRating());
-
-        return Response.ok(reviewMapper.toDto(saved)).build();
-    }
-
-    /**
-     * Retrieves the review for a specific order.
-     *
-     * @param orderId the ID of the order
-     * @return the associated review, if present
-     */
-    @GET
-    @Path("/{orderId}/review")
-    @RolesAllowed("CLIENT")
-    public Response getReview(@PathParam("orderId") final Long orderId) {
-        log.info("Review fetch request: orderId={}", orderId);
-
-        Review review = reviewService.getByOrderId(orderId);
-        if (review == null) {
-            log.warn("No review found for orderId={}", orderId);
-            return Response.noContent().build();
-        }
-
-        log.debug("Review found: reviewId={}, rating={}", review.getId(), review.getRating());
-        return Response.ok(reviewMapper.toDto(review)).build();
-    }
     /**
      * Retrieves all orders created by a specific client.
      * <p>

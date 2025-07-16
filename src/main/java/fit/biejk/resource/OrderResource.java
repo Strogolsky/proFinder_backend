@@ -2,11 +2,9 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
-import fit.biejk.dto.ReviewDto;
 import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
-import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.service.*;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -32,11 +30,6 @@ import java.util.List;
 @Path("/order")
 @Slf4j
 public class OrderResource {
-    /**
-     * Service handling review-related business logic.
-     */
-    @Inject
-    private ReviewService reviewService;
 
     /**
      * Service handling order-related business logic.

@@ -43,7 +43,7 @@ public enum OrderStatus {
     static {
         VALID_TRANSITIONS.put(CREATED, Set.of(CANCELLED, CLIENT_PENDING));
         VALID_TRANSITIONS.put(CLIENT_PENDING, Set.of(CLIENT_PENDING, CANCELLED, COMPLETED));
-        VALID_TRANSITIONS.put(COMPLETED, Set.of());// final state
+        VALID_TRANSITIONS.put(COMPLETED, Set.of()); // final state
         VALID_TRANSITIONS.put(CANCELLED, Set.of()); // final state
     }
 

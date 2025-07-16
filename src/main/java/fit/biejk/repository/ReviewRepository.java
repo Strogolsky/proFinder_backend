@@ -1,7 +1,6 @@
 package fit.biejk.repository;
 
 import fit.biejk.entity.Client;
-import fit.biejk.entity.Order;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.Specialist;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;

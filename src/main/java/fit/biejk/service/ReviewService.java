@@ -1,7 +1,6 @@
 package fit.biejk.service;
 
 import fit.biejk.entity.Client;
-import fit.biejk.entity.Order;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.Specialist;
 import fit.biejk.repository.ReviewRepository;
@@ -30,10 +29,6 @@ public class ReviewService {
     /** Service for retrieving and updating specialists. */
     @Inject
     private SpecialistService specialistService;
-
-    /** Service for retrieving orders. */
-    @Inject
-    private OrderService orderService;
 
     /** Service for retrieving clients. */
     @Inject

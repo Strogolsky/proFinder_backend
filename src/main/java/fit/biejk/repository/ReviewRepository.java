@@ -26,16 +26,6 @@ public class ReviewRepository implements PanacheRepository<Review> {
     }
 
     /**
-     * Finds the review associated with a specific order.
-     *
-     * @param order the order to filter by
-     * @return review linked to the order, or {@code null} if not found
-     */
-    public Review findByOrder(final Order order) {
-        return find("order", order).firstResult();
-    }
-
-    /**
      * Finds all reviews submitted by the given client.
      *
      * @param client the client to filter by

@@ -20,7 +20,6 @@ public interface ReviewMapper {
      */
     @Mapping(source = "client.id", target = "clientId")
     @Mapping(source = "specialist.id", target = "specialistId")
-    @Mapping(source = "order.id", target = "orderId")
     ReviewDto toDto(Review entity);
 
     /**
@@ -34,7 +33,6 @@ public interface ReviewMapper {
      */
     @Mapping(target = "client", ignore = true)
     @Mapping(target = "specialist", ignore = true)
-    @Mapping(target = "order", ignore = true)
     @Mapping(target = "createAt", ignore = true)
     Review toEntity(ReviewDto dto);
 

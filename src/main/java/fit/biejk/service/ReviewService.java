@@ -89,24 +89,4 @@ public class ReviewService {
         return reviews;
     }
 
-    /**
-     * Retrieves the review associated with a specific order.
-     *
-     * @param orderId the order ID
-     * @return the review linked to the order, or {@code null} if not found
-     */
-    public Review getByOrderId(final Long orderId) {
-        log.info("Fetching review for orderId={}", orderId);
-        Order order = orderService.getById(orderId);
-        Review review = reviewRepository.findByOrder(order);
-
-        if (review == null) {
-            log.warn("No review found for orderId={}", orderId);
-        } else {
-            log.debug("Found review: reviewId={} for orderId={}", review.getId(), orderId);
-        }
-
-        return review;
-    }
-
 }

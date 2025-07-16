@@ -54,16 +54,6 @@ public class OrderService {
     private AuthService authService;
 
     /**
-     * Service layer for handling client-related business logic.
-     */
-    @Inject
-    private ClientService clientService;
-
-    /** Service for accessing client reviews. */
-    @Inject
-    private ReviewService reviewService;
-
-    /**
      * Creates a new order with default status.
      *
      * @param order order entity
@@ -233,64 +223,6 @@ public class OrderService {
             }
         }
         return false;
-    }
-    /**
-     * Creates a review for a completed order.
-     * <p>
-     * The review can only be created by the client who owns the order,
-     * and only if the order status is {@link OrderStatus#COMPLETED}.
-     * </p>
-     *
-     * @param orderId ID of the order to review
-     * @param review  review to be created
-     * @return saved review
-     * @throws IllegalArgumentException if the order is not completed,
-     *                                  user is not logged in,
-     *                                  or not the owner of the order
-     */
-    @Transactional
-    public Review review(final Long orderId, final Review review) {
-        log.info("Creating review for orderId={}", orderId);
-
-        Order order = getById(orderId);
-
-        if (order.getStatus() != OrderStatus.COMPLETED) {
-            log.error("Cannot review: order not completed. orderId={}, status={}", orderId, order.getStatus());
-            throw new IllegalArgumentException("Order is not completed");
-        }
-
-        Long clientId = authService.getCurrentUserId();
-        if (clientId == null) {
-            log.error("Cannot review: client is not authenticated");
-            throw new IllegalArgumentException("User is not logged in");
-        }
-
-        if (!clientId.equals(order.getClient().getId())) {
-            log.error("Cannot review: clientId={} is not the owner of orderId={}", clientId, orderId);
-            throw new IllegalArgumentException("Client is not the owner of this order");
-        }
-
-        Client client = clientService.getById(clientId);
-        Specialist specialist = orderProposalService.getConfirmedSpecialist(orderId);
-        if (specialist == null) {
-            log.error("Cannot review: no approved specialist found for orderId={}", orderId);
-            throw new IllegalArgumentException("No specialist found for this order");
-        }
-
-        order.setStatus(order.getStatus().transitionTo(OrderStatus.REVIEWED));
-
-        review.setClient(client);
-        review.setSpecialist(specialist);
-        review.setOrder(order);
-
-        Review saved = reviewService.create(review);
-
-        OrderSearchDto dto = orderSearchMapper.toDto(order);
-        orderSearchService.save(dto);
-
-        log.debug("Review created: reviewId={}, rating={}, orderId={}", saved.getId(), saved.getRating(), orderId);
-
-        return saved;
     }
 
     /**

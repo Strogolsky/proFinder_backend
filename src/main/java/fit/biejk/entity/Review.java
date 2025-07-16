@@ -32,15 +32,6 @@ public class Review {
     private Client client;
 
     /**
-     * The order that this review is associated with.
-     * <p>
-     * One review per order.
-     * </p>
-     */
-    @OneToOne
-    private Order order;
-
-    /**
      * The specialist being reviewed.
      */
     @ManyToOne

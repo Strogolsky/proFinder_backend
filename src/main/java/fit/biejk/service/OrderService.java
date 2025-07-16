@@ -88,17 +88,17 @@ public class OrderService {
             throw new IllegalArgumentException();
         }
         old.setServiceOfferings(order.getServiceOfferings());
-        // todo maybe add update location
+        old.setLocation(order.getLocation());
         old.setTitle(order.getTitle());
         old.setDescription(order.getDescription());
         old.setPrice(order.getPrice());
         old.setDeadline(order.getDeadline());
 
-        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        OrderSearchDto dto = orderSearchMapper.toDto(old);
         orderSearchService.save(dto);
 
         log.debug("Order updated with ID={}", orderId);
-        return order;
+        return old;
     }
 
     /**

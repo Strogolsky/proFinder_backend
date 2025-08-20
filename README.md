@@ -1,66 +1,62 @@
-# pro-finder
+# ProFinder Backend
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+> **Note:** This repository contains only the **backend component** of the ProFinder platform. The client applications are developed separately.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## 📖 Table of Contents
 
-## Running the application in dev mode
+- [Service Overview](#-service-overview)
+- [Technology Stack](#-technology-stack)
+- [Architecture & Features](#-architecture--features)
 
-You can run your application in dev mode that enables live coding using:
+## 🚀 Service Overview
 
-```shell script
-./mvnw quarkus:dev
-```
+**ProFinder** is a comprehensive service marketplace platform designed to bridge the gap between clients seeking professional services and skilled specialists. 
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+The platform enables clients to post job listings for various tasks and connect with qualified professionals. Specialists can showcase their expertise, browse available opportunities, and apply for projects that match their skills.
 
-## Packaging and running the application
+This backend service powers the core functionality including user management, job postings, search capabilities, real-time communication, and transaction processing.
 
-The application can be packaged using:
+## 🛠 Technology Stack
 
-```shell script
-./mvnw package
-```
+### Core Technologies
+- Java
+- Quarkus
+- Maven
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+### Database & Storage
+- PostgreSQL
+- Hibernate ORM with Panache
+- Elasticsearch
+- Redis
+- MinIO
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+### Security & Authentication
+- JWT (SmallRye JWT)
+- Quarkus Security
+- BCrypt
+- Hibernate Validator
 
-If you want to build an _über-jar_, execute the following command:
+### Additional Components
+- WebSockets
+- MapStruct
+- Lombok
+- Mailer
+- Micrometer + Prometheus
+- OpenAPI
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+## 🏗 Architecture & Features
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+### Platform Features
+- **User Management** - Separate profiles for Clients and Professionals
+- **Job Listings System** - Clients create service requests
+-  **Specialist Search** - Ability to find professionals through search functionality
+- **Application System** - Professionals apply to relevant projects
+- **Review & Rating System** - Feedback and reputation management
+- **Real-time Chat** - WebSocket-based messaging between users
+- **Secure Authentication** - JWT-based security with role management
 
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/pro-finder-1.0.0-SNAPSHOT-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- RESTEasy Classic ([guide](https://quarkus.io/guides/resteasy)): REST endpoint framework implementing Jakarta REST and more
-
-## Provided Code
-
-### RESTEasy JAX-RS
-
-Easily start your RESTful Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started#the-jax-rs-resources)
+### Operational Features
+- **Containerization** - Docker support for easy deployment
+- **Performance Monitoring** - Integrated metrics with Prometheus
+- **API Documentation** - Auto-generated OpenAPI specifications
+- **Data Validation** - Multi-layer input validation

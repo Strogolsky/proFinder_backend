@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * REST resource that handles operations related to chat creation and message history retrieval.
  */
-@Path("/chat")
+@Path("/v1/chats")
 public class ChatResource {
 
     /**

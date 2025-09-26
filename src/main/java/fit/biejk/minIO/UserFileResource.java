@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  * the upload to {@link UserFileService}.
  * </p>
  */
-@Path("/users")
+@Path("/v1/users")
 @Slf4j
 public class UserFileResource {
 

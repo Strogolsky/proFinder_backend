@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  * Routes are grouped under the "/auth" path.
  * </p>
  */
-@Path("/auth")
+@Path("/v1/auth")
 @Slf4j
 public class AuthResource {
 

@@ -30,7 +30,7 @@ import java.util.List;
  * Provides endpoints for retrieving and managing client data.
  * </p>
  */
-@Path("/client")
+@Path("/v1/clients")
 @Slf4j
 public class ClientResource {
     /**

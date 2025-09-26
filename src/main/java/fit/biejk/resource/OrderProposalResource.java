@@ -27,7 +27,7 @@ import java.util.List;
  * </p>
  */
 @Slf4j
-@Path("/proposal")
+@Path("/v1/proposals")
 public class OrderProposalResource {
 
     /**

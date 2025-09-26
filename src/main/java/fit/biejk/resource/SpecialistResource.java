@@ -28,7 +28,7 @@ import java.util.List;
  * as well as accessing and modifying the current specialist's profile.
  * </p>
  */
-@Path("/specialist")
+@Path("/v1/specialists")
 @Slf4j
 public class SpecialistResource {
 

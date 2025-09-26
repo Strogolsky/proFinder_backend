@@ -27,7 +27,7 @@ import java.util.List;
  * Supports creating, updating, confirming and retrieving orders, as well as submitting and managing proposals.
  * </p>
  */
-@Path("/order")
+@Path("/v1/orders")
 @Slf4j
 public class OrderResource {
 

@@ -192,7 +192,7 @@ public class SpecialistResource {
      * @return HTTP response containing list of reviews
      */
     @GET
-    @Path("/{specialistId}/review")
+    @Path("/{specialistId}/reviews")
     @PermitAll
     public Response getReviews(final Long specialistId) {
         List<Review> res = reviewService.getBySpecialistId(specialistId);
@@ -206,7 +206,7 @@ public class SpecialistResource {
      * @return HTTP response with updated specialist data
      */
     @PUT
-    @Path("/me/service")
+    @Path("/me/services")
     @RolesAllowed("SPECIALIST")
     public Response updateServiceOffering(final List<ServiceOffering> serviceOfferings) {
         Long id = authService.getCurrentUserId();
@@ -222,8 +222,8 @@ public class SpecialistResource {
      * @param dto review data
      * @return HTTP 200 with saved review
      */
-    @PUT
-    @Path("/{specialistId}/review")
+    @POST
+    @Path("/{specialistId}/reviews")
     @RolesAllowed("CLIENT")
     public Response createReview(@PathParam("specialistId") final Long specialistId, @Valid final ReviewDto dto) {
         Review review = reviewMapper.toEntity(dto);

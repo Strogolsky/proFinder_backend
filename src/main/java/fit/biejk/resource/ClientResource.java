@@ -202,7 +202,7 @@ public class ClientResource {
      * @return list of client's reviews
      */
     @GET
-    @Path("/me/review")
+    @Path("/me/reviews")
     @RolesAllowed("CLIENT")
     public Response getReviews() {
         Long clientId = authService.getCurrentUserId();

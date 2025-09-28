@@ -6,6 +6,7 @@ import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -67,30 +68,13 @@ public class AuthResource {
     }
 
     /**
-     * Changes the password of the authenticated user.
-     * <p>
-     * Requires the old password, new password, and confirmation.
-     * </p>
-     *
-     * @param request contains old, new, and confirm passwords
-     * @return HTTP 200 response with a new authentication token
-     */
-    @PUT
-    @Path("/password/change")
-    @Authenticated
-    public Response changePassword(@Valid final ChangePasswordRequest request) {
-        AuthResponse response = new AuthResponse(authService.changePassword(request));
-        return Response.ok(response).build();
-    }
-
-    /**
      * Initiates password reset by generating and emailing a verification code to the user.
      *
      * @param request contains the email address of the user
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
     @PUT
-    @Path("/password/forgot")
+    @Path(":forgotPassword")
     @PermitAll
     public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
@@ -104,29 +88,10 @@ public class AuthResource {
      * @return HTTP 200 response with a new authentication token
      */
     @PUT
-    @Path("/password/reset")
+    @Path(":resetPassword")
     @PermitAll
     public Response resetPassword(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));
-        return Response.ok(response).build();
-    }
-
-    /**
-     * Endpoint for changing the authenticated user's email address.
-     * <p>
-     * Requires the user to provide their new email and current password.
-     * On success, returns a new authentication token.
-     *
-     * @param request the request containing the new email and current password
-     * @return the HTTP response with the new authentication token
-     */
-
-    @PUT
-    @Path("/email/change")
-    @Authenticated
-    public Response changeEmail(@Valid final ChangeEmailRequest request) {
-        String token = authService.changeEmail(request.getNewEmail(), request.getPassword());
-        AuthResponse response = new AuthResponse(token);
         return Response.ok(response).build();
     }
 

@@ -18,7 +18,7 @@ import java.io.InputStream;
  */
 @ApplicationScoped
 @Slf4j
-public class UserFileService {
+public class FileService {
 
     /**
      * Name of the MinIO bucket used to store user avatar images.

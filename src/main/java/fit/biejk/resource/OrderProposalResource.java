@@ -9,10 +9,7 @@ import fit.biejk.service.OrderProposalService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.*;
 
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +66,7 @@ public class OrderProposalResource {
      * @return order associated with the proposal
      */
     @GET
-    @Path("/{proposalId}/order")
+    @Path("/{proposalId}/orders")
     @RolesAllowed({"CLIENT", "SPECIALIST"})
     public Response getOrderById(@PathParam("proposalId") final Long proposalId) {
         Order order = orderProposalService.getOrderById(proposalId);
@@ -117,8 +114,8 @@ public class OrderProposalResource {
      * @param confirm the confirmation data including final price and deadline
      * @return the updated and confirmed order
      */
-    @PUT
-    @Path("/{proposalId}/confirm")
+    @POST
+    @Path("/{proposalId}:confirm")
     @RolesAllowed("CLIENT")
     public Response confirm(@PathParam("proposalId") final Long proposalId,
                             @Valid final ConfirmProposal confirm) {

@@ -112,8 +112,8 @@ public class OrderResource {
      * @param orderId order ID
      * @return canceled order
      */
-    @PUT
-    @Path("/{orderId}/cancel")
+    @POST
+    @Path("/{orderId}:cancel")
     @RolesAllowed("CLIENT")
     public Response cancel(@PathParam("orderId") final Long orderId) {
         log.info("Cancel order request: orderId={}", orderId);
@@ -129,8 +129,8 @@ public class OrderResource {
      * @param proposalDto  proposal data
      * @return created proposal
      */
-    @PUT
-    @Path("/{orderId}/proposal")
+    @POST
+    @Path("/{orderId}:proposal")
     @RolesAllowed("SPECIALIST")
     public Response proposal(@PathParam("orderId") final Long orderId, @Valid final OrderProposalDto proposalDto) {
         log.info("Proposal request: orderId={}, proposalDto={}", orderId, proposalDto);

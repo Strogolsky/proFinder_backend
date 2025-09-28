@@ -1,5 +1,6 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
 import fit.biejk.entity.*;
@@ -143,6 +144,33 @@ public class OrderResource {
         return Response.ok(orderProposalMapper.toDto(result)).build();
     }
 
+
+    /**
+     * Confirms a proposal and updates the corresponding order with final price and deadline.
+     * <p>
+     * Only the client who created the order can confirm a proposal.
+     * </p>
+     *
+     * @param orderId the ID of the proposal to confirm
+     * @param confirm the confirmation data including final price and deadline
+     * @return the updated and confirmed order
+     */
+    @POST
+    @Path("/{orderId}:confirm")
+    @RolesAllowed("CLIENT")
+    public Response confirm(@PathParam("orderId") final Long orderId,
+                            @Valid final ConfirmProposal confirm) {
+        log.info("Confirm order proposal: orderId ={},confirm={}", orderId, confirm);
+
+        Order result = orderService.confirm(
+                orderId,
+                confirm.getProposalId(),
+                confirm.getFinalPrice(),
+                confirm.getFinalDeadline());
+        log.debug("Order confirmed with ID={}", result.getId());
+        return Response.ok(orderMapper.toDto(result)).build();
+    }
+
     /**
      * Retrieves an order by ID.
      *
@@ -222,7 +250,6 @@ public class OrderResource {
         List<Order> result = orderService.getBySpecialistId(specialistId);
         return Response.ok(orderMapper.toDtoList(result)).build();
     }
-
 
 
 

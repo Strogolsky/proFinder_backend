@@ -52,7 +52,7 @@ public class OrderProposalResource {
      * @return list of proposals submitted by the specialist
      */
     @GET
-    @Path("/specialist/{specialistId}")
+    @Path("/specialists/{specialistId}")
     @RolesAllowed("SPECIALIST")
     public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
         List<OrderProposal> result = orderProposalService.getBySpecialistId(specialistId);
@@ -69,7 +69,7 @@ public class OrderProposalResource {
     @Path("/{proposalId}/orders")
     @RolesAllowed({"CLIENT", "SPECIALIST"})
     public Response getOrderById(@PathParam("proposalId") final Long proposalId) {
-        Order order = orderProposalService.getOrderById(proposalId);
+        Order order = orderProposalService.getOrderByProposalId(proposalId);
         return Response.ok(orderMapper.toDto(order)).build();
     }
 
@@ -95,35 +95,12 @@ public class OrderProposalResource {
      * @return list of proposals for the order
      */
     @GET
-    @Path("/order/{orderId}")
+    @Path("/orders/{orderId}")
     @RolesAllowed("CLIENT")
     public Response getAllByOrderId(@PathParam("orderId") final Long orderId) {
         log.info("Get all proposals for orderId={}", orderId);
         List<OrderProposal> proposals = orderProposalService.getByOrderId(orderId);
         log.debug("Proposals found: {}", proposals.size());
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
-    }
-
-    /**
-     * Confirms a proposal and updates the corresponding order with final price and deadline.
-     * <p>
-     * Only the client who created the order can confirm a proposal.
-     * </p>
-     *
-     * @param proposalId the ID of the proposal to confirm
-     * @param confirm the confirmation data including final price and deadline
-     * @return the updated and confirmed order
-     */
-    @POST
-    @Path("/{proposalId}:confirm")
-    @RolesAllowed("CLIENT")
-    public Response confirm(@PathParam("proposalId") final Long proposalId,
-                            @Valid final ConfirmProposal confirm) {
-        log.info("Confirm proposal: proposalId={}, confirm={}", proposalId, confirm);
-
-        Order result = orderProposalService.confirm(proposalId,
-                confirm.getFinalPrice(), confirm.getFinalDeadline());
-        log.debug("Order confirmed with ID={}", result.getId());
-        return Response.ok(orderMapper.toDto(result)).build();
     }
 }

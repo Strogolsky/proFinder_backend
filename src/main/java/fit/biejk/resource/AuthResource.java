@@ -2,13 +2,10 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.*;
 import fit.biejk.service.AuthService;
-import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +70,7 @@ public class AuthResource {
      * @param request contains the email address of the user
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
-    @PUT
+    @POST
     @Path(":forgotPassword")
     @PermitAll
     public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
@@ -87,7 +84,7 @@ public class AuthResource {
      * @param request contains email, verification code, and new password with confirmation
      * @return HTTP 200 response with a new authentication token
      */
-    @PUT
+    @POST
     @Path(":resetPassword")
     @PermitAll
     public Response resetPassword(@Valid final ResetPasswordRequest request) {

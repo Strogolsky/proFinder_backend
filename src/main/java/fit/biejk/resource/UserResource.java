@@ -4,9 +4,12 @@ import fit.biejk.dto.AuthResponse;
 import fit.biejk.dto.AvatarData;
 import fit.biejk.dto.ChangeEmailRequest;
 import fit.biejk.dto.ChangePasswordRequest;
+import fit.biejk.entity.User;
 import fit.biejk.minIO.FileUploadForm;
 import fit.biejk.minIO.FileService;
 import fit.biejk.service.AuthService;
+import fit.biejk.service.TokenService;
+import fit.biejk.service.UserService;
 import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
@@ -40,6 +43,11 @@ public class UserResource {
     @Inject
     private AuthService authService;
 
+    @Inject
+    private UserService userService;
+
+    @Inject
+    private TokenService tokenService;
     /**
      * Handles avatar upload for the currently authenticated user.
      *
@@ -91,39 +99,32 @@ public class UserResource {
         }
 
     }
-
-    /**
-     * Changes the password of the authenticated user.
-     * <p>
-     * Requires the old password, new password, and confirmation.
-     * </p>
-     *
-     * @param request contains old, new, and confirm passwords
-     * @return HTTP 200 response with a new authentication token
-     */
     @PATCH
     @Path("/me/password")
     @Authenticated
     public Response changePassword(@Valid final ChangePasswordRequest request) {
-        AuthResponse response = new AuthResponse(authService.changePassword(request));
-        return Response.ok(response).build();
+        Long userId = authService.getCurrentUserId();
+        User updated = userService.changePassword(
+                userId,
+                request.getOldPassword(),
+                request.getNewPassword(),
+                request.getConfirmPassword()
+        );
+        String token = tokenService.generateToken(updated);
+        return Response.ok(new AuthResponse(token)).build();
     }
 
-    /**
-     * Endpoint for changing the authenticated user's email address.
-     * <p>
-     * Requires the user to provide their new email and current password.
-     * On success, returns a new authentication token.
-     *
-     * @param request the request containing the new email and current password
-     * @return the HTTP response with the new authentication token
-     */
     @PATCH
     @Path("/me/email")
     @Authenticated
     public Response changeEmail(@Valid final ChangeEmailRequest request) {
-        String token = authService.changeEmail(request.getNewEmail(), request.getPassword());
-        AuthResponse response = new AuthResponse(token);
-        return Response.ok(response).build();
+        Long userId = authService.getCurrentUserId();
+        User updated = userService.changeEmail(
+                userId,
+                request.getNewEmail(),
+                request.getPassword()
+        );
+        String token = tokenService.generateToken(updated);
+        return Response.ok(new AuthResponse(token)).build();
     }
 }

@@ -163,15 +163,4 @@ public class OrderProposalService {
         }
         return orderProposalRepository.findBySpecialistId(specialistId);
     }
-
-    /**
-     * Retrieves the order associated with a given proposal.
-     *
-     * @param orderProposalId the ID of the proposal
-     * @return the related order
-     */
-    public Order getOrderByProposalId(final Long orderProposalId) {
-        OrderProposal orderProposal = getById(orderProposalId);
-        return orderProposal.getOrder();
-    }
 }

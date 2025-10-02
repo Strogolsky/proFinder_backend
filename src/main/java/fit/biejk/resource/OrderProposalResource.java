@@ -40,40 +40,6 @@ public class OrderProposalResource {
     private OrderProposalMapper orderProposalMapper;
 
     /**
-     * Mapper for converting between Order entities and DTOs.
-     */
-    @Inject
-    private OrderMapper orderMapper;
-
-    /**
-     * Retrieves all proposals submitted by the specified specialist.
-     *
-     * @param specialistId the ID of the specialist
-     * @return list of proposals submitted by the specialist
-     */
-    @GET
-    @Path("/specialists/{specialistId}")
-    @RolesAllowed("SPECIALIST")
-    public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
-        List<OrderProposal> result = orderProposalService.getBySpecialistId(specialistId);
-        return Response.ok(orderProposalMapper.toDtoList(result)).build();
-    }
-
-    /**
-     * Retrieves the order associated with a specific proposal.
-     *
-     * @param proposalId the ID of the proposal
-     * @return order associated with the proposal
-     */
-    @GET
-    @Path("/{proposalId}/orders")
-    @RolesAllowed({"CLIENT", "SPECIALIST"})
-    public Response getOrderById(@PathParam("proposalId") final Long proposalId) {
-        Order order = orderProposalService.getOrderByProposalId(proposalId);
-        return Response.ok(orderMapper.toDto(order)).build();
-    }
-
-    /**
      * Retrieves a specific proposal by its ID.
      *
      * @param proposalId the ID of the proposal
@@ -86,21 +52,5 @@ public class OrderProposalResource {
         log.info("Get proposal: proposalId={}", proposalId);
         OrderProposal result = orderProposalService.getById(proposalId);
         return Response.ok(orderProposalMapper.toDto(result)).build();
-    }
-
-    /**
-     * Retrieves all proposals associated with a specific order.
-     *
-     * @param orderId the ID of the order
-     * @return list of proposals for the order
-     */
-    @GET
-    @Path("/orders/{orderId}")
-    @RolesAllowed("CLIENT")
-    public Response getAllByOrderId(@PathParam("orderId") final Long orderId) {
-        log.info("Get all proposals for orderId={}", orderId);
-        List<OrderProposal> proposals = orderProposalService.getByOrderId(orderId);
-        log.debug("Proposals found: {}", proposals.size());
-        return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
     }
 }

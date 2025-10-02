@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthResource {
 
     /**
-     * Service for handling authentication logic such as user registration, login,
+     * Service for handling authentication logic such as user registration, signIn,
      * password reset, and password change.
      */
     @Inject
@@ -35,7 +35,7 @@ public class AuthResource {
      * @return HTTP 200 response with a generated authentication token
      */
     @POST
-    @Path("/signUp")
+    @Path("/sign-up")
     @PermitAll
     public Response signUp(@Valid final AuthRequest request) {
         log.info("Sign up request: {}", request);
@@ -53,7 +53,7 @@ public class AuthResource {
      * @return HTTP 200 response with a generated authentication token
      */
     @POST
-    @Path("/signIn")
+    @Path("/sign-in")
     @PermitAll
     public Response signIn(@Valid final AuthRequest request) {
         log.info("Sign in request: {}", request);
@@ -71,7 +71,7 @@ public class AuthResource {
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
     @POST
-    @Path(":forgotPassword")
+    @Path("/forgot-password")
     @PermitAll
     public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
@@ -85,7 +85,7 @@ public class AuthResource {
      * @return HTTP 200 response with a new authentication token
      */
     @POST
-    @Path(":resetPassword")
+    @Path("/reset-password")
     @PermitAll
     public Response resetPassword(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));

@@ -32,6 +32,8 @@ import java.util.List;
 @Slf4j
 public class OrderResource {
 
+    @Inject
+    private OrderProposalService orderProposalService;
     /**
      * Service handling order-related business logic.
      */
@@ -114,7 +116,7 @@ public class OrderResource {
      * @return canceled order
      */
     @POST
-    @Path("/{orderId}:cancel")
+    @Path("/{orderId}/cancel")
     @RolesAllowed("CLIENT")
     public Response cancel(@PathParam("orderId") final Long orderId) {
         log.info("Cancel order request: orderId={}", orderId);
@@ -131,7 +133,7 @@ public class OrderResource {
      * @return created proposal
      */
     @POST
-    @Path("/{orderId}:proposal")
+    @Path("/{orderId}/proposals")
     @RolesAllowed("SPECIALIST")
     public Response proposal(@PathParam("orderId") final Long orderId, @Valid final OrderProposalDto proposalDto) {
         log.info("Proposal request: orderId={}, proposalDto={}", orderId, proposalDto);
@@ -142,6 +144,22 @@ public class OrderResource {
         OrderProposal result = orderService.proposal(orderId, proposal);
         log.debug("Proposal created with ID={}", result.getId());
         return Response.ok(orderProposalMapper.toDto(result)).build();
+    }
+
+    /**
+     * Retrieves all proposals associated with a specific order.
+     *
+     * @param orderId the ID of the order
+     * @return list of proposals for the order
+     */
+    @GET
+    @Path("/{orderId}/proposals")
+    @RolesAllowed("CLIENT")
+    public Response getProposals(@PathParam("orderId") final Long orderId) {
+        log.info("Get all proposals for orderId={}", orderId);
+        List<OrderProposal> proposals = orderProposalService.getByOrderId(orderId);
+        log.debug("Proposals found: {}", proposals.size());
+        return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
     }
 
 
@@ -156,7 +174,7 @@ public class OrderResource {
      * @return the updated and confirmed order
      */
     @POST
-    @Path("/{orderId}:confirm")
+    @Path("/{orderId}/confirm")
     @RolesAllowed("CLIENT")
     public Response confirm(@PathParam("orderId") final Long orderId,
                             @Valid final ConfirmProposal confirm) {

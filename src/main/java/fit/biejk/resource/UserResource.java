@@ -54,9 +54,10 @@ public class UserResource {
      * @param form the uploaded file and its metadata
      * @return HTTP 200 if upload was successful, 500 otherwise
      */
-    @POST
-    @Path("/avatar")
+    @PUT
+    @Path("/me/avatar")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Authenticated
     public Response uploadAvatar(final FileUploadForm form) {
         Long userId = authService.getCurrentUserId();
         log.info("Received avatar upload request from userId={}", userId);

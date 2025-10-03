@@ -2,12 +2,10 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.*;
 import fit.biejk.service.AuthService;
-import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -19,12 +17,12 @@ import lombok.extern.slf4j.Slf4j;
  * Routes are grouped under the "/auth" path.
  * </p>
  */
-@Path("/auth")
+@Path("/v1/auth")
 @Slf4j
 public class AuthResource {
 
     /**
-     * Service for handling authentication logic such as user registration, login,
+     * Service for handling authentication logic such as user registration, signIn,
      * password reset, and password change.
      */
     @Inject
@@ -37,7 +35,7 @@ public class AuthResource {
      * @return HTTP 200 response with a generated authentication token
      */
     @POST
-    @Path("/signUp")
+    @Path("/sign-up")
     @PermitAll
     public Response signUp(@Valid final AuthRequest request) {
         log.info("Sign up request: {}", request);
@@ -55,7 +53,7 @@ public class AuthResource {
      * @return HTTP 200 response with a generated authentication token
      */
     @POST
-    @Path("/signIn")
+    @Path("/sign-in")
     @PermitAll
     public Response signIn(@Valid final AuthRequest request) {
         log.info("Sign in request: {}", request);
@@ -67,30 +65,13 @@ public class AuthResource {
     }
 
     /**
-     * Changes the password of the authenticated user.
-     * <p>
-     * Requires the old password, new password, and confirmation.
-     * </p>
-     *
-     * @param request contains old, new, and confirm passwords
-     * @return HTTP 200 response with a new authentication token
-     */
-    @PUT
-    @Path("/password/change")
-    @Authenticated
-    public Response changePassword(@Valid final ChangePasswordRequest request) {
-        AuthResponse response = new AuthResponse(authService.changePassword(request));
-        return Response.ok(response).build();
-    }
-
-    /**
      * Initiates password reset by generating and emailing a verification code to the user.
      *
      * @param request contains the email address of the user
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
-    @PUT
-    @Path("/password/forgot")
+    @POST
+    @Path("/forgot-password")
     @PermitAll
     public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
@@ -103,30 +84,11 @@ public class AuthResource {
      * @param request contains email, verification code, and new password with confirmation
      * @return HTTP 200 response with a new authentication token
      */
-    @PUT
-    @Path("/password/reset")
+    @POST
+    @Path("/reset-password")
     @PermitAll
     public Response resetPassword(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));
-        return Response.ok(response).build();
-    }
-
-    /**
-     * Endpoint for changing the authenticated user's email address.
-     * <p>
-     * Requires the user to provide their new email and current password.
-     * On success, returns a new authentication token.
-     *
-     * @param request the request containing the new email and current password
-     * @return the HTTP response with the new authentication token
-     */
-
-    @PUT
-    @Path("/email/change")
-    @Authenticated
-    public Response changeEmail(@Valid final ChangeEmailRequest request) {
-        String token = authService.changeEmail(request.getNewEmail(), request.getPassword());
-        AuthResponse response = new AuthResponse(token);
         return Response.ok(response).build();
     }
 

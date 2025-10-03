@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * REST resource that handles operations related to chat creation and message history retrieval.
  */
-@Path("/chat")
+@Path("/v1/chats")
 public class ChatResource {
 
     /**
@@ -66,10 +66,10 @@ public class ChatResource {
      * @return A Response containing a list of ChatOutputMessage DTOs.
      */
     @GET
-    @Path("/{chatId}/history")
+    @Path("/{chatId}/messages")
     @Authenticated
-    public Response getHistory(final Long chatId) {
-        List<ChatMessage> result = chatService.getHistory(chatId);
+    public Response getMessagesById(final Long chatId) {
+        List<ChatMessage> result = chatService.getMessagesById(chatId);
         return Response.ok().entity(chatMessageMapper.toDtoList(result)).build();
     }
 
@@ -79,9 +79,9 @@ public class ChatResource {
      * @return list of chat DTOs
      */
     @GET
-    @Path("/profile")
+    @Path("/me")
     @Authenticated
-    public Response getChatsByProfile() {
+    public Response getAllByProfile() {
         Long userId = authService.getCurrentUserId();
         List<Chat> result = chatService.getByUserId(userId);
         return Response.ok().entity(chatMapper.toDtoList(result, userId)).build();

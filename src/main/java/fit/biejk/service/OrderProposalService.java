@@ -5,11 +5,9 @@ import fit.biejk.repository.OrderProposalRepository;
 import fit.biejk.repository.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -162,44 +160,5 @@ public class OrderProposalService {
             throw new IllegalArgumentException("Specialist ID " + specialistId + " not authorized");
         }
         return orderProposalRepository.findBySpecialistId(specialistId);
-    }
-
-    /**
-     * Retrieves the order associated with a given proposal.
-     *
-     * @param orderProposalId the ID of the proposal
-     * @return the related order
-     */
-    public Order getOrderById(final Long orderProposalId) {
-        OrderProposal orderProposal = getById(orderProposalId);
-        return orderProposal.getOrder();
-    }
-
-    /**
-     * Confirms a proposal, updates the related order with final price and deadline,
-     * changes the order status, and rejects all other proposals.
-     *
-     * @param proposalId the ID of the approved proposal
-     * @param price      the agreed final price
-     * @param deadline   the agreed final deadline
-     * @return the updated order
-     * @throws IllegalArgumentException if the current user is not the order's client
-     */
-    @Transactional
-    public Order confirm(final Long proposalId, final int price, final LocalDateTime deadline) {
-        log.info("Confirm proposal: proposalId={}", proposalId);
-        Order order = getOrderById(proposalId);
-        if (!authService.isCurrentUser(order.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}",
-                    order.getId(), order.getClient().getId());
-            throw new IllegalArgumentException();
-        }
-        order.setPrice(price);
-        order.setDeadline(deadline);
-        approveProposal(order.getId(), proposalId);
-        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
-        orderRepository.persist(order);
-        log.debug("Order confirmed with ID={}", order.getId());
-        return order;
     }
 }

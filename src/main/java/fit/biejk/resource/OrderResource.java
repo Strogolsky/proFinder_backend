@@ -1,5 +1,6 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
 import fit.biejk.entity.*;
@@ -27,10 +28,13 @@ import java.util.List;
  * Supports creating, updating, confirming and retrieving orders, as well as submitting and managing proposals.
  * </p>
  */
-@Path("/order")
+@Path("/v1/orders")
 @Slf4j
 public class OrderResource {
 
+    /** Service for managing order proposals. */
+    @Inject
+    private OrderProposalService orderProposalService;
     /**
      * Service handling order-related business logic.
      */
@@ -112,7 +116,7 @@ public class OrderResource {
      * @param orderId order ID
      * @return canceled order
      */
-    @PUT
+    @POST
     @Path("/{orderId}/cancel")
     @RolesAllowed("CLIENT")
     public Response cancel(@PathParam("orderId") final Long orderId) {
@@ -129,8 +133,8 @@ public class OrderResource {
      * @param proposalDto  proposal data
      * @return created proposal
      */
-    @PUT
-    @Path("/{orderId}/proposal")
+    @POST
+    @Path("/{orderId}/proposals")
     @RolesAllowed("SPECIALIST")
     public Response proposal(@PathParam("orderId") final Long orderId, @Valid final OrderProposalDto proposalDto) {
         log.info("Proposal request: orderId={}, proposalDto={}", orderId, proposalDto);
@@ -141,6 +145,49 @@ public class OrderResource {
         OrderProposal result = orderService.proposal(orderId, proposal);
         log.debug("Proposal created with ID={}", result.getId());
         return Response.ok(orderProposalMapper.toDto(result)).build();
+    }
+
+    /**
+     * Retrieves all proposals associated with a specific order.
+     *
+     * @param orderId the ID of the order
+     * @return list of proposals for the order
+     */
+    @GET
+    @Path("/{orderId}/proposals")
+    @RolesAllowed("CLIENT")
+    public Response getProposals(@PathParam("orderId") final Long orderId) {
+        log.info("Get all proposals for orderId={}", orderId);
+        List<OrderProposal> proposals = orderProposalService.getByOrderId(orderId);
+        log.debug("Proposals found: {}", proposals.size());
+        return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
+    }
+
+
+    /**
+     * Confirms a proposal and updates the corresponding order with final price and deadline.
+     * <p>
+     * Only the client who created the order can confirm a proposal.
+     * </p>
+     *
+     * @param orderId the ID of the proposal to confirm
+     * @param confirm the confirmation data including final price and deadline
+     * @return the updated and confirmed order
+     */
+    @POST
+    @Path("/{orderId}/confirm")
+    @RolesAllowed("CLIENT")
+    public Response confirm(@PathParam("orderId") final Long orderId,
+                            @Valid final ConfirmProposal confirm) {
+        log.info("Confirm order proposal: orderId ={},confirm={}", orderId, confirm);
+
+        Order result = orderService.confirm(
+                orderId,
+                confirm.getProposalId(),
+                confirm.getFinalPrice(),
+                confirm.getFinalDeadline());
+        log.debug("Order confirmed with ID={}", result.getId());
+        return Response.ok(orderMapper.toDto(result)).build();
     }
 
     /**
@@ -222,7 +269,6 @@ public class OrderResource {
         List<Order> result = orderService.getBySpecialistId(specialistId);
         return Response.ok(orderMapper.toDtoList(result)).build();
     }
-
 
 
 

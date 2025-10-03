@@ -18,7 +18,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConfirmProposal {
-
+    /** ID of the proposal to confirm. */
+    @NotNull
+    private Long proposalId;
     /**
      * The final agreed deadline for the proposal.
      * Must not be null.

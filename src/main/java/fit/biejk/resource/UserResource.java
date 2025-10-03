@@ -1,9 +1,19 @@
-package fit.biejk.minIO;
+package fit.biejk.resource;
 
+import fit.biejk.dto.AuthResponse;
 import fit.biejk.dto.AvatarData;
+import fit.biejk.dto.ChangeEmailRequest;
+import fit.biejk.dto.ChangePasswordRequest;
+import fit.biejk.entity.User;
+import fit.biejk.minIO.FileUploadForm;
+import fit.biejk.minIO.FileService;
 import fit.biejk.service.AuthService;
+import fit.biejk.service.TokenService;
+import fit.biejk.service.UserService;
+import io.quarkus.security.Authenticated;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -14,18 +24,18 @@ import lombok.extern.slf4j.Slf4j;
  * REST endpoint for handling user file uploads such as avatar images.
  * <p>
  * Accepts multipart/form-data requests from authenticated users and delegates
- * the upload to {@link UserFileService}.
+ * the upload to {@link FileService}.
  * </p>
  */
-@Path("/users")
+@Path("/v1/users")
 @Slf4j
-public class UserFileResource {
+public class UserResource {
 
     /**
      * Service responsible for handling file uploads and interactions with MinIO.
      */
     @Inject
-    private UserFileService userFileService;
+    private FileService fileService;
 
     /**
      * Service for retrieving the currently authenticated user ID and auth logic.
@@ -33,21 +43,29 @@ public class UserFileResource {
     @Inject
     private AuthService authService;
 
+    /** Service for user entity management. */
+    @Inject
+    private UserService userService;
+
+    /** Service for generating JWT tokens. */
+    @Inject
+    private TokenService tokenService;
     /**
      * Handles avatar upload for the currently authenticated user.
      *
      * @param form the uploaded file and its metadata
      * @return HTTP 200 if upload was successful, 500 otherwise
      */
-    @POST
-    @Path("/avatar")
+    @PUT
+    @Path("/me/avatar")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @Authenticated
     public Response uploadAvatar(final FileUploadForm form) {
         Long userId = authService.getCurrentUserId();
         log.info("Received avatar upload request from userId={}", userId);
 
         try {
-            userFileService.uploadAvatar(userId, form.getFile(), form.getContentType());
+            fileService.uploadAvatar(userId, form.getFile(), form.getContentType());
             log.debug("Avatar uploaded successfully for userId={}", userId);
             return Response.ok().build();
         } catch (Exception e) {
@@ -74,7 +92,7 @@ public class UserFileResource {
     @PermitAll
     public Response getAvatar(@PathParam("userId") final Long userId) {
         try {
-            AvatarData data = userFileService.getAvatar(userId);
+            AvatarData data = fileService.getAvatar(userId);
 
             return Response.ok(data.stream())
                     .type(data.contentType())
@@ -83,5 +101,46 @@ public class UserFileResource {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
+    }
+
+    /**
+     * Changes the current user's password.
+     *
+     * @param request password change request
+     * @return new JWT token wrapped in {@link AuthResponse}
+     */
+    @PATCH
+    @Path("/me/password")
+    @Authenticated
+    public Response changePassword(@Valid final ChangePasswordRequest request) {
+        Long userId = authService.getCurrentUserId();
+        User updated = userService.changePassword(
+                userId,
+                request.getOldPassword(),
+                request.getNewPassword(),
+                request.getConfirmPassword()
+        );
+        String token = tokenService.generateToken(updated);
+        return Response.ok(new AuthResponse(token)).build();
+    }
+
+    /**
+     * Changes the current user's email.
+     *
+     * @param request email change request
+     * @return new JWT token wrapped in {@link AuthResponse}
+     */
+    @PATCH
+    @Path("/me/email")
+    @Authenticated
+    public Response changeEmail(@Valid final ChangeEmailRequest request) {
+        Long userId = authService.getCurrentUserId();
+        User updated = userService.changeEmail(
+                userId,
+                request.getNewEmail(),
+                request.getPassword()
+        );
+        String token = tokenService.generateToken(updated);
+        return Response.ok(new AuthResponse(token)).build();
     }
 }

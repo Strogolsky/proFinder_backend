@@ -88,7 +88,7 @@ public class ChatService {
      * @param chatId ID of the chat
      * @return list of {@link ChatMessage} in the chat
      */
-    public List<ChatMessage> getHistory(final Long chatId) {
+    public List<ChatMessage> getMessagesById(final Long chatId) {
         log.info("Getting history for chat {}", chatId);
         Chat chat = getById(chatId);
         return chat.getMessages();

@@ -2,12 +2,15 @@ package fit.biejk.resource;
 
 import fit.biejk.dto.ReviewDto;
 import fit.biejk.dto.SpecialistDto;
+import fit.biejk.entity.OrderProposal;
 import fit.biejk.entity.Review;
 import fit.biejk.entity.ServiceOffering;
 import fit.biejk.entity.Specialist;
+import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.mapper.SpecialistMapper;
 import fit.biejk.service.AuthService;
+import fit.biejk.service.OrderProposalService;
 import fit.biejk.service.ReviewService;
 import fit.biejk.service.SpecialistService;
 import jakarta.annotation.security.DenyAll;
@@ -28,9 +31,21 @@ import java.util.List;
  * as well as accessing and modifying the current specialist's profile.
  * </p>
  */
-@Path("/specialist")
+@Path("/v1/specialists")
 @Slf4j
 public class SpecialistResource {
+
+    /**
+     * Service responsible for handling business logic related to order proposals.
+     */
+    @Inject
+    private OrderProposalService orderProposalService;
+
+    /**
+     * Mapper for converting between OrderProposal entities and DTOs.
+     */
+    @Inject
+    private OrderProposalMapper orderProposalMapper;
 
     /** Service for handling business logic related to specialists. */
     @Inject
@@ -192,9 +207,9 @@ public class SpecialistResource {
      * @return HTTP response containing list of reviews
      */
     @GET
-    @Path("/{specialistId}/review")
+    @Path("/{specialistId}/reviews")
     @PermitAll
-    public Response getReviews(final Long specialistId) {
+    public Response getReviews(@PathParam("specialistId") final Long specialistId) {
         List<Review> res = reviewService.getBySpecialistId(specialistId);
         return Response.ok(reviewMapper.toDtoList(res)).build();
     }
@@ -206,7 +221,7 @@ public class SpecialistResource {
      * @return HTTP response with updated specialist data
      */
     @PUT
-    @Path("/me/service")
+    @Path("/me/services")
     @RolesAllowed("SPECIALIST")
     public Response updateServiceOffering(final List<ServiceOffering> serviceOfferings) {
         Long id = authService.getCurrentUserId();
@@ -222,13 +237,27 @@ public class SpecialistResource {
      * @param dto review data
      * @return HTTP 200 with saved review
      */
-    @PUT
-    @Path("/{specialistId}/review")
+    @POST
+    @Path("/{specialistId}/reviews")
     @RolesAllowed("CLIENT")
     public Response createReview(@PathParam("specialistId") final Long specialistId, @Valid final ReviewDto dto) {
         Review review = reviewMapper.toEntity(dto);
         Review saved = specialistService.review(specialistId, review);
 
         return Response.ok(reviewMapper.toDto(saved)).build();
+    }
+
+    /**
+     * Retrieves all proposals submitted by the specified specialist.
+     *
+     * @param specialistId the ID of the specialist
+     * @return list of proposals submitted by the specialist
+     */
+    @GET
+    @Path("/{specialistId}/proposals")
+    @RolesAllowed("SPECIALIST")
+    public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
+        List<OrderProposal> result = orderProposalService.getBySpecialistId(specialistId);
+        return Response.ok(orderProposalMapper.toDtoList(result)).build();
     }
 }

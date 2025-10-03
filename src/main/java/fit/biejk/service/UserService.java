@@ -3,6 +3,7 @@ package fit.biejk.service;
 import fit.biejk.entity.Location;
 import fit.biejk.entity.User;
 import fit.biejk.repository.UserRepository;
+import fit.biejk.utilits.CryptoUtils;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -36,6 +37,10 @@ public class UserService {
      */
     @Inject
     private LocationService locationService;
+
+    /** Service for sending user notifications via email. */
+    @Inject
+    private MailService mailService;
 
     /**
      * Checks if the given email is unique.
@@ -133,39 +138,31 @@ public class UserService {
     }
 
     /**
-     * Updates the password for the specified user.
-     * <p>
-     * Retrieves the user by ID, updates the password, and returns the updated user entity.
-     * Assumes the password is already hashed.
-     * </p>
+     * Updates user password.
      *
-     * @param userId the ID of the user whose password is to be updated
-     * @param user a user object containing the new hashed password
-     * @return the updated user entity
+     * @param userId      user ID
+     * @param newPassword new plain text password
+     * @return updated user
      */
     @Transactional
-    public User updatePassword(final Long userId, final User user) {
-        log.info("Update user: userId={}, newPassword={}", user.getId(), user.getPassword());
-        User existingUser = getById(userId);
-        existingUser.setPassword(user.getPassword());
-        log.debug("User updated with ID={}", existingUser.getId());
-        return existingUser;
+    public User updatePassword(final Long userId, final String newPassword) {
+        User user = getById(userId);
+        user.setPassword(CryptoUtils.hash(newPassword));
+        return user;
     }
 
     /**
-     * Updates the email address of the user with the given userId.
-     * <p>
-     * Fetches the existing user by ID, updates the email, and returns the updated user.
+     * Updates user email.
      *
-     * @param userId the ID of the user whose email is to be updated
-     * @param user the user object containing the new email address
-     * @return the updated user entity with the new email address
+     * @param userId   user ID
+     * @param newEmail new email
+     * @return updated user
      */
     @Transactional
-    public User updateEmail(final Long userId, final User user) {
-        log.info("Update user: userId={}, newEmail={}", userId, user.getEmail());
+    public User updateEmail(final Long userId, final String newEmail) {
+        log.info("Update user: userId={}, newEmail={}", userId, newEmail);
         User existingUser = getById(userId);
-        existingUser.setEmail(user.getEmail());
+        existingUser.setEmail(newEmail);
         log.debug("User updated with ID={}", existingUser.getId());
         return existingUser;
     }
@@ -188,5 +185,57 @@ public class UserService {
         }
         userRepository.delete(existingUser);
         log.debug("User deleted with ID={}", userId);
+    }
+
+    /**
+     * Changes password after verifying current one.
+     *
+     * @param userId          user ID
+     * @param currentPassword current password
+     * @param newPassword     new password
+     * @param confirmPassword confirmation of new password
+     * @return updated user
+     */
+    @Transactional
+    public User changePassword(final Long userId,
+                               final String currentPassword,
+                               final String newPassword,
+                               final String confirmPassword) {
+        User user = getById(userId);
+        if (!CryptoUtils.verify(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid old password");
+        }
+        if (!newPassword.equals(confirmPassword)) {
+            throw new IllegalArgumentException("Passwords do not match");
+        }
+        return updatePassword(userId, newPassword);
+    }
+
+    /**
+     * Changes email after verifying password.
+     *
+     * @param userId         user ID
+     * @param newEmail       new email
+     * @param currentPassword current password
+     * @return updated user
+     */
+    @Transactional
+    public User changeEmail(final Long userId,
+                            final String newEmail,
+                            final String currentPassword) {
+        User user = getById(userId);
+        if (user.getEmail().equalsIgnoreCase(newEmail)) {
+            throw new IllegalArgumentException("New email is same as old email");
+        }
+        if (!CryptoUtils.verify(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("Invalid password");
+        }
+        checkUniqueEmail(newEmail);
+        String oldEmail = user.getEmail();
+        user = updateEmail(userId, newEmail);
+        mailService.send(oldEmail, "Email change notification",
+                "Your email has been changed to: " + newEmail
+                    + "\nIf this wasn’t you, please contact support.");
+        return user;
     }
 }

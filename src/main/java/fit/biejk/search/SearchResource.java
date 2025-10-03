@@ -20,7 +20,7 @@ import java.util.List;
  * and to search orders based on selected services and location.
  * </p>
  */
-@Path("/search")
+@Path("/v1/search")
 public class SearchResource {
 
     /**

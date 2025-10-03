@@ -15,7 +15,7 @@ import java.util.List;
  * Provides public access to the list of all available {@link Location} entities.
  * </p>
  */
-@Path("/location")
+@Path("/v1/locations")
 public class LocationResource {
 
     /**

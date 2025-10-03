@@ -11,6 +11,7 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -261,6 +262,41 @@ public class OrderService {
             throw new IllegalArgumentException("User is not logged in");
         }
         return orderRepository.findBySpecialistId(specialistId);
+    }
+
+    /**
+     * Confirms a proposal, updates the related order with final price and deadline,
+     * changes the order status, and rejects all other proposals.
+     *
+     * @param orderId    the ID of the order
+     * @param proposalId the ID of the approved proposal
+     * @param price      the agreed final price
+     * @param deadline   the agreed final deadline
+     * @return the updated order
+     * @throws IllegalArgumentException if the current user is not the order's client
+     */
+    @Transactional
+    public Order confirm(final Long orderId, final Long proposalId, final int price, final LocalDateTime deadline) {
+        Order order = getById(orderId);
+        if (!authService.isCurrentUser(order.getClient().getId())) {
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    order.getId(), order.getClient().getId());
+            throw new IllegalArgumentException();
+        }
+        order.setPrice(price);
+        order.setDeadline(deadline);
+        log.info("Before transition: orderId={}, currentStatus={}", order.getId(), order.getStatus());
+        orderProposalService.approveProposal(order.getId(), proposalId);
+        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
+        log.info("After transition: orderId={}, currentStatus={}", order.getId(), order.getStatus());
+
+        orderRepository.persist(order);
+
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
+
+        log.debug("Order confirmed with ID={}", order.getId());
+        return order;
     }
 
 }

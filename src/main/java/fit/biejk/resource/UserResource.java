@@ -43,9 +43,11 @@ public class UserResource {
     @Inject
     private AuthService authService;
 
+    /** Service for user entity management. */
     @Inject
     private UserService userService;
 
+    /** Service for generating JWT tokens. */
     @Inject
     private TokenService tokenService;
     /**
@@ -100,6 +102,13 @@ public class UserResource {
         }
 
     }
+
+    /**
+     * Changes the current user's password.
+     *
+     * @param request password change request
+     * @return new JWT token wrapped in {@link AuthResponse}
+     */
     @PATCH
     @Path("/me/password")
     @Authenticated
@@ -115,6 +124,12 @@ public class UserResource {
         return Response.ok(new AuthResponse(token)).build();
     }
 
+    /**
+     * Changes the current user's email.
+     *
+     * @param request email change request
+     * @return new JWT token wrapped in {@link AuthResponse}
+     */
     @PATCH
     @Path("/me/email")
     @Authenticated

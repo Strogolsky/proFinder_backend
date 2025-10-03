@@ -32,6 +32,7 @@ import java.util.List;
 @Slf4j
 public class OrderResource {
 
+    /** Service for managing order proposals. */
     @Inject
     private OrderProposalService orderProposalService;
     /**

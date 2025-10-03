@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ConfirmProposal {
+    /** ID of the proposal to confirm. */
     @NotNull
     private Long proposalId;
     /**

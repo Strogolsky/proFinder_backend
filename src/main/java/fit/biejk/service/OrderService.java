@@ -268,6 +268,7 @@ public class OrderService {
      * Confirms a proposal, updates the related order with final price and deadline,
      * changes the order status, and rejects all other proposals.
      *
+     * @param orderId    the ID of the order
      * @param proposalId the ID of the approved proposal
      * @param price      the agreed final price
      * @param deadline   the agreed final deadline

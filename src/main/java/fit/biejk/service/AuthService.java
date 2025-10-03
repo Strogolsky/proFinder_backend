@@ -71,6 +71,7 @@ public class AuthService {
     @Inject
     private RedisClient redisClient;
 
+    /** Service for generating signed JWT tokens. */
     @Inject
     private TokenService tokenService;
 

@@ -38,6 +38,7 @@ public class UserService {
     @Inject
     private LocationService locationService;
 
+    /** Service for sending user notifications via email. */
     @Inject
     private MailService mailService;
 
@@ -136,6 +137,13 @@ public class UserService {
         return existingUser;
     }
 
+    /**
+     * Updates user password.
+     *
+     * @param userId      user ID
+     * @param newPassword new plain text password
+     * @return updated user
+     */
     @Transactional
     public User updatePassword(final Long userId, final String newPassword) {
         User user = getById(userId);
@@ -143,6 +151,13 @@ public class UserService {
         return user;
     }
 
+    /**
+     * Updates user email.
+     *
+     * @param userId   user ID
+     * @param newEmail new email
+     * @return updated user
+     */
     @Transactional
     public User updateEmail(final Long userId, final String newEmail) {
         log.info("Update user: userId={}, newEmail={}", userId, newEmail);
@@ -172,6 +187,15 @@ public class UserService {
         log.debug("User deleted with ID={}", userId);
     }
 
+    /**
+     * Changes password after verifying current one.
+     *
+     * @param userId          user ID
+     * @param currentPassword current password
+     * @param newPassword     new password
+     * @param confirmPassword confirmation of new password
+     * @return updated user
+     */
     @Transactional
     public User changePassword(final Long userId,
                                final String currentPassword,
@@ -187,6 +211,14 @@ public class UserService {
         return updatePassword(userId, newPassword);
     }
 
+    /**
+     * Changes email after verifying password.
+     *
+     * @param userId         user ID
+     * @param newEmail       new email
+     * @param currentPassword current password
+     * @return updated user
+     */
     @Transactional
     public User changeEmail(final Long userId,
                             final String newEmail,
@@ -202,8 +234,8 @@ public class UserService {
         String oldEmail = user.getEmail();
         user = updateEmail(userId, newEmail);
         mailService.send(oldEmail, "Email change notification",
-                "Your email has been changed to: " + newEmail +
-                        "\nIf this wasn’t you, please contact support.");
+                "Your email has been changed to: " + newEmail
+                    + "\nIf this wasn’t you, please contact support.");
         return user;
     }
 }

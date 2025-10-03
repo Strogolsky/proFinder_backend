@@ -1,20 +1,14 @@
 package fit.biejk.resource;
 
-import fit.biejk.dto.ConfirmProposal;
-import fit.biejk.entity.Order;
 import fit.biejk.entity.OrderProposal;
-import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.service.OrderProposalService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 /**
  * REST resource for managing order proposals submitted by specialists.

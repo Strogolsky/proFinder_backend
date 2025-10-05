@@ -73,11 +73,16 @@ public class SpecialistSearchService {
      * @param location the city to filter specialists by
      * @return a list of matching specialists
      */
-    public List<SpecialistSearchDto> search(final String keyword, final String location) {
+    public List<SpecialistSearchDto> search(final String keyword, final String location, int page, int size) {
+
+        int from = (page - 1) * size;
+
         try {
             log.info("Searching for Specialist with keyword {} and location {}", keyword, location);
             SearchResponse<SpecialistSearchDto> response = elasticsearchClient.search(s -> s
                             .index("specialists")
+                            .from(from)
+                            .size(size)
                             .query(q -> q
                                     .bool(b -> b
                                             .must(m -> m

@@ -6,6 +6,7 @@ import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.SpecialistMapper;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
@@ -70,11 +71,13 @@ public class SearchResource {
      * @return HTTP response containing the list of matching specialist DTOs
      */
     @GET
-    @Path("/specialist")
+    @Path("/specialists")
     @PermitAll
     public Response searchSpecialists(@QueryParam("query") final String query,
-                                      @QueryParam("location") final String location) {
-        List<SpecialistSearchDto> results = specialistSearchService.search(query, location);
+                                      @QueryParam("location") final String location,
+                                      @QueryParam("page") @DefaultValue("1") int page,
+                                      @QueryParam("size") @DefaultValue("10") int size) {
+        List<SpecialistSearchDto> results = specialistSearchService.search(query, location, page, size);
         List<Specialist> specialists = specialistSearchMapper.toEntityList(results);
         return Response.ok(specialistMapper.toDtoList(specialists)).build();
     }
@@ -90,11 +93,13 @@ public class SearchResource {
      * @return HTTP response containing the list of matching order DTOs
      */
     @GET
-    @Path("/order")
+    @Path("/orders")
     @PermitAll
     public Response searchOrders(final List<String> services,
-                                 @QueryParam("location") final String location) {
-        List<OrderSearchDto> results = orderSearchService.search(services, location);
+                                 @QueryParam("location") final String location,
+                                 @QueryParam("page") @DefaultValue("1") int page,
+                                 @QueryParam("size") @DefaultValue("10") int size) {
+        List<OrderSearchDto> results = orderSearchService.search(services, location, page, size);
         List<Order> orders = orderSearchMapper.toEntityList(results);
         return Response.ok(orderMapper.toDtoList(orders)).build();
     }

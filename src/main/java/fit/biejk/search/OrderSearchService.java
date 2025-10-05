@@ -69,12 +69,17 @@ public class OrderSearchService {
      * @param location the city/location to filter orders by
      * @return a list of matching {@link OrderSearchDto} objects
      */
-    public List<OrderSearchDto> search(final List<String> services, final String location) {
+    public List<OrderSearchDto> search(final List<String> services, final String location, int page, int size) {
+
+        int from = (page - 1) * size;
+
         try {
             log.info("Searching for Orders with services {} and location {}", services, location);
 
             SearchResponse<OrderSearchDto> response = elasticsearchClient.search(s -> s
                             .index("orders")
+                            .from(from)
+                            .size(size)
                             .query(q -> q
                                     .bool(b -> b
                                         .must(m -> m

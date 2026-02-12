@@ -19,8 +19,11 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.Context;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -278,9 +281,9 @@ public class SpecialistResource {
                                  @Valid final ReviewDto dto
     ) {
         Review review = reviewMapper.toEntity(dto);
-        Review saved = specialistService.review(specialistId, review);
+        Review result = specialistService.review(specialistId, review);
 
-        return Response.ok(reviewMapper.toDto(saved)).build();
+        return Response.status(Response.Status.CREATED).entity(reviewMapper.toDto(result)).build();
     }
 
     /**

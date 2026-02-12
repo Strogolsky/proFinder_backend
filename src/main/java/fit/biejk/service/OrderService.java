@@ -48,6 +48,9 @@ public class OrderService {
     @Inject
     private OrderProposalService orderProposalService;
 
+    @Inject
+    private SpecialistService specialistService;
+
     /**
      * Service for user identity validation.
      */
@@ -185,7 +188,7 @@ public class OrderService {
      * @return created proposal
      */
     @Transactional
-    public OrderProposal proposal(final Long orderId, final OrderProposal proposal) {
+    public OrderProposal proposal(final Long orderId, final Long specialistId, final OrderProposal proposal) {
         log.info("Create proposal: orderId={}, specialistId={}", orderId, proposal.getSpecialist().getId());
         Order order = getById(orderId);
         if (haveSpecialistProposal(order, proposal)) {
@@ -194,6 +197,10 @@ public class OrderService {
             throw new IllegalArgumentException("Order proposal already exists");
         }
         proposal.setOrder(order);
+
+        Specialist specialist = specialistService.getById(specialistId);
+        proposal.setSpecialist(specialist);
+
         orderProposalService.create(proposal);
         order.getOrderProposals().add(proposal);
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CLIENT_PENDING));

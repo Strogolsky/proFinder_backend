@@ -13,7 +13,10 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
+import org.mapstruct.Context;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -52,10 +55,18 @@ public class ChatResource {
      */
     @POST
     @Authenticated
-    public Response create(@Valid final CreateChatRequest request) {
+    public Response create(
+            @Valid final CreateChatRequest request,
+            @Context UriInfo uriInfo
+    ) {
         Long userId = authService.getCurrentUserId();
-        Chat chat = chatService.create(userId, request.getRecipientId());
-        return Response.ok().entity(chatMapper.toDto(chat, userId)).build();
+        Chat result = chatService.create(userId, request.getRecipientId());
+
+        URI location = uriInfo.getAbsolutePathBuilder()
+                .path(Long.toString(result.getId()))
+                .build();
+
+        return Response.created(location).entity(chatMapper.toDto(result, userId)).build();
     }
 
     /**

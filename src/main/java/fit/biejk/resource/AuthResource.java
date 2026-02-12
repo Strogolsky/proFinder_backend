@@ -8,7 +8,9 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.Context;
 
 /**
  * REST resource for handling authentication-related operations such as sign-up, sign-in,
@@ -37,13 +39,17 @@ public class AuthResource {
     @POST
     @Path("/signUp")
     @PermitAll
-    public Response signUp(@Valid final AuthRequest request) {
+    public Response signUp(
+            @Valid final AuthRequest request
+    ) {
         log.info("Sign up request: {}", request);
         String result = authService.signUp(request.getEmail(), request.getPassword(), request.getRole());
         log.debug("Sign up result: {}", result);
         AuthResponse response = new AuthResponse(result);
         log.info("Sign up response: {}", response);
-        return Response.ok(response).build();
+
+
+        return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
     /**

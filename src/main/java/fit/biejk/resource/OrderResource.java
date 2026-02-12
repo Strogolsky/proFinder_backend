@@ -13,8 +13,11 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.Context;
 
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -90,7 +93,8 @@ public class OrderResource {
         order.setLocation(client.getLocation());
         Order result = orderService.create(order);
         log.debug("Order created with ID={}", result.getId());
-        return Response.ok(orderMapper.toDto(result)).build();
+
+        return Response.status(Response.Status.CREATED).entity(orderMapper.toDto(result)).build();
     }
 
     /**
@@ -137,15 +141,17 @@ public class OrderResource {
     @POST
     @Path("/{orderId}/proposals")
     @RolesAllowed("SPECIALIST")
-    public Response proposal(@PathParam("orderId") final Long orderId, @Valid final OrderProposalDto proposalDto) {
+    public Response proposal(
+            @PathParam("orderId") final Long orderId,
+            @Valid final OrderProposalDto proposalDto) {
         log.info("Proposal request: orderId={}, proposalDto={}", orderId, proposalDto);
         OrderProposal proposal = orderProposalMapper.toEntity(proposalDto);
         Long specialistId = authService.getCurrentUserId();
-        Specialist specialist = specialistService.getById(specialistId);
-        proposal.setSpecialist(specialist);
-        OrderProposal result = orderService.proposal(orderId, proposal);
+
+        OrderProposal result = orderService.proposal(orderId, specialistId, proposal);
+
         log.debug("Proposal created with ID={}", result.getId());
-        return Response.ok(orderProposalMapper.toDto(result)).build();
+        return Response.status(Response.Status.CREATED).entity(orderProposalMapper.toDto(result)).build();
     }
 
     /**

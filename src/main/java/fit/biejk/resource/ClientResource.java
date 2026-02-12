@@ -71,9 +71,12 @@ public class ClientResource {
      */
     @GET
     @PermitAll
-    public Response getAll() {
+    public Response getClients(@BeanParam PageRequest pagination) {
         log.info("getAll request");
-        List<Client> result = clientService.getAll();
+        List<Client> result = clientService.getAll(
+                pagination.getPage(),
+                pagination.getSize()
+        );
         log.debug("Found {} clients", result.size());
         return Response.ok(clientMapper.toDtoList(result)).build();
     }

@@ -129,28 +129,6 @@ public class SpecialistResource {
     }
 
     /**
-     * Creates a new specialist.
-     * Currently disabled with {@code @DenyAll}.
-     *
-     * @param dto data for the new specialist
-     * @return HTTP response with the created specialist or error
-     */
-    @POST
-    @DenyAll
-    public Response create(@Valid final SpecialistDto dto) {
-        log.info("Create specialist request: {}", dto);
-        Specialist entity = specialistMapper.toEntity(dto);
-        try {
-            Specialist result = specialistService.create(entity);
-            log.debug("Specialist created with ID={}", result.getId());
-            return Response.ok(specialistMapper.toDto(result)).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error creating specialist: {}", e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
-    }
-
-    /**
      * Updates a specialist by ID.
      * Currently disabled with {@code @DenyAll}.
      *

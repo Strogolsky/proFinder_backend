@@ -98,28 +98,6 @@ public class ClientResource {
     }
 
     /**
-     * Creates a new client.
-     * Currently disabled by @DenyAll.
-     *
-     * @param dto client data
-     * @return created client or error
-     */
-    @POST
-    @DenyAll
-    public Response create(@Valid final ClientDto dto) {
-        log.info("create request: {}", dto);
-        Client entity = clientMapper.toEntity(dto);
-        try {
-            Client result = clientService.create(entity);
-            log.debug("Created client with ID={}", result.getId());
-            return Response.ok(clientMapper.toDto(result)).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Create failed: {}", e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
-    }
-
-    /**
      * Updates a client by ID.
      * Currently disabled by @DenyAll.
      *

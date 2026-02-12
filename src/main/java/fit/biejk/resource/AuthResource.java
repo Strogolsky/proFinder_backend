@@ -6,6 +6,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
@@ -77,9 +78,9 @@ public class AuthResource {
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
     @POST
-    @Path("/forgotPassword")
+    @Path("/passwordRecovery")
     @PermitAll
-    public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
+    public Response createRecoveryRequest(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
         return Response.ok().build();
     }
@@ -90,10 +91,10 @@ public class AuthResource {
      * @param request contains email, verification code, and new password with confirmation
      * @return HTTP 200 response with a new authentication token
      */
-    @POST
-    @Path("/resetPassword")
+    @PUT
+    @Path("/password-recovery")
     @PermitAll
-    public Response resetPassword(@Valid final ResetPasswordRequest request) {
+    public Response completeRecovery(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));
         return Response.ok(response).build();
     }

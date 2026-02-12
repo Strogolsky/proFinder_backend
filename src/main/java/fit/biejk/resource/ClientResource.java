@@ -1,24 +1,23 @@
 package fit.biejk.resource;
 
 import fit.biejk.dto.ClientDto;
+import fit.biejk.dto.PageRequest;
 import fit.biejk.entity.Client;
+import fit.biejk.entity.Order;
 import fit.biejk.entity.Review;
 import fit.biejk.mapper.ClientMapper;
+import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.service.AuthService;
 import fit.biejk.service.ClientService;
+import fit.biejk.service.OrderService;
 import fit.biejk.service.ReviewService;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +37,12 @@ public class ClientResource {
      */
     @Inject
     private ClientMapper clientMapper;
+
+    @Inject
+    private OrderMapper orderMapper;
+
+    @Inject
+    private OrderService orderService;
 
     /**
      * Service layer for handling client-related business logic.
@@ -76,15 +81,15 @@ public class ClientResource {
     /**
      * Retrieves a client by ID.
      *
-     * @param id the client ID
+     * @param clientId the client ID
      * @return client data
      */
     @GET
-    @Path("/{id}")
+    @Path("/{clientId}")
     @PermitAll
-    public Response getById(@PathParam("id") final Long id) {
-        log.info("getById request: {}", id);
-        Client result = clientService.getById(id);
+    public Response getById(@PathParam("clientId") final Long clientId) {
+        log.info("getById request: {}", clientId);
+        Client result = clientService.getById(clientId);
         log.debug("Found client with ID={}", result.getId());
         return Response.ok(clientMapper.toDto(result)).build();
     }
@@ -115,17 +120,17 @@ public class ClientResource {
      * Updates a client by ID.
      * Currently disabled by @DenyAll.
      *
-     * @param id  client ID
+     * @param clientId  client ID
      * @param dto updated client data
      * @return updated client
      */
     @PUT
-    @Path("/{id}")
+    @Path("/{clientId}")
     @DenyAll
-    public Response update(@PathParam("id") final Long id, @Valid final ClientDto dto) {
-        log.info("update request: id={}, dto={}", id, dto);
+    public Response update(@PathParam("clientId") final Long clientId, @Valid final ClientDto dto) {
+        log.info("update request: clientId={}, dto={}", clientId, dto);
         Client entity = clientMapper.toEntity(dto);
-        Client result = clientService.update(id, entity);
+        Client result = clientService.update(clientId, entity);
         log.debug("Updated client with ID={}", result.getId());
         return Response.ok(clientMapper.toDto(result)).build();
     }
@@ -134,16 +139,16 @@ public class ClientResource {
      * Deletes a client by ID.
      * Currently disabled by @DenyAll.
      *
-     * @param id client ID
+     * @param clientId client ID
      * @return response status
      */
     @DELETE
-    @Path("/{id}")
+    @Path("/{clientId}")
     @DenyAll
-    public Response delete(@PathParam("id") final Long id) {
-        log.info("delete request: {}", id);
-        clientService.delete(id);
-        log.debug("Deleted client with ID={}", id);
+    public Response delete(@PathParam("clientId") final Long clientId) {
+        log.info("delete request: {}", clientId);
+        clientService.delete(clientId);
+        log.debug("Deleted client with ID={}", clientId);
         return Response.ok().build();
     }
 
@@ -204,10 +209,39 @@ public class ClientResource {
     @GET
     @Path("/me/reviews")
     @RolesAllowed("CLIENT")
-    public Response getReviews() {
+    public Response getReviews(
+            @BeanParam PageRequest pagination
+
+    ) {
         Long clientId = authService.getCurrentUserId();
-        List<Review> res = reviewService.getByClientId(clientId);
+        List<Review> res = reviewService.getByClientId(
+                clientId,
+                pagination.getPage(),
+                pagination.getSize());
         return Response.ok(reviewMapper.toDtoList(res)).build();
+    }
+
+    /**
+     * Retrieves all orders created by a specific client.
+     * <p>
+     * Only accessible to authenticated users with the CLIENT role.
+     * </p>
+     *
+     * @return list of orders created by the client
+     */
+    @GET
+    @Path("/me/orders")
+    @RolesAllowed("CLIENT")
+    public Response getOrders(
+            @BeanParam PageRequest pagination
+    ) {
+        Long clientId = authService.getCurrentUserId();
+        log.info("Get client request: clientId={}", clientId);
+        List<Order> result = orderService.getByClientId(
+                clientId,
+                pagination.getPage(),
+                pagination.getSize());
+        return Response.ok(orderMapper.toDtoList(result)).build();
     }
 
 

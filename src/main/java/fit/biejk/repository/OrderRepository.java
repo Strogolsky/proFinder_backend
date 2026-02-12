@@ -1,5 +1,6 @@
 package fit.biejk.repository;
 
+import co.elastic.clients.elasticsearch.ml.Page;
 import fit.biejk.entity.Order;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,8 +23,10 @@ public class OrderRepository implements PanacheRepository<Order> {
      * @param clientId the ID of the client
      * @return a list of {@link Order} entities associated with the given client
      */
-    public List<Order> findByClientId(final Long clientId) {
-        return find("client.id", clientId).list();
+    public List<Order> findByClientId(final Long clientId,final int page,final int size) {
+        return find("client.id", clientId)
+                .page(page - 1, size)
+                .list();
     }
 
     /**
@@ -32,8 +35,10 @@ public class OrderRepository implements PanacheRepository<Order> {
      * @param specialistId the ID of the specialist
      * @return a list of {@link Order} entities assigned to the given specialist
      */
-    public List<Order> findBySpecialistId(final Long specialistId) {
-        return find("specialist.id", specialistId).list();
+    public List<Order> findBySpecialistId(final Long specialistId, int page, int size) {
+        return find("specialist.id", specialistId)
+                .page(page - 1, size)
+                .list();
     }
 }
 

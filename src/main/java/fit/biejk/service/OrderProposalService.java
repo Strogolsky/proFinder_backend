@@ -2,7 +2,6 @@ package fit.biejk.service;
 
 import fit.biejk.entity.*;
 import fit.biejk.repository.OrderProposalRepository;
-import fit.biejk.repository.OrderRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
@@ -32,13 +31,6 @@ public class OrderProposalService {
      */
     @Inject
     private OrderProposalRepository orderProposalRepository;
-
-    /**
-     * Repository for managing order persistence.
-     */
-    @Inject
-    private OrderRepository orderRepository;
-
     /**
      * Creates a new proposal for an order and assigns it the {@link ProposalStatus#CREATED} status.
      *
@@ -77,7 +69,7 @@ public class OrderProposalService {
         orderProposalRepository.persist(approvedProposal);
         log.debug("Proposal ID={} approved", approvedProposal.getId());
 
-        List<OrderProposal> allProposals = getByOrderId(orderId);
+        List<OrderProposal> allProposals = getAllByOrderId(orderId);
         for (OrderProposal proposal : allProposals) {
             if (!proposal.getId().equals(approvedProposal.getId())) {
                 proposal.setStatus(ProposalStatus.REJECTED);
@@ -113,10 +105,19 @@ public class OrderProposalService {
      * @param orderId the ID of the order
      * @return list of proposals for the order
      */
-    public List<OrderProposal> getByOrderId(final Long orderId) {
+    public List<OrderProposal> getByOrderId(final Long orderId, int page, int size) {
         log.info("Fetching all proposals for order ID={}", orderId);
 
-        List<OrderProposal> proposals = orderProposalRepository.findByOrderId(orderId);
+        List<OrderProposal> proposals = orderProposalRepository.findByOrderId(orderId, page, size);
+        log.debug("Found {} proposal(s) for order ID={}", proposals.size(), orderId);
+
+        return proposals;
+    }
+
+    public List<OrderProposal> getAllByOrderId(final Long orderId) {
+        log.info("Fetching all proposals for order ID={}", orderId);
+
+        List<OrderProposal> proposals = orderProposalRepository.findAllByOrderId(orderId);
         log.debug("Found {} proposal(s) for order ID={}", proposals.size(), orderId);
 
         return proposals;
@@ -131,7 +132,7 @@ public class OrderProposalService {
     public Specialist getConfirmedSpecialist(final Long orderId) {
         log.info("Searching for confirmed specialist for order ID={}", orderId);
 
-        List<OrderProposal> proposals = getByOrderId(orderId);
+        List<OrderProposal> proposals = getAllByOrderId(orderId);
         for (OrderProposal proposal : proposals) {
             if (ProposalStatus.APPROVED.equals(proposal.getStatus())) {
                 log.debug("Confirmed specialist found: specialistId={}, proposalId={}",
@@ -154,11 +155,11 @@ public class OrderProposalService {
      * @return list of proposals submitted by the specialist
      * @throws IllegalArgumentException if the caller is not the same as the specialist
      */
-    public List<OrderProposal> getBySpecialistId(final Long specialistId) {
+    public List<OrderProposal> getBySpecialistId(final Long specialistId, int page, int size) {
         log.info("Searching for proposal by specialist ID={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
             throw new IllegalArgumentException("Specialist ID " + specialistId + " not authorized");
         }
-        return orderProposalRepository.findBySpecialistId(specialistId);
+        return orderProposalRepository.findBySpecialistId(specialistId, page, size);
     }
 }

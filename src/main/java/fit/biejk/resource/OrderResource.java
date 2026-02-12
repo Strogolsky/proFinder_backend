@@ -3,6 +3,7 @@ package fit.biejk.resource;
 import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.dto.OrderDto;
 import fit.biejk.dto.OrderProposalDto;
+import fit.biejk.dto.PageRequest;
 import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
@@ -11,12 +12,7 @@ import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
@@ -156,9 +152,15 @@ public class OrderResource {
     @GET
     @Path("/{orderId}/proposals")
     @RolesAllowed("CLIENT")
-    public Response getProposals(@PathParam("orderId") final Long orderId) {
+    public Response getProposals(
+            @PathParam("orderId") final Long orderId,
+            @BeanParam PageRequest pagination
+    ) {
         log.info("Get all proposals for orderId={}", orderId);
-        List<OrderProposal> proposals = orderProposalService.getByOrderId(orderId);
+        List<OrderProposal> proposals = orderProposalService.getByOrderId(
+                orderId,
+                pagination.getPage(),
+                pagination.getSize());
         log.debug("Proposals found: {}", proposals.size());
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
     }
@@ -233,43 +235,5 @@ public class OrderResource {
         orderService.delete(orderId);
         return Response.ok().build();
     }
-
-    /**
-     * Retrieves all orders created by a specific client.
-     * <p>
-     * Only accessible to authenticated users with the CLIENT role.
-     * </p>
-     *
-     * @return list of orders created by the client
-     */
-    @GET
-    @Path("/client")
-    @RolesAllowed("CLIENT")
-    public Response getByClient() {
-        Long clientId = authService.getCurrentUserId();
-        log.info("Get client request: clientId={}", clientId);
-        List<Order> result = orderService.getByClientId(clientId);
-        return Response.ok(orderMapper.toDtoList(result)).build();
-    }
-
-    /**
-     * Retrieves all active orders assigned to a specific specialist.
-     * <p>
-     * Only accessible to authenticated users with the SPECIALIST role.
-     * </p>
-     *
-     * @return list of orders currently assigned to the specialist
-     */
-    @GET
-    @Path("/specialist")
-    @RolesAllowed("SPECIALIST")
-    public Response getBySpecialist() {
-        Long specialistId = authService.getCurrentUserId();
-        log.info("Get assigned by specialist id: specialistId={}", specialistId);
-        List<Order> result = orderService.getBySpecialistId(specialistId);
-        return Response.ok(orderMapper.toDtoList(result)).build();
-    }
-
-
 
 }

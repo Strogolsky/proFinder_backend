@@ -236,13 +236,13 @@ public class OrderService {
      * @return list of orders belonging to the client
      * @throws IllegalArgumentException if the current user is not the same as the client
      */
-    public List<Order> getByClientId(final Long userId) {
+    public List<Order> getByClientId(final Long userId,final int page,final int size) {
         log.info("Get orders by clientId={}", userId);
         if (!authService.isCurrentUser(userId)) {
             log.warn("User is not logged in");
             throw new IllegalArgumentException("User is not logged in");
         } // todo delete, when admin system will be created
-        return orderRepository.findByClientId(userId);
+        return orderRepository.findByClientId(userId, page, size);
     }
 
     /**
@@ -255,13 +255,13 @@ public class OrderService {
      * @return list of orders currently assigned to the specialist
      * @throws IllegalArgumentException if the current user is not the same as the specialist
      */
-    public List<Order> getBySpecialistId(final Long specialistId) {
+    public List<Order> getBySpecialistId(final Long specialistId,int page, int size) {
         log.info("Get orders by specialistId={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
             log.warn("User is not logged in");
             throw new IllegalArgumentException("User is not logged in");
         }
-        return orderRepository.findBySpecialistId(specialistId);
+        return orderRepository.findBySpecialistId(specialistId, page, size);
     }
 
     /**

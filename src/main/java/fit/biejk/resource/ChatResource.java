@@ -1,6 +1,7 @@
 package fit.biejk.resource;
 
 import fit.biejk.dto.CreateChatRequest;
+import fit.biejk.dto.PageRequest;
 import fit.biejk.entity.Chat;
 import fit.biejk.entity.ChatMessage;
 import fit.biejk.mapper.ChatMapper;
@@ -10,9 +11,7 @@ import fit.biejk.service.ChatService;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 
 import java.util.List;
@@ -68,8 +67,14 @@ public class ChatResource {
     @GET
     @Path("/{chatId}/messages")
     @Authenticated
-    public Response getMessagesById(final Long chatId) {
-        List<ChatMessage> result = chatService.getMessagesById(chatId);
+    public Response getMessagesById(
+            @PathParam("chatId") final Long chatId,
+            @BeanParam PageRequest pagination) {
+        List<ChatMessage> result = chatService.getMessagesById(
+                chatId,
+                pagination.getPage(),
+                pagination.getSize()
+        );
         return Response.ok().entity(chatMessageMapper.toDtoList(result)).build();
     }
 
@@ -81,9 +86,13 @@ public class ChatResource {
     @GET
     @Path("/me")
     @Authenticated
-    public Response getAllByProfile() {
+    public Response getAllByProfile(@BeanParam PageRequest pagination) {
         Long userId = authService.getCurrentUserId();
-        List<Chat> result = chatService.getByUserId(userId);
+        List<Chat> result = chatService.getByUserId(
+                userId,
+                pagination.getPage(),
+                pagination.getSize()
+        );
         return Response.ok().entity(chatMapper.toDtoList(result, userId)).build();
     }
 

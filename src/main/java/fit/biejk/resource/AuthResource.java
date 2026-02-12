@@ -35,7 +35,7 @@ public class AuthResource {
      * @return HTTP 200 response with a generated authentication token
      */
     @POST
-    @Path("/sign-up")
+    @Path("/signUp")
     @PermitAll
     public Response signUp(@Valid final AuthRequest request) {
         log.info("Sign up request: {}", request);
@@ -53,7 +53,7 @@ public class AuthResource {
      * @return HTTP 200 response with a generated authentication token
      */
     @POST
-    @Path("/sign-in")
+    @Path("/signIn")
     @PermitAll
     public Response signIn(@Valid final AuthRequest request) {
         log.info("Sign in request: {}", request);
@@ -71,7 +71,7 @@ public class AuthResource {
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
     @POST
-    @Path("/forgot-password")
+    @Path("/forgotPassword")
     @PermitAll
     public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
@@ -85,7 +85,7 @@ public class AuthResource {
      * @return HTTP 200 response with a new authentication token
      */
     @POST
-    @Path("/reset-password")
+    @Path("/resetPassword")
     @PermitAll
     public Response resetPassword(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));

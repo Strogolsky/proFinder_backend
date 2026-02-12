@@ -62,10 +62,10 @@ public class ReviewService {
      * @param specialistId the specialist's ID
      * @return list of reviews for the specialist
      */
-    public List<Review> getBySpecialistId(final Long specialistId) {
+    public List<Review> getBySpecialistId(final Long specialistId, int page, int size) {
         log.info("Fetching reviews for specialistId={}", specialistId);
         Specialist specialist = specialistService.getById(specialistId);
-        List<Review> reviews = reviewRepository.findBySpecialist(specialist);
+        List<Review> reviews = reviewRepository.findBySpecialist(specialist, page, size);
         log.debug("Found {} reviews for specialistId={}", reviews.size(), specialistId);
         return reviews;
     }
@@ -76,10 +76,10 @@ public class ReviewService {
      * @param clientId the client's ID
      * @return list of reviews created by the client
      */
-    public List<Review> getByClientId(final Long clientId) {
+    public List<Review> getByClientId(final Long clientId, int page, int size) {
         log.info("Fetching reviews by clientId={}", clientId);
         Client client = clientService.getById(clientId);
-        List<Review> reviews = reviewRepository.findByClient(client);
+        List<Review> reviews = reviewRepository.findByClient(client, page, size);
         log.debug("Found {} reviews by clientId={}", reviews.size(), clientId);
         return reviews;
     }

@@ -20,8 +20,10 @@ public class ReviewRepository implements PanacheRepository<Review> {
      * @param specialist the specialist to filter by
      * @return list of reviews associated with the specialist
      */
-    public List<Review> findBySpecialist(final Specialist specialist) {
-        return find("specialist", specialist).list();
+    public List<Review> findBySpecialist(final Specialist specialist, int page, int size) {
+        return find("specialist", specialist)
+                .page(page, size)
+                .list();
     }
 
     /**
@@ -30,7 +32,9 @@ public class ReviewRepository implements PanacheRepository<Review> {
      * @param client the client to filter by
      * @return list of reviews created by the client
      */
-    public List<Review> findByClient(final Client client) {
-        return find("client", client).list();
+    public List<Review> findByClient(final Client client, int page, int size) {
+        return find("client", client)
+                .page(page - 1, size)
+                .list();
     }
 }

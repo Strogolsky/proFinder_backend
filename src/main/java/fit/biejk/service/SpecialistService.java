@@ -84,9 +84,9 @@ public class SpecialistService {
      *
      * @return list of all specialists
      */
-    public List<Specialist> getAll() {
+    public List<Specialist> getAll(int page, int size) {
         log.info("Get all specialists");
-        List<Specialist> specialists = specialistRepository.listAll();
+        List<Specialist> specialists = specialistRepository.findAll().page(page, size).list();
         log.debug("Found {} specialists", specialists.size());
         return specialists;
     }

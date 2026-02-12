@@ -1,6 +1,8 @@
 package fit.biejk.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.FieldValue;
+import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -69,12 +71,16 @@ public class OrderSearchService {
      * @param location the city/location to filter orders by
      * @return a list of matching {@link OrderSearchDto} objects
      */
-    public List<OrderSearchDto> search(final List<String> services, final String location, int page, int size) {
+    public List<OrderSearchDto> search(final String keyword,
+                                       final String location,
+                                       final List<String> services,
+                                       int page,
+                                       int size) {
 
         int from = (page - 1) * size;
 
         try {
-            log.info("Searching for Orders with services {} and location {}", services, location);
+            log.info("Searching for Order with keyword '{}', location '{}'", keyword, location);
 
             SearchResponse<OrderSearchDto> response = elasticsearchClient.search(s -> s
                             .index("orders")
@@ -82,35 +88,46 @@ public class OrderSearchService {
                             .size(size)
                             .query(q -> q
                                     .bool(b -> b
-                                        .must(m -> m
-                                                .terms(t -> t
-                                                    .field("services.keyword")
-                                                        .terms(ts -> ts
-                                                            .value(services.stream()
-                                                                    .map(v -> co.elastic.clients.
-                                                                            elasticsearch._types.FieldValue.of(v))
-                                                                    .toList())
-                                                            )
+                                            .must(m -> m
+                                                    .multiMatch(mm -> mm
+                                                            .fields("title", "description")
+                                                            .query(keyword != null ? keyword : "")
+                                                            .fuzziness("AUTO")
                                                     )
                                             )
                                             .filter(f -> f
-                                                .term(t -> t
-                                                    .field("location.keyword")
-                                                        .value(co.elastic.clients.elasticsearch._types.
-                                                                    FieldValue.of(location))
+                                                    .term(t -> t
+                                                            .field("location.keyword")
+                                                            .value(location != null ? location : "")
                                                     )
                                             )
+                                            .filter(f -> {
+                                                if (services != null && !services.isEmpty()) {
+                                                    return f.terms(t -> t
+                                                            .field("services.keyword")
+                                                            .terms(ts -> ts
+                                                                    .value(services.stream()
+                                                                            .map(FieldValue::of)
+                                                                            .toList())
+                                                            )
+                                                    );
+                                                }
+                                                return f.matchAll(ma -> ma);
+                                            })
                                             .filter(f -> f
-                                                .terms(t -> t
-                                                    .field("status.keyword")
-                                                        .terms(ts -> ts
-                                                            .value(List.of("CREATED", "CLIENT_PENDING").stream()
-                                                                .map(co.elastic.clients.
-                                                                    elasticsearch._types.FieldValue::of)
-                                                                    .toList())
+                                                    .terms(t -> t
+                                                            .field("status.keyword")
+                                                            .terms(ts -> ts
+                                                                    .value(List.of(FieldValue.of("CREATED"), FieldValue.of("CLIENT_PENDING")))
                                                             )
                                                     )
                                             )
+                                    )
+                            )
+                            .sort(so -> so
+                                    .field(f -> f
+                                            .field("createdAt")
+                                            .order(SortOrder.Desc)
                                     )
                             ),
                     OrderSearchDto.class
@@ -121,7 +138,8 @@ public class OrderSearchService {
                     .toList();
 
         } catch (IOException e) {
-            log.error("Failed to search orders", e);
+            log.warn("Search failed: {}", e.getMessage());
+            e.printStackTrace();
             return List.of();
         }
     }

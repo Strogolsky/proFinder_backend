@@ -12,4 +12,5 @@ import jakarta.enterprise.context.ApplicationScoped;
  */
 @ApplicationScoped
 public class SpecialistRepository implements PanacheRepository<Specialist> {
+
 }

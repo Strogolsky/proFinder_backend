@@ -1,6 +1,7 @@
 package fit.biejk.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import fit.biejk.repository.OrderRepository;
 import fit.biejk.service.OrderService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
@@ -40,7 +41,7 @@ public class OrderIndexInitializer {
      * Service for accessing orders from the relational database.
      */
     @Inject
-    private OrderService orderService;
+    private OrderRepository orderRepository;
 
     /**
      * Service for indexing orders in Elasticsearch.
@@ -99,7 +100,7 @@ public class OrderIndexInitializer {
      */
     void load() {
         log.info("Loading orders from database");
-        orderService.getAll()
+        orderRepository.listAll()
                 .forEach(order ->
                         orderSearchService.save(orderSearchMapper.toDto(order))
                 );

@@ -1,6 +1,7 @@
 package fit.biejk.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import fit.biejk.repository.SpecialistRepository;
 import fit.biejk.service.SpecialistService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
@@ -32,7 +33,7 @@ public class SpecialistIndexInitializer {
      * Service used to retrieve specialist data from the PostgreSQL database.
      */
     @Inject
-    private SpecialistService specialistService;
+    private SpecialistRepository specialistRepository;
 
     /**
      * Service used to persist specialist data to the Elasticsearch index.
@@ -91,7 +92,7 @@ public class SpecialistIndexInitializer {
      */
     void load() {
         log.info("Loading specialists from database");
-        specialistService.getAll()
+        specialistRepository.listAll()
                 .forEach(specialist ->
                         specialistSearchService.save(specialistSearchMapper.toDto(specialist))
                 );

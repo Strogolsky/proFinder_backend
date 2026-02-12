@@ -3,11 +3,14 @@ package fit.biejk.resource;
 import fit.biejk.dto.PageRequest;
 import fit.biejk.dto.ReviewDto;
 import fit.biejk.dto.SpecialistDto;
+import fit.biejk.dto.SpecialistFilterCriteria;
 import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.mapper.SpecialistMapper;
+import fit.biejk.search.SpecialistSearchMapper;
+import fit.biejk.search.SpecialistSearchService;
 import fit.biejk.service.*;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
@@ -18,7 +21,6 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 /**
@@ -43,6 +45,12 @@ public class SpecialistResource {
 
     @Inject
     private OrderMapper orderMapper;
+
+    @Inject
+    private SpecialistSearchService specialistSearchService;
+
+    @Inject
+    private SpecialistSearchMapper specialistSearchMapper;
 
     /**
      * Mapper for converting between OrderProposal entities and DTOs.
@@ -77,9 +85,27 @@ public class SpecialistResource {
      */
     @GET
     @PermitAll
-    public Response getAll() {
+    public Response getSpecialists(
+            @BeanParam SpecialistFilterCriteria criteria,
+            @BeanParam PageRequest pagination
+    ) {
+
+        if (criteria.hasFilters()) {
+            var searchResults = specialistSearchService.search(
+                    criteria.getQuery(),
+                    criteria.getLocation(),
+                    pagination.getPage(),
+                    pagination.getSize()
+            );
+            var result = specialistSearchMapper.toEntityList(searchResults);
+            return Response.ok(specialistMapper.toDtoList(result)).build();
+        }
+
         log.info("Get all specialists");
-        List<Specialist> result = specialistService.getAll();
+        List<Specialist> result = specialistService.getAll(
+                pagination.getPage(),
+                pagination.getSize()
+        );
         log.debug("Found {} specialists", result.size());
         return Response.ok(specialistMapper.toDtoList(result)).build();
     }

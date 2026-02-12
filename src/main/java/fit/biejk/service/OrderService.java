@@ -170,9 +170,9 @@ public class OrderService {
      *
      * @return list of orders
      */
-    public List<Order> getAll() {
+    public List<Order> getAll(int page, int size) {
         log.info("Get all orders");
-        List<Order> orders = orderRepository.listAll();
+        List<Order> orders = orderRepository.findAll().page(page, size).list();
         log.debug("Found {} orders", orders.size());
         return orders;
     }

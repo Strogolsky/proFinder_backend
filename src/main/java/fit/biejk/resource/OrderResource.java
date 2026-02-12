@@ -1,12 +1,11 @@
 package fit.biejk.resource;
 
-import fit.biejk.dto.ConfirmProposal;
-import fit.biejk.dto.OrderDto;
-import fit.biejk.dto.OrderProposalDto;
-import fit.biejk.dto.PageRequest;
+import fit.biejk.dto.*;
 import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
+import fit.biejk.search.OrderSearchMapper;
+import fit.biejk.search.OrderSearchService;
 import fit.biejk.service.*;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -36,6 +35,12 @@ public class OrderResource {
      */
     @Inject
     private  OrderService orderService;
+
+    @Inject
+    private OrderSearchService orderSearchService;
+
+    @Inject
+    private OrderSearchMapper orderSearchMapper;
 
     /**
      * Mapper for converting between Order entities and DTOs.
@@ -214,9 +219,26 @@ public class OrderResource {
      */
     @GET
     @PermitAll
-    public Response getAll() {
+    public Response getOrders(
+            @BeanParam OrderFilterCriteria criteria,
+            @BeanParam PageRequest pagination) {
+
+        if (criteria.hasFilters()) {
+            var searchResults = orderSearchService.search(
+                    criteria.getQuery(),
+                    criteria.getLocation(),
+                    criteria.getServices()                    ,
+                    pagination.getPage(),
+                    pagination.getSize()
+            );
+
+            List<Order> result = orderSearchMapper.toEntityList(searchResults);
+
+            return Response.ok(orderMapper.toDtoList(result)).build();
+        }
+
         log.info("Get all orders");
-        List<Order> result = orderService.getAll();
+        List<Order> result = orderService.getAll(pagination.getPage(), pagination.getSize());
         log.debug("Orders found: {}", result.size());
         return Response.ok(orderMapper.toDtoList(result)).build();
     }

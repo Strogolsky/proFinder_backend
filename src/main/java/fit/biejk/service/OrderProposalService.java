@@ -103,9 +103,11 @@ public class OrderProposalService {
      * Retrieves all proposals associated with a specific order.
      *
      * @param orderId the ID of the order
+     * @param page    page number for pagination
+     * @param size    number of proposals per page
      * @return list of proposals for the order
      */
-    public List<OrderProposal> getByOrderId(final Long orderId, int page, int size) {
+    public List<OrderProposal> getByOrderId(final Long orderId, final int page, final int size) {
         log.info("Fetching all proposals for order ID={}", orderId);
 
         List<OrderProposal> proposals = orderProposalRepository.findByOrderId(orderId, page, size);
@@ -114,6 +116,12 @@ public class OrderProposalService {
         return proposals;
     }
 
+    /**
+     * Retrieves all proposals for a specific order without pagination.
+     *
+     * @param orderId the ID of the order
+     * @return list of all proposals for the order
+     */
     public List<OrderProposal> getAllByOrderId(final Long orderId) {
         log.info("Fetching all proposals for order ID={}", orderId);
 
@@ -152,10 +160,12 @@ public class OrderProposalService {
      * </p>
      *
      * @param specialistId the ID of the specialist
+     * @param page         page number for pagination
+     * @param size         number of proposals per page
      * @return list of proposals submitted by the specialist
      * @throws IllegalArgumentException if the caller is not the same as the specialist
      */
-    public List<OrderProposal> getBySpecialistId(final Long specialistId, int page, int size) {
+    public List<OrderProposal> getBySpecialistId(final Long specialistId, final int page, final int size) {
         log.info("Searching for proposal by specialist ID={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
             throw new IllegalArgumentException("Specialist ID " + specialistId + " not authorized");

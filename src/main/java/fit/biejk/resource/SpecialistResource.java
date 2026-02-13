@@ -19,11 +19,8 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.Context;
 
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -43,15 +40,27 @@ public class SpecialistResource {
     @Inject
     private OrderProposalService orderProposalService;
 
+    /**
+     * Service for managing order-related operations.
+     */
     @Inject
     private OrderService orderService;
 
+    /**
+     * Mapper for converting between Order entities and DTOs.
+     */
     @Inject
     private OrderMapper orderMapper;
 
+    /**
+     * Service for searching and filtering specialists.
+     */
     @Inject
     private SpecialistSearchService specialistSearchService;
 
+    /**
+     * Mapper for converting specialist search results to DTOs.
+     */
     @Inject
     private SpecialistSearchMapper specialistSearchMapper;
 
@@ -84,13 +93,15 @@ public class SpecialistResource {
     /**
      * Retrieves a list of all specialists.
      *
+     * @param criteria   the filtering criteria for searching specialists
+     * @param pagination the pagination parameters (page and size)
      * @return HTTP response containing a list of all specialists
      */
     @GET
     @PermitAll
     public Response getSpecialists(
-            @BeanParam SpecialistFilterCriteria criteria,
-            @BeanParam PageRequest pagination
+            @BeanParam final SpecialistFilterCriteria criteria,
+            @BeanParam final PageRequest pagination
     ) {
 
         if (criteria.hasFilters()) {
@@ -214,6 +225,7 @@ public class SpecialistResource {
      * Retrieves all reviews submitted by id specialist.
      *
      * @param specialistId specialist ID
+     * @param pagination   the pagination parameters (page and size)
      * @return HTTP response containing list of reviews
      */
     @GET
@@ -221,7 +233,7 @@ public class SpecialistResource {
     @PermitAll
     public Response getReviews(
             @PathParam("specialistId") final Long specialistId,
-            @BeanParam PageRequest pagination) {
+            @BeanParam final PageRequest pagination) {
         List<Review> res = reviewService.getBySpecialistId(
                 specialistId,
                 pagination.getPage(),
@@ -268,6 +280,7 @@ public class SpecialistResource {
      * Retrieves all proposals submitted by the specified specialist.
      *
      * @param specialistId the ID of the specialist
+     * @param pagination   the pagination parameters (page and size)
      * @return list of proposals submitted by the specialist
      */
     @GET
@@ -275,7 +288,7 @@ public class SpecialistResource {
     @RolesAllowed("SPECIALIST")
     public Response getProposals(
             @PathParam("specialistId") final Long specialistId,
-            @BeanParam PageRequest pagination
+            @BeanParam final PageRequest pagination
     ) {
         List<OrderProposal> result = orderProposalService.getBySpecialistId(
                 specialistId,
@@ -290,13 +303,14 @@ public class SpecialistResource {
      * Only accessible to authenticated users with the SPECIALIST role.
      * </p>
      *
+     * @param pagination the pagination parameters (page and size)
      * @return list of orders currently assigned to the specialist
      */
     @GET
     @Path("/me/orders")
     @RolesAllowed("SPECIALIST")
     public Response getOrders(
-            @BeanParam PageRequest pagination
+            @BeanParam final PageRequest pagination
     ) {
         Long specialistId = authService.getCurrentUserId();
         log.info("Get assigned by specialist id: specialistId={}", specialistId);

@@ -13,10 +13,6 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
-import org.mapstruct.Context;
-
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -56,23 +52,20 @@ public class ChatResource {
     @POST
     @Authenticated
     public Response create(
-            @Valid final CreateChatRequest request,
-            @Context UriInfo uriInfo
+            @Valid final CreateChatRequest request
     ) {
         Long userId = authService.getCurrentUserId();
         Chat result = chatService.create(userId, request.getRecipientId());
 
-        URI location = uriInfo.getAbsolutePathBuilder()
-                .path(Long.toString(result.getId()))
-                .build();
 
-        return Response.created(location).entity(chatMapper.toDto(result, userId)).build();
+        return Response.status(Response.Status.CREATED).entity(chatMapper.toDto(result, userId)).build();
     }
 
     /**
      * Retrieves the message history for a specific chat.
      *
-     * @param chatId The ID of the chat whose history is to be retrieved.
+     * @param chatId     The ID of the chat whose history is to be retrieved.
+     * @param pagination The pagination parameters (page and size).
      * @return A Response containing a list of ChatOutputMessage DTOs.
      */
     @GET
@@ -80,7 +73,7 @@ public class ChatResource {
     @Authenticated
     public Response getMessagesById(
             @PathParam("chatId") final Long chatId,
-            @BeanParam PageRequest pagination) {
+            @BeanParam final PageRequest pagination) {
         List<ChatMessage> result = chatService.getMessagesById(
                 chatId,
                 pagination.getPage(),
@@ -92,12 +85,13 @@ public class ChatResource {
     /**
      * Returns a list of chats associated with the current user.
      *
+     * @param pagination the pagination parameters (page and size)
      * @return list of chat DTOs
      */
     @GET
     @Path("/me")
     @Authenticated
-    public Response getAllByProfile(@BeanParam PageRequest pagination) {
+    public Response getAllByProfile(@BeanParam final PageRequest pagination) {
         Long userId = authService.getCurrentUserId();
         List<Chat> result = chatService.getByUserId(
                 userId,

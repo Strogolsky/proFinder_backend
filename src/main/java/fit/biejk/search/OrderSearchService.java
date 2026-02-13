@@ -67,15 +67,18 @@ public class OrderSearchService {
      * Searches for orders that match the specified service names and location.
      * Only orders with status "CREATED" or "CLIENT_PENDING" are returned.
      *
-     * @param services a list of service names to search for
+     * @param keyword  the search keyword (e.g., title or description)
      * @param location the city/location to filter orders by
+     * @param services a list of service names to search for
+     * @param page     page number for pagination (1-based)
+     * @param size     number of orders per page
      * @return a list of matching {@link OrderSearchDto} objects
      */
     public List<OrderSearchDto> search(final String keyword,
                                        final String location,
                                        final List<String> services,
-                                       int page,
-                                       int size) {
+                                       final int page,
+                                       final int size) {
 
         int from = (page - 1) * size;
 
@@ -118,7 +121,8 @@ public class OrderSearchService {
                                                     .terms(t -> t
                                                             .field("status.keyword")
                                                             .terms(ts -> ts
-                                                                    .value(List.of(FieldValue.of("CREATED"), FieldValue.of("CLIENT_PENDING")))
+                                                                    .value(List.of(FieldValue.of("CREATED"),
+                                                                            FieldValue.of("CLIENT_PENDING")))
                                                             )
                                                     )
                                             )

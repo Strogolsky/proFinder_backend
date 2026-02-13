@@ -38,11 +38,17 @@ public class ClientResource {
     @Inject
     private ClientMapper clientMapper;
 
-    @Inject
-    private OrderMapper orderMapper;
-
+    /**
+     * Service for managing order-related operations.
+     */
     @Inject
     private OrderService orderService;
+
+    /**
+     * Mapper for converting between Order entities and DTOs.
+     */
+    @Inject
+    private OrderMapper orderMapper;
 
     /**
      * Service layer for handling client-related business logic.
@@ -67,11 +73,12 @@ public class ClientResource {
     /**
      * Retrieves all clients.
      *
+     * @param pagination the pagination parameters (page and size)
      * @return list of all clients
      */
     @GET
     @PermitAll
-    public Response getClients(@BeanParam PageRequest pagination) {
+    public Response getClients(@BeanParam final PageRequest pagination) {
         log.info("getAll request");
         List<Client> result = clientService.getAll(
                 pagination.getPage(),
@@ -185,14 +192,14 @@ public class ClientResource {
     /**
      * Retrieves all reviews submitted by the currently authenticated client.
      *
+     * @param pagination the pagination parameters (page and size)
      * @return list of client's reviews
      */
     @GET
     @Path("/me/reviews")
     @RolesAllowed("CLIENT")
     public Response getReviews(
-            @BeanParam PageRequest pagination
-
+            @BeanParam final PageRequest pagination
     ) {
         Long clientId = authService.getCurrentUserId();
         List<Review> res = reviewService.getByClientId(
@@ -208,13 +215,14 @@ public class ClientResource {
      * Only accessible to authenticated users with the CLIENT role.
      * </p>
      *
+     * @param pagination the pagination parameters (page and size)
      * @return list of orders created by the client
      */
     @GET
     @Path("/me/orders")
     @RolesAllowed("CLIENT")
     public Response getOrders(
-            @BeanParam PageRequest pagination
+            @BeanParam final PageRequest pagination
     ) {
         Long clientId = authService.getCurrentUserId();
         log.info("Get client request: clientId={}", clientId);

@@ -20,14 +20,22 @@ public class OrderProposalRepository implements PanacheRepository<OrderProposal>
      * Retrieves all proposals associated with a specific order.
      *
      * @param orderId the ID of the order
+     * @param page    page number for pagination
+     * @param size    number of proposals per page
      * @return a list of {@link OrderProposal} entities related to the given order
      */
-    public List<OrderProposal> findByOrderId(final Long orderId, int page, int size) {
+    public List<OrderProposal> findByOrderId(final Long orderId, final int page, final int size) {
         return find("order.id", orderId)
                 .page(page, size)
                 .list();
     }
 
+    /**
+     * Retrieves all proposals for a specific order without pagination.
+     *
+     * @param orderId the ID of the order
+     * @return list of all proposals for the order
+     */
     public List<OrderProposal> findAllByOrderId(final Long orderId) {
         return find("order.id", orderId)
                 .list();
@@ -37,11 +45,13 @@ public class OrderProposalRepository implements PanacheRepository<OrderProposal>
      * Retrieves all proposals submitted by a specific specialist.
      *
      * @param specialistId the ID of the specialist
+     * @param page         page number for pagination
+     * @param size         number of proposals per page
      * @return a list of {@link OrderProposal} entities submitted by the given specialist
      */
-    public List<OrderProposal> findBySpecialistId(final Long specialistId, int page, int size) {
+    public List<OrderProposal> findBySpecialistId(final Long specialistId, final int page, final int size) {
         return find("specialist.id", specialistId)
-                .page(page,size)
+                .page(page, size)
                 .list();
     }
 }

@@ -13,11 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.Context;
-
-import java.net.URI;
 import java.util.List;
 
 /**
@@ -39,9 +35,15 @@ public class OrderResource {
     @Inject
     private  OrderService orderService;
 
+    /**
+     * Service for searching and filtering orders.
+     */
     @Inject
     private OrderSearchService orderSearchService;
 
+    /**
+     * Mapper for converting order search results and criteria.
+     */
     @Inject
     private OrderSearchMapper orderSearchMapper;
 
@@ -56,12 +58,6 @@ public class OrderResource {
      */
     @Inject
     private ClientService clientService;
-
-    /**
-     * Service for accessing specialist information.
-     */
-    @Inject
-    private SpecialistService specialistService;
 
     /**
      * Service for authentication and identity resolution.
@@ -157,7 +153,8 @@ public class OrderResource {
     /**
      * Retrieves all proposals associated with a specific order.
      *
-     * @param orderId the ID of the order
+     * @param orderId    the ID of the order
+     * @param pagination the pagination parameters (page and size)
      * @return list of proposals for the order
      */
     @GET
@@ -165,7 +162,7 @@ public class OrderResource {
     @RolesAllowed("CLIENT")
     public Response getProposals(
             @PathParam("orderId") final Long orderId,
-            @BeanParam PageRequest pagination
+            @BeanParam final PageRequest pagination
     ) {
         log.info("Get all proposals for orderId={}", orderId);
         List<OrderProposal> proposals = orderProposalService.getByOrderId(
@@ -221,19 +218,21 @@ public class OrderResource {
     /**
      * Retrieves a list of all orders.
      *
+     * @param criteria   the filtering criteria for searching orders
+     * @param pagination the pagination parameters (page and size)
      * @return list of all orders
      */
     @GET
     @PermitAll
     public Response getOrders(
-            @BeanParam OrderFilterCriteria criteria,
-            @BeanParam PageRequest pagination) {
+            @BeanParam final OrderFilterCriteria criteria,
+            @BeanParam final PageRequest pagination) {
 
         if (criteria.hasFilters()) {
             var searchResults = orderSearchService.search(
                     criteria.getQuery(),
                     criteria.getLocation(),
-                    criteria.getServices()                    ,
+                    criteria.getServices(),
                     pagination.getPage(),
                     pagination.getSize()
             );
@@ -244,7 +243,10 @@ public class OrderResource {
         }
 
         log.info("Get all orders");
-        List<Order> result = orderService.getAll(pagination.getPage(), pagination.getSize());
+        List<Order> result = orderService.getAll(
+                pagination.getPage(),
+                pagination.getSize()
+        );
         log.debug("Orders found: {}", result.size());
         return Response.ok(orderMapper.toDtoList(result)).build();
     }

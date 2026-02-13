@@ -2,7 +2,6 @@ package fit.biejk.search;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import fit.biejk.repository.SpecialistRepository;
-import fit.biejk.service.SpecialistService;
 import io.quarkus.runtime.Startup;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -15,7 +14,7 @@ import java.io.IOException;
  * Initializes the Elasticsearch index for storing specialist data.
  * <p>
  * This class deletes the existing index on startup, recreates it with the correct mappings,
- * and populates it from the database using the {@link SpecialistService}.
+ * and populates it from the database using the {@link SpecialistRepository}.
  * </p>
  */
 @Startup

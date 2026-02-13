@@ -9,9 +9,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.UriInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.mapstruct.Context;
 
 /**
  * REST resource for handling authentication-related operations such as sign-up, sign-in,

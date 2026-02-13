@@ -71,9 +71,14 @@ public class SpecialistSearchService {
      *
      * @param keyword  the search keyword (e.g., service name or description)
      * @param location the city to filter specialists by
+     * @param page     page number for pagination (1-based)
+     * @param size     number of specialists per page
      * @return a list of matching specialists
      */
-    public List<SpecialistSearchDto> search(final String keyword, final String location, int page, int size) {
+    public List<SpecialistSearchDto> search(final String keyword,
+                                            final String location,
+                                            final int page,
+                                            final int size) {
 
         int from = (page - 1) * size;
 

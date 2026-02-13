@@ -48,6 +48,7 @@ public class OrderService {
     @Inject
     private OrderProposalService orderProposalService;
 
+    /** Service for handling business logic related to specialists. */
     @Inject
     private SpecialistService specialistService;
 
@@ -88,7 +89,8 @@ public class OrderService {
         log.info("Update order: orderId={}, newDescription={}", orderId, order.getDescription());
         Order old = getById(orderId);
         if (!authService.isCurrentUser(old.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}", orderId, old.getClient().getId());
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    orderId, old.getClient().getId());
             throw new IllegalArgumentException();
         }
         old.setServiceOfferings(order.getServiceOfferings());
@@ -171,9 +173,11 @@ public class OrderService {
     /**
      * Retrieves all orders.
      *
+     * @param page page number for pagination
+     * @param size number of orders per page
      * @return list of orders
      */
-    public List<Order> getAll(int page, int size) {
+    public List<Order> getAll(final int page, final int size) {
         log.info("Get all orders");
         List<Order> orders = orderRepository.findAll().page(page, size).list();
         log.debug("Found {} orders", orders.size());
@@ -184,6 +188,7 @@ public class OrderService {
      * Adds a new proposal to an order.
      *
      * @param orderId  ID of the order
+     * @param specialistId ID of the specialist
      * @param proposal proposal entity
      * @return created proposal
      */
@@ -240,10 +245,12 @@ public class OrderService {
      * </p>
      *
      * @param userId ID of the client
+     * @param page   page number for pagination
+     * @param size   number of orders per page
      * @return list of orders belonging to the client
      * @throws IllegalArgumentException if the current user is not the same as the client
      */
-    public List<Order> getByClientId(final Long userId,final int page,final int size) {
+    public List<Order> getByClientId(final Long userId, final int page, final int size) {
         log.info("Get orders by clientId={}", userId);
         if (!authService.isCurrentUser(userId)) {
             log.warn("User is not logged in");
@@ -259,10 +266,12 @@ public class OrderService {
      * </p>
      *
      * @param specialistId ID of the specialist
+     * @param page         page number for pagination
+     * @param size         number of orders per page
      * @return list of orders currently assigned to the specialist
      * @throws IllegalArgumentException if the current user is not the same as the specialist
      */
-    public List<Order> getBySpecialistId(final Long specialistId,int page, int size) {
+    public List<Order> getBySpecialistId(final Long specialistId, final int page, final int size) {
         log.info("Get orders by specialistId={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
             log.warn("User is not logged in");

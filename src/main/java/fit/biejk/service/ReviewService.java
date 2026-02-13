@@ -60,9 +60,11 @@ public class ReviewService {
      * Retrieves all reviews written for a specific specialist.
      *
      * @param specialistId the specialist's ID
+     * @param page         page number for pagination
+     * @param size         number of reviews per page
      * @return list of reviews for the specialist
      */
-    public List<Review> getBySpecialistId(final Long specialistId, int page, int size) {
+    public List<Review> getBySpecialistId(final Long specialistId, final int page, final int size) {
         log.info("Fetching reviews for specialistId={}", specialistId);
         Specialist specialist = specialistService.getById(specialistId);
         List<Review> reviews = reviewRepository.findBySpecialist(specialist, page, size);
@@ -74,9 +76,11 @@ public class ReviewService {
      * Retrieves all reviews written by a specific client.
      *
      * @param clientId the client's ID
+     * @param page     page number for pagination
+     * @param size     number of reviews per page
      * @return list of reviews created by the client
      */
-    public List<Review> getByClientId(final Long clientId, int page, int size) {
+    public List<Review> getByClientId(final Long clientId, final int page, final int size) {
         log.info("Fetching reviews by clientId={}", clientId);
         Client client = clientService.getById(clientId);
         List<Review> reviews = reviewRepository.findByClient(client, page, size);

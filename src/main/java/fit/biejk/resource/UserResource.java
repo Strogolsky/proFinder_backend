@@ -56,7 +56,7 @@ public class UserResource {
      * @param form the uploaded file and its metadata
      * @return HTTP 200 if upload was successful, 500 otherwise
      */
-    @PUT
+    @PATCH
     @Path("/me/avatar")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     @Authenticated

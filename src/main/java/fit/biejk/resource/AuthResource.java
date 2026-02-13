@@ -5,8 +5,8 @@ import fit.biejk.service.AuthService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -89,8 +89,8 @@ public class AuthResource {
      * @param request contains email, verification code, and new password with confirmation
      * @return HTTP 200 response with a new authentication token
      */
-    @PUT
-    @Path("/password-recovery")
+    @PATCH
+    @Path("/passwordRecovery")
     @PermitAll
     public Response completeRecovery(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));

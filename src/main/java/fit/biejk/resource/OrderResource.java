@@ -118,7 +118,7 @@ public class OrderResource {
      * @return canceled order
      */
     @POST
-    @Path("/{orderId}/cancel")
+    @Path("/{orderId}:cancel")
     @RolesAllowed("CLIENT")
     public Response cancel(@PathParam("orderId") final Long orderId) {
         log.info("Cancel order request: orderId={}", orderId);
@@ -181,19 +181,21 @@ public class OrderResource {
      * </p>
      *
      * @param orderId the ID of the proposal to confirm
+     * @param proposalId the ID of the proposal to confirm
      * @param confirm the confirmation data including final price and deadline
      * @return the updated and confirmed order
      */
     @POST
-    @Path("/{orderId}/confirm")
+    @Path("/{orderId}/proposals/{proposalId}:confirm")
     @RolesAllowed("CLIENT")
     public Response confirm(@PathParam("orderId") final Long orderId,
+                            @PathParam("proposalId") final Long proposalId,
                             @Valid final ConfirmProposal confirm) {
         log.info("Confirm order proposal: orderId ={},confirm={}", orderId, confirm);
 
         Order result = orderService.confirm(
                 orderId,
-                confirm.getProposalId(),
+                proposalId,
                 confirm.getFinalPrice(),
                 confirm.getFinalDeadline());
         log.debug("Order confirmed with ID={}", result.getId());

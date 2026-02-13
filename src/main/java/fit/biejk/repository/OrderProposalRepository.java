@@ -1,6 +1,7 @@
 package fit.biejk.repository;
 
 import fit.biejk.entity.OrderProposal;
+import fit.biejk.entity.ProposalStatus;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -53,6 +54,11 @@ public class OrderProposalRepository implements PanacheRepository<OrderProposal>
         return find("specialist.id", specialistId)
                 .page(page, size)
                 .list();
+    }
+
+    public void rejectOthersForOrder(Long orderId, Long approvedProposalId) {
+        update("status = ?1 where order.id = ?2 and id != ?3",
+                ProposalStatus.REJECTED, orderId, approvedProposalId);
     }
 }
 

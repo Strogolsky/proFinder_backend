@@ -1,10 +1,14 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.ConfirmProposal;
+import fit.biejk.entity.Order;
 import fit.biejk.entity.OrderProposal;
+import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.service.OrderProposalService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 
 import jakarta.ws.rs.core.Response;
@@ -33,6 +37,9 @@ public class OrderProposalResource {
     @Inject
     private OrderProposalMapper orderProposalMapper;
 
+    @Inject
+    private OrderMapper orderMapper;
+
     /**
      * Retrieves a specific proposal by its ID.
      *
@@ -46,5 +53,15 @@ public class OrderProposalResource {
         log.info("Get proposal: proposalId={}", proposalId);
         OrderProposal result = orderProposalService.getById(proposalId);
         return Response.ok(orderProposalMapper.toDto(result)).build();
+    }
+
+
+    @POST
+    @Path("/{proposalId}/confirm")
+    public Response confirm(@PathParam("proposalId") final Long proposalId,
+                            @Valid final ConfirmProposal confirm) {
+
+        Order result = orderProposalService.confirmAndAssign(proposalId, confirm);
+        return Response.ok(orderMapper.toDto(result)).build();
     }
 }

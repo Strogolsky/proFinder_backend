@@ -1,9 +1,17 @@
 package fit.biejk.service;
 
+import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.entity.*;
+import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.repository.OrderProposalRepository;
+import fit.biejk.repository.OrderRepository;
+import fit.biejk.search.OrderSearchDto;
+import fit.biejk.search.OrderSearchMapper;
+import fit.biejk.search.OrderSearchService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,11 +28,19 @@ import java.util.List;
 @ApplicationScoped
 public class OrderProposalService {
 
+    @Inject
+    OrderRepository orderRepository;
     /**
      * Service for checking the identity of the currently authenticated user.
      */
     @Inject
     private AuthService authService;
+
+    @Inject
+    private OrderSearchService orderSearchService;
+
+    @Inject
+    private OrderSearchMapper orderSearchMapper;
 
     /**
      * Repository for managing order proposal persistence.
@@ -49,34 +65,65 @@ public class OrderProposalService {
         return orderProposal;
     }
 
-    /**
-     * Approves a specific proposal and rejects all other proposals for the same order.
-     *
-     * @param orderId    the ID of the order
-     * @param proposalId the ID of the proposal to approve
-     * @throws NotFoundException if the proposal does not exist
-     */
-    public void approveProposal(final Long orderId, final Long proposalId) {
-        log.info("Approving proposal ID={} for order ID={}", proposalId, orderId);
+//    /**
+//     * Approves a specific proposal and rejects all other proposals for the same order.
+//     *
+//     * @param orderId    the ID of the order
+//     * @param proposalId the ID of the proposal to approve
+//     * @throws NotFoundException if the proposal does not exist
+//     */
+//    public void approveProposal(final Long orderId, final Long proposalId) {
+//        log.info("Approving proposal ID={} for order ID={}", proposalId, orderId);
+//
+//        OrderProposal approvedProposal = orderProposalRepository.findById(proposalId);
+//        if (approvedProposal == null) {
+//            log.error("Cannot approve proposal: proposal with ID={} not found", proposalId);
+//            throw new NotFoundException("Proposal with ID=" + proposalId + " not found");
+//        }
+//
+//        approvedProposal.setStatus(ProposalStatus.APPROVED);
+//        orderProposalRepository.persist(approvedProposal);
+//        log.debug("Proposal ID={} approved", approvedProposal.getId());
+//
+//        List<OrderProposal> allProposals = getAllByOrderId(orderId);
+//        for (OrderProposal proposal : allProposals) {
+//            if (!proposal.getId().equals(approvedProposal.getId())) {
+//                proposal.setStatus(ProposalStatus.REJECTED);
+//                orderProposalRepository.persist(proposal);
+//                log.debug("Proposal ID={} rejected", proposal.getId());
+//            }
+//        }
+//    }
 
-        OrderProposal approvedProposal = orderProposalRepository.findById(proposalId);
-        if (approvedProposal == null) {
-            log.error("Cannot approve proposal: proposal with ID={} not found", proposalId);
-            throw new NotFoundException("Proposal with ID=" + proposalId + " not found");
+    @Transactional
+    public Order confirmAndAssign(Long proposalId, ConfirmProposal dto) {
+        OrderProposal proposal = orderProposalRepository.findByIdOptional(proposalId)
+                .orElseThrow(() -> new NotFoundException("Proposal not found"));
+
+        Order order = proposal.getOrder();
+
+        if (!authService.isCurrentUser(order.getClient().getId())) {
+            throw new ForbiddenException("You are not the owner of this order");
         }
 
-        approvedProposal.setStatus(ProposalStatus.APPROVED);
-        orderProposalRepository.persist(approvedProposal);
-        log.debug("Proposal ID={} approved", approvedProposal.getId());
+        order.setPrice(dto.getFinalPrice());
+        order.setDeadline(dto.getFinalDeadline());
+        order.setStatus(OrderStatus.COMPLETED);
 
-        List<OrderProposal> allProposals = getAllByOrderId(orderId);
-        for (OrderProposal proposal : allProposals) {
-            if (!proposal.getId().equals(approvedProposal.getId())) {
-                proposal.setStatus(ProposalStatus.REJECTED);
-                orderProposalRepository.persist(proposal);
-                log.debug("Proposal ID={} rejected", proposal.getId());
-            }
-        }
+        proposal.setStatus(ProposalStatus.APPROVED);
+
+        orderProposalRepository.rejectOthersForOrder(order.getId(), proposalId);
+
+        orderRepository.persist(order);
+
+        updateSearchIndex(order);
+
+        return order;
+    }
+
+    private void updateSearchIndex(final Order order) {
+        OrderSearchDto dto = orderSearchMapper.toDto(order);
+        orderSearchService.save(dto);
     }
 
     /**

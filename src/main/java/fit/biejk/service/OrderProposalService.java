@@ -2,7 +2,6 @@ package fit.biejk.service;
 
 import fit.biejk.dto.ConfirmProposal;
 import fit.biejk.entity.*;
-import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.repository.OrderProposalRepository;
 import fit.biejk.repository.OrderRepository;
 import fit.biejk.search.OrderSearchDto;
@@ -27,18 +26,26 @@ import java.util.List;
 @Slf4j
 @ApplicationScoped
 public class OrderProposalService {
-
+    /**
+     * Repository for accessing order data.
+     */
     @Inject
-    OrderRepository orderRepository;
+    private OrderRepository orderRepository;
     /**
      * Service for checking the identity of the currently authenticated user.
      */
     @Inject
     private AuthService authService;
 
+    /**
+     * Service for indexing orders in Elasticsearch.
+     */
     @Inject
     private OrderSearchService orderSearchService;
 
+    /**
+     * Mapper responsible for converting Order to OrderSearchDto.
+     */
     @Inject
     private OrderSearchMapper orderSearchMapper;
 
@@ -65,38 +72,23 @@ public class OrderProposalService {
         return orderProposal;
     }
 
-//    /**
-//     * Approves a specific proposal and rejects all other proposals for the same order.
-//     *
-//     * @param orderId    the ID of the order
-//     * @param proposalId the ID of the proposal to approve
-//     * @throws NotFoundException if the proposal does not exist
-//     */
-//    public void approveProposal(final Long orderId, final Long proposalId) {
-//        log.info("Approving proposal ID={} for order ID={}", proposalId, orderId);
-//
-//        OrderProposal approvedProposal = orderProposalRepository.findById(proposalId);
-//        if (approvedProposal == null) {
-//            log.error("Cannot approve proposal: proposal with ID={} not found", proposalId);
-//            throw new NotFoundException("Proposal with ID=" + proposalId + " not found");
-//        }
-//
-//        approvedProposal.setStatus(ProposalStatus.APPROVED);
-//        orderProposalRepository.persist(approvedProposal);
-//        log.debug("Proposal ID={} approved", approvedProposal.getId());
-//
-//        List<OrderProposal> allProposals = getAllByOrderId(orderId);
-//        for (OrderProposal proposal : allProposals) {
-//            if (!proposal.getId().equals(approvedProposal.getId())) {
-//                proposal.setStatus(ProposalStatus.REJECTED);
-//                orderProposalRepository.persist(proposal);
-//                log.debug("Proposal ID={} rejected", proposal.getId());
-//            }
-//        }
-//    }
-
+    /**
+     * Confirms a specific proposal, updates the associated order with final terms,
+     * and marks the order as completed.
+     * <p>
+     * This method validates that the current user is the owner of the order. It approves
+     * the selected proposal, automatically rejects all other proposals for the same order,
+     * and synchronizes the changes with the search index.
+     * </p>
+     *
+     * @param proposalId the unique ID of the proposal to be approved
+     * @param dto the confirmation data containing the final agreed price and deadline
+     * @return the updated and persisted order
+     * @throws NotFoundException if the proposal does not exist
+     * @throws ForbiddenException if the current user is not the client who created the order
+     */
     @Transactional
-    public Order confirmAndAssign(Long proposalId, ConfirmProposal dto) {
+    public Order confirmAndAssign(final Long proposalId, final ConfirmProposal dto) {
         OrderProposal proposal = orderProposalRepository.findByIdOptional(proposalId)
                 .orElseThrow(() -> new NotFoundException("Proposal not found"));
 
@@ -121,6 +113,11 @@ public class OrderProposalService {
         return order;
     }
 
+    /**
+     * Synchronizes the order state with the external search index.
+     *
+     * @param order the order entity to be indexed
+     */
     private void updateSearchIndex(final Order order) {
         OrderSearchDto dto = orderSearchMapper.toDto(order);
         orderSearchService.save(dto);

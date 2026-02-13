@@ -37,6 +37,9 @@ public class OrderProposalResource {
     @Inject
     private OrderProposalMapper orderProposalMapper;
 
+    /**
+     * Mapper for converting between Order entities and DTOs.
+     */
     @Inject
     private OrderMapper orderMapper;
 
@@ -55,7 +58,18 @@ public class OrderProposalResource {
         return Response.ok(orderProposalMapper.toDto(result)).build();
     }
 
-
+    /**
+     * Confirms an order proposal and transitions the order to the next stage.
+     * <p>
+     * This endpoint allows a client to accept a specific specialist's proposal.
+     * By confirming, the system updates the order with the final agreed-upon terms
+     * and assigns the specialist to the project.
+     * </p>
+     *
+     * @param proposalId the unique ID of the proposal to be confirmed
+     * @param confirm the DTO containing final price and deadline details
+     * @return order
+     */
     @POST
     @Path("/{proposalId}/confirm")
     public Response confirm(@PathParam("proposalId") final Long proposalId,

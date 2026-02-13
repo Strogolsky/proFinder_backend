@@ -56,7 +56,17 @@ public class OrderProposalRepository implements PanacheRepository<OrderProposal>
                 .list();
     }
 
-    public void rejectOthersForOrder(Long orderId, Long approvedProposalId) {
+    /**
+     * Rejects all proposals associated with a specific order, except for the one that was approved.
+     * <p>
+     * This method performs a bulk update in the database to efficiently transition the status
+     * of multiple proposals to {@link ProposalStatus#REJECTED} in a single query.
+     * </p>
+     *
+     * @param orderId the ID of the order whose proposals should be rejected
+     * @param approvedProposalId the ID of the proposal that is excluded from rejection
+     */
+    public void rejectOthersForOrder(final Long orderId, final Long approvedProposalId) {
         update("status = ?1 where order.id = ?2 and id != ?3",
                 ProposalStatus.REJECTED, orderId, approvedProposalId);
     }

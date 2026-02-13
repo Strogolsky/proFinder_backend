@@ -1,18 +1,17 @@
 package fit.biejk.resource;
 
+import fit.biejk.dto.PageRequest;
 import fit.biejk.dto.ReviewDto;
 import fit.biejk.dto.SpecialistDto;
-import fit.biejk.entity.OrderProposal;
-import fit.biejk.entity.Review;
-import fit.biejk.entity.ServiceOffering;
-import fit.biejk.entity.Specialist;
+import fit.biejk.dto.SpecialistFilterCriteria;
+import fit.biejk.entity.*;
+import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
 import fit.biejk.mapper.ReviewMapper;
 import fit.biejk.mapper.SpecialistMapper;
-import fit.biejk.service.AuthService;
-import fit.biejk.service.OrderProposalService;
-import fit.biejk.service.ReviewService;
-import fit.biejk.service.SpecialistService;
+import fit.biejk.search.SpecialistSearchMapper;
+import fit.biejk.search.SpecialistSearchService;
+import fit.biejk.service.*;
 import jakarta.annotation.security.DenyAll;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -40,6 +39,30 @@ public class SpecialistResource {
      */
     @Inject
     private OrderProposalService orderProposalService;
+
+    /**
+     * Service for managing order-related operations.
+     */
+    @Inject
+    private OrderService orderService;
+
+    /**
+     * Mapper for converting between Order entities and DTOs.
+     */
+    @Inject
+    private OrderMapper orderMapper;
+
+    /**
+     * Service for searching and filtering specialists.
+     */
+    @Inject
+    private SpecialistSearchService specialistSearchService;
+
+    /**
+     * Mapper for converting specialist search results to DTOs.
+     */
+    @Inject
+    private SpecialistSearchMapper specialistSearchMapper;
 
     /**
      * Mapper for converting between OrderProposal entities and DTOs.
@@ -70,13 +93,33 @@ public class SpecialistResource {
     /**
      * Retrieves a list of all specialists.
      *
+     * @param criteria   the filtering criteria for searching specialists
+     * @param pagination the pagination parameters (page and size)
      * @return HTTP response containing a list of all specialists
      */
     @GET
     @PermitAll
-    public Response getAll() {
+    public Response getSpecialists(
+            @BeanParam final SpecialistFilterCriteria criteria,
+            @BeanParam final PageRequest pagination
+    ) {
+
+        if (criteria.hasFilters()) {
+            var searchResults = specialistSearchService.search(
+                    criteria.getQuery(),
+                    criteria.getLocation(),
+                    pagination.getPage(),
+                    pagination.getSize()
+            );
+            var result = specialistSearchMapper.toEntityList(searchResults);
+            return Response.ok(specialistMapper.toDtoList(result)).build();
+        }
+
         log.info("Get all specialists");
-        List<Specialist> result = specialistService.getAll();
+        List<Specialist> result = specialistService.getAll(
+                pagination.getPage(),
+                pagination.getSize()
+        );
         log.debug("Found {} specialists", result.size());
         return Response.ok(specialistMapper.toDtoList(result)).build();
     }
@@ -84,55 +127,33 @@ public class SpecialistResource {
     /**
      * Retrieves a specialist by their ID.
      *
-     * @param id ID of the specialist
+     * @param specialistId ID of the specialist
      * @return HTTP response containing the specialist
      */
     @GET
-    @Path("/{id}")
+    @Path("/{specialistId}")
     @PermitAll
-    public Response getById(@PathParam("id") final Long id) {
-        log.info("Get specialist by ID={}", id);
-        Specialist result = specialistService.getById(id);
+    public Response getById(@PathParam("specialistId") final Long specialistId) {
+        log.info("Get specialist by ID={}", specialistId);
+        Specialist result = specialistService.getById(specialistId);
         return Response.ok(specialistMapper.toDto(result)).build();
-    }
-
-    /**
-     * Creates a new specialist.
-     * Currently disabled with {@code @DenyAll}.
-     *
-     * @param dto data for the new specialist
-     * @return HTTP response with the created specialist or error
-     */
-    @POST
-    @DenyAll
-    public Response create(@Valid final SpecialistDto dto) {
-        log.info("Create specialist request: {}", dto);
-        Specialist entity = specialistMapper.toEntity(dto);
-        try {
-            Specialist result = specialistService.create(entity);
-            log.debug("Specialist created with ID={}", result.getId());
-            return Response.ok(specialistMapper.toDto(result)).build();
-        } catch (IllegalArgumentException e) {
-            log.error("Error creating specialist: {}", e.getMessage());
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        }
     }
 
     /**
      * Updates a specialist by ID.
      * Currently disabled with {@code @DenyAll}.
      *
-     * @param id  ID of the specialist to update
+     * @param specialistId  ID of the specialist to update
      * @param dto updated data
      * @return HTTP response with updated specialist
      */
     @PUT
-    @Path("/{id}")
+    @Path("/{specialistId}")
     @DenyAll
-    public Response update(@PathParam("id") final Long id, @Valid final SpecialistDto dto) {
-        log.info("Update specialist request: ID={}, dto={}", id, dto);
+    public Response update(@PathParam("specialistId") final Long specialistId, @Valid final SpecialistDto dto) {
+        log.info("Update specialist request: ID={}, dto={}", specialistId, dto);
         Specialist entity = specialistMapper.toEntity(dto);
-        Specialist result = specialistService.update(id, entity);
+        Specialist result = specialistService.update(specialistId, entity);
         log.debug("Specialist updated with ID={}", result.getId());
         return Response.ok(specialistMapper.toDto(result)).build();
     }
@@ -141,15 +162,15 @@ public class SpecialistResource {
      * Deletes a specialist by ID.
      * Currently disabled with {@code @DenyAll}.
      *
-     * @param id ID of the specialist to delete
+     * @param specialistId ID of the specialist to delete
      * @return HTTP response
      */
     @DELETE
-    @Path("/{id}")
+    @Path("/{specialistId}")
     @DenyAll
-    public Response delete(@PathParam("id") final Long id) {
-        log.info("Delete specialist request: ID={}", id);
-        specialistService.delete(id);
+    public Response delete(@PathParam("specialistId") final Long specialistId) {
+        log.info("Delete specialist request: ID={}", specialistId);
+        specialistService.delete(specialistId);
         return Response.ok().build();
     }
 
@@ -204,13 +225,19 @@ public class SpecialistResource {
      * Retrieves all reviews submitted by id specialist.
      *
      * @param specialistId specialist ID
+     * @param pagination   the pagination parameters (page and size)
      * @return HTTP response containing list of reviews
      */
     @GET
     @Path("/{specialistId}/reviews")
     @PermitAll
-    public Response getReviews(@PathParam("specialistId") final Long specialistId) {
-        List<Review> res = reviewService.getBySpecialistId(specialistId);
+    public Response getReviews(
+            @PathParam("specialistId") final Long specialistId,
+            @BeanParam final PageRequest pagination) {
+        List<Review> res = reviewService.getBySpecialistId(
+                specialistId,
+                pagination.getPage(),
+                pagination.getSize());
         return Response.ok(reviewMapper.toDtoList(res)).build();
     }
 
@@ -240,24 +267,58 @@ public class SpecialistResource {
     @POST
     @Path("/{specialistId}/reviews")
     @RolesAllowed("CLIENT")
-    public Response createReview(@PathParam("specialistId") final Long specialistId, @Valid final ReviewDto dto) {
+    public Response createReview(@PathParam("specialistId") final Long specialistId,
+                                 @Valid final ReviewDto dto
+    ) {
         Review review = reviewMapper.toEntity(dto);
-        Review saved = specialistService.review(specialistId, review);
+        Review result = specialistService.review(specialistId, review);
 
-        return Response.ok(reviewMapper.toDto(saved)).build();
+        return Response.status(Response.Status.CREATED).entity(reviewMapper.toDto(result)).build();
     }
 
     /**
      * Retrieves all proposals submitted by the specified specialist.
      *
      * @param specialistId the ID of the specialist
+     * @param pagination   the pagination parameters (page and size)
      * @return list of proposals submitted by the specialist
      */
     @GET
     @Path("/{specialistId}/proposals")
     @RolesAllowed("SPECIALIST")
-    public Response getBySpecialistId(@PathParam("specialistId") final Long specialistId) {
-        List<OrderProposal> result = orderProposalService.getBySpecialistId(specialistId);
+    public Response getProposals(
+            @PathParam("specialistId") final Long specialistId,
+            @BeanParam final PageRequest pagination
+    ) {
+        List<OrderProposal> result = orderProposalService.getBySpecialistId(
+                specialistId,
+                pagination.getPage(),
+                pagination.getSize());
         return Response.ok(orderProposalMapper.toDtoList(result)).build();
+    }
+
+    /**
+     * Retrieves all active orders assigned to a specific specialist.
+     * <p>
+     * Only accessible to authenticated users with the SPECIALIST role.
+     * </p>
+     *
+     * @param pagination the pagination parameters (page and size)
+     * @return list of orders currently assigned to the specialist
+     */
+    @GET
+    @Path("/me/orders")
+    @RolesAllowed("SPECIALIST")
+    public Response getOrders(
+            @BeanParam final PageRequest pagination
+    ) {
+        Long specialistId = authService.getCurrentUserId();
+        log.info("Get assigned by specialist id: specialistId={}", specialistId);
+        List<Order> result = orderService.getBySpecialistId(
+                specialistId,
+                pagination.getPage(),
+                pagination.getSize()
+        );
+        return Response.ok(orderMapper.toDtoList(result)).build();
     }
 }

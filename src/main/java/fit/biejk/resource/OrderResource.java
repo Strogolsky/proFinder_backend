@@ -1,25 +1,19 @@
 package fit.biejk.resource;
 
-import fit.biejk.dto.ConfirmProposal;
-import fit.biejk.dto.OrderDto;
-import fit.biejk.dto.OrderProposalDto;
+import fit.biejk.dto.*;
 import fit.biejk.entity.*;
 import fit.biejk.mapper.OrderMapper;
 import fit.biejk.mapper.OrderProposalMapper;
+import fit.biejk.search.OrderSearchMapper;
+import fit.biejk.search.OrderSearchService;
 import fit.biejk.service.*;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.List;
 
 /**
@@ -42,6 +36,18 @@ public class OrderResource {
     private  OrderService orderService;
 
     /**
+     * Service for searching and filtering orders.
+     */
+    @Inject
+    private OrderSearchService orderSearchService;
+
+    /**
+     * Mapper for converting order search results and criteria.
+     */
+    @Inject
+    private OrderSearchMapper orderSearchMapper;
+
+    /**
      * Mapper for converting between Order entities and DTOs.
      */
     @Inject
@@ -52,12 +58,6 @@ public class OrderResource {
      */
     @Inject
     private ClientService clientService;
-
-    /**
-     * Service for accessing specialist information.
-     */
-    @Inject
-    private SpecialistService specialistService;
 
     /**
      * Service for authentication and identity resolution.
@@ -89,7 +89,8 @@ public class OrderResource {
         order.setLocation(client.getLocation());
         Order result = orderService.create(order);
         log.debug("Order created with ID={}", result.getId());
-        return Response.ok(orderMapper.toDto(result)).build();
+
+        return Response.status(Response.Status.CREATED).entity(orderMapper.toDto(result)).build();
     }
 
     /**
@@ -117,7 +118,7 @@ public class OrderResource {
      * @return canceled order
      */
     @POST
-    @Path("/{orderId}/cancel")
+    @Path("/{orderId}:cancel")
     @RolesAllowed("CLIENT")
     public Response cancel(@PathParam("orderId") final Long orderId) {
         log.info("Cancel order request: orderId={}", orderId);
@@ -136,58 +137,40 @@ public class OrderResource {
     @POST
     @Path("/{orderId}/proposals")
     @RolesAllowed("SPECIALIST")
-    public Response proposal(@PathParam("orderId") final Long orderId, @Valid final OrderProposalDto proposalDto) {
+    public Response proposal(
+            @PathParam("orderId") final Long orderId,
+            @Valid final OrderProposalDto proposalDto) {
         log.info("Proposal request: orderId={}, proposalDto={}", orderId, proposalDto);
         OrderProposal proposal = orderProposalMapper.toEntity(proposalDto);
         Long specialistId = authService.getCurrentUserId();
-        Specialist specialist = specialistService.getById(specialistId);
-        proposal.setSpecialist(specialist);
-        OrderProposal result = orderService.proposal(orderId, proposal);
+
+        OrderProposal result = orderService.proposal(orderId, specialistId, proposal);
+
         log.debug("Proposal created with ID={}", result.getId());
-        return Response.ok(orderProposalMapper.toDto(result)).build();
+        return Response.status(Response.Status.CREATED).entity(orderProposalMapper.toDto(result)).build();
     }
 
     /**
      * Retrieves all proposals associated with a specific order.
      *
-     * @param orderId the ID of the order
+     * @param orderId    the ID of the order
+     * @param pagination the pagination parameters (page and size)
      * @return list of proposals for the order
      */
     @GET
     @Path("/{orderId}/proposals")
     @RolesAllowed("CLIENT")
-    public Response getProposals(@PathParam("orderId") final Long orderId) {
+    public Response getProposals(
+            @PathParam("orderId") final Long orderId,
+            @BeanParam final PageRequest pagination
+    ) {
         log.info("Get all proposals for orderId={}", orderId);
-        List<OrderProposal> proposals = orderProposalService.getByOrderId(orderId);
+        List<OrderProposal> proposals = orderProposalService.getByOrderId(
+                orderId,
+                pagination.getPage(),
+                pagination.getSize());
         log.debug("Proposals found: {}", proposals.size());
         return Response.ok(orderProposalMapper.toDtoList(proposals)).build();
-    }
-
-
-    /**
-     * Confirms a proposal and updates the corresponding order with final price and deadline.
-     * <p>
-     * Only the client who created the order can confirm a proposal.
-     * </p>
-     *
-     * @param orderId the ID of the proposal to confirm
-     * @param confirm the confirmation data including final price and deadline
-     * @return the updated and confirmed order
-     */
-    @POST
-    @Path("/{orderId}/confirm")
-    @RolesAllowed("CLIENT")
-    public Response confirm(@PathParam("orderId") final Long orderId,
-                            @Valid final ConfirmProposal confirm) {
-        log.info("Confirm order proposal: orderId ={},confirm={}", orderId, confirm);
-
-        Order result = orderService.confirm(
-                orderId,
-                confirm.getProposalId(),
-                confirm.getFinalPrice(),
-                confirm.getFinalDeadline());
-        log.debug("Order confirmed with ID={}", result.getId());
-        return Response.ok(orderMapper.toDto(result)).build();
     }
 
     /**
@@ -208,13 +191,35 @@ public class OrderResource {
     /**
      * Retrieves a list of all orders.
      *
+     * @param criteria   the filtering criteria for searching orders
+     * @param pagination the pagination parameters (page and size)
      * @return list of all orders
      */
     @GET
     @PermitAll
-    public Response getAll() {
+    public Response getOrders(
+            @BeanParam final OrderFilterCriteria criteria,
+            @BeanParam final PageRequest pagination) {
+
+        if (criteria.hasFilters()) {
+            var searchResults = orderSearchService.search(
+                    criteria.getQuery(),
+                    criteria.getLocation(),
+                    criteria.getServices(),
+                    pagination.getPage(),
+                    pagination.getSize()
+            );
+
+            List<Order> result = orderSearchMapper.toEntityList(searchResults);
+
+            return Response.ok(orderMapper.toDtoList(result)).build();
+        }
+
         log.info("Get all orders");
-        List<Order> result = orderService.getAll();
+        List<Order> result = orderService.getAll(
+                pagination.getPage(),
+                pagination.getSize()
+        );
         log.debug("Orders found: {}", result.size());
         return Response.ok(orderMapper.toDtoList(result)).build();
     }
@@ -233,43 +238,5 @@ public class OrderResource {
         orderService.delete(orderId);
         return Response.ok().build();
     }
-
-    /**
-     * Retrieves all orders created by a specific client.
-     * <p>
-     * Only accessible to authenticated users with the CLIENT role.
-     * </p>
-     *
-     * @return list of orders created by the client
-     */
-    @GET
-    @Path("/client")
-    @RolesAllowed("CLIENT")
-    public Response getByClient() {
-        Long clientId = authService.getCurrentUserId();
-        log.info("Get client request: clientId={}", clientId);
-        List<Order> result = orderService.getByClientId(clientId);
-        return Response.ok(orderMapper.toDtoList(result)).build();
-    }
-
-    /**
-     * Retrieves all active orders assigned to a specific specialist.
-     * <p>
-     * Only accessible to authenticated users with the SPECIALIST role.
-     * </p>
-     *
-     * @return list of orders currently assigned to the specialist
-     */
-    @GET
-    @Path("/specialist")
-    @RolesAllowed("SPECIALIST")
-    public Response getBySpecialist() {
-        Long specialistId = authService.getCurrentUserId();
-        log.info("Get assigned by specialist id: specialistId={}", specialistId);
-        List<Order> result = orderService.getBySpecialistId(specialistId);
-        return Response.ok(orderMapper.toDtoList(result)).build();
-    }
-
-
 
 }

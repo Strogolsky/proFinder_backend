@@ -1,6 +1,7 @@
 package fit.biejk.resource;
 
 import fit.biejk.dto.CreateChatRequest;
+import fit.biejk.dto.PageRequest;
 import fit.biejk.entity.Chat;
 import fit.biejk.entity.ChatMessage;
 import fit.biejk.mapper.ChatMapper;
@@ -10,11 +11,8 @@ import fit.biejk.service.ChatService;
 import io.quarkus.security.Authenticated;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-
 import java.util.List;
 
 /**
@@ -53,37 +51,53 @@ public class ChatResource {
      */
     @POST
     @Authenticated
-    public Response create(@Valid final CreateChatRequest request) {
+    public Response create(
+            @Valid final CreateChatRequest request
+    ) {
         Long userId = authService.getCurrentUserId();
-        Chat chat = chatService.create(userId, request.getRecipientId());
-        return Response.ok().entity(chatMapper.toDto(chat, userId)).build();
+        Chat result = chatService.create(userId, request.getRecipientId());
+
+
+        return Response.status(Response.Status.CREATED).entity(chatMapper.toDto(result, userId)).build();
     }
 
     /**
      * Retrieves the message history for a specific chat.
      *
-     * @param chatId The ID of the chat whose history is to be retrieved.
+     * @param chatId     The ID of the chat whose history is to be retrieved.
+     * @param pagination The pagination parameters (page and size).
      * @return A Response containing a list of ChatOutputMessage DTOs.
      */
     @GET
     @Path("/{chatId}/messages")
     @Authenticated
-    public Response getMessagesById(final Long chatId) {
-        List<ChatMessage> result = chatService.getMessagesById(chatId);
+    public Response getMessagesById(
+            @PathParam("chatId") final Long chatId,
+            @BeanParam final PageRequest pagination) {
+        List<ChatMessage> result = chatService.getMessagesById(
+                chatId,
+                pagination.getPage(),
+                pagination.getSize()
+        );
         return Response.ok().entity(chatMessageMapper.toDtoList(result)).build();
     }
 
     /**
      * Returns a list of chats associated with the current user.
      *
+     * @param pagination the pagination parameters (page and size)
      * @return list of chat DTOs
      */
     @GET
     @Path("/me")
     @Authenticated
-    public Response getAllByProfile() {
+    public Response getAllByProfile(@BeanParam final PageRequest pagination) {
         Long userId = authService.getCurrentUserId();
-        List<Chat> result = chatService.getByUserId(userId);
+        List<Chat> result = chatService.getByUserId(
+                userId,
+                pagination.getPage(),
+                pagination.getSize()
+        );
         return Response.ok().entity(chatMapper.toDtoList(result, userId)).build();
     }
 

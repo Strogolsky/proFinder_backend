@@ -5,6 +5,7 @@ import fit.biejk.service.AuthService;
 import jakarta.annotation.security.PermitAll;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.PATCH;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
@@ -37,13 +38,17 @@ public class AuthResource {
     @POST
     @Path("/sign-up")
     @PermitAll
-    public Response signUp(@Valid final AuthRequest request) {
+    public Response signUp(
+            @Valid final AuthRequest request
+    ) {
         log.info("Sign up request: {}", request);
         String result = authService.signUp(request.getEmail(), request.getPassword(), request.getRole());
         log.debug("Sign up result: {}", result);
         AuthResponse response = new AuthResponse(result);
         log.info("Sign up response: {}", response);
-        return Response.ok(response).build();
+
+
+        return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
     /**
@@ -71,9 +76,9 @@ public class AuthResource {
      * @return HTTP 200 response if the operation succeeds (even if user does not exist)
      */
     @POST
-    @Path("/forgot-password")
+    @Path("/password-recovery")
     @PermitAll
-    public Response forgotPassword(@Valid final ForgotPasswordRequest request) {
+    public Response createRecoveryRequest(@Valid final ForgotPasswordRequest request) {
         authService.forgotPassword(request.getEmail());
         return Response.ok().build();
     }
@@ -84,10 +89,10 @@ public class AuthResource {
      * @param request contains email, verification code, and new password with confirmation
      * @return HTTP 200 response with a new authentication token
      */
-    @POST
-    @Path("/reset-password")
+    @PATCH
+    @Path("/password-recovery")
     @PermitAll
-    public Response resetPassword(@Valid final ResetPasswordRequest request) {
+    public Response completeRecovery(@Valid final ResetPasswordRequest request) {
         AuthResponse response = new AuthResponse(authService.resetPassword(request));
         return Response.ok(response).build();
     }

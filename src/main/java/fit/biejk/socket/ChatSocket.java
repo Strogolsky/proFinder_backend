@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @ApplicationScoped
 @ServerEndpoint(
-        value = "/chat/{chatId}",
+        value = "/v1/chats/{chatId}",
         decoders = ChatMessageDecoder.class,
         encoders = ChatMessageEncoder.class
 )

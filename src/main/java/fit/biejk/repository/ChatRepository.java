@@ -35,9 +35,13 @@ public class ChatRepository implements PanacheRepository<Chat> {
      * Finds all chats where the given user is a participant.
      *
      * @param userId ID of the user
+     * @param page   page number for pagination
+     * @param size   number of chats per page
      * @return list of {@link Chat} entities
      */
-    public List<Chat> findByUserId(final Long userId) {
-        return find("user1.id = ?1 OR user2.id = ?1", userId).list();
+    public List<Chat> findByUserId(final Long userId, final int page, final int size) {
+        return find("user1.id = ?1 OR user2.id = ?1", userId)
+                .page(page - 1, size)
+                .list();
     }
 }

@@ -20,20 +20,28 @@ public class OrderRepository implements PanacheRepository<Order> {
      * Retrieves all orders created by the specified client.
      *
      * @param clientId the ID of the client
+     * @param page     page number for pagination
+     * @param size     number of orders per page
      * @return a list of {@link Order} entities associated with the given client
      */
-    public List<Order> findByClientId(final Long clientId) {
-        return find("client.id", clientId).list();
+    public List<Order> findByClientId(final Long clientId, final int page, final int size) {
+        return find("client.id", clientId)
+                .page(page - 1, size)
+                .list();
     }
 
     /**
      * Retrieves all orders assigned to the specified specialist.
      *
      * @param specialistId the ID of the specialist
+     * @param page         page number for pagination
+     * @param size         number of orders per page
      * @return a list of {@link Order} entities assigned to the given specialist
      */
-    public List<Order> findBySpecialistId(final Long specialistId) {
-        return find("specialist.id", specialistId).list();
+    public List<Order> findBySpecialistId(final Long specialistId, final int page, final int size) {
+        return find("specialist.id", specialistId)
+                .page(page - 1, size)
+                .list();
     }
 }
 

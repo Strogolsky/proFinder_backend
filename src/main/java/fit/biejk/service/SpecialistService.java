@@ -82,11 +82,13 @@ public class SpecialistService {
     /**
      * Retrieves all specialists from the database.
      *
+     * @param page page number for pagination
+     * @param size number of specialists per page
      * @return list of all specialists
      */
-    public List<Specialist> getAll() {
+    public List<Specialist> getAll(final int page, final int size) {
         log.info("Get all specialists");
-        List<Specialist> specialists = specialistRepository.listAll();
+        List<Specialist> specialists = specialistRepository.findAll().page(page, size).list();
         log.debug("Found {} specialists", specialists.size());
         return specialists;
     }
@@ -222,9 +224,7 @@ public class SpecialistService {
         review.setClient(client);
         review.setSpecialist(specialist);
 
-        Review saved = reviewService.create(review);
-
-        return saved;
+        return reviewService.create(review);
     }
 
 

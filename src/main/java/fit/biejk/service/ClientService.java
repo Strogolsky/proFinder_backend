@@ -53,11 +53,13 @@ public class ClientService {
     /**
      * Retrieves a list of all clients.
      *
+     * @param page page number for pagination
+     * @param size number of clients per page
      * @return list of clients
      */
-    public List<Client> getAll() {
+    public List<Client> getAll(final int page, final int size) {
         log.info("Get all clients");
-        List<Client> result = clientRepository.listAll();
+        List<Client> result = clientRepository.findAll().page(page, size).list();
         log.debug("Found {} clients", result.size());
         return result;
     }

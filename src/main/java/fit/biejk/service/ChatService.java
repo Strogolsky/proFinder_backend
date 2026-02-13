@@ -3,6 +3,7 @@ package fit.biejk.service;
 import fit.biejk.entity.Chat;
 import fit.biejk.entity.ChatMessage;
 import fit.biejk.entity.User;
+import fit.biejk.repository.ChatMessageRepository;
 import fit.biejk.repository.ChatRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -29,6 +30,12 @@ public class ChatService {
     private ChatRepository chatRepository;
 
     /**
+     * Repository for performing CRUD operations on {@link ChatMessage} entities.
+     */
+    @Inject
+    private ChatMessageRepository chatMessageRepository;
+
+    /**
      * Service for user-related operations.
      */
     @Inject
@@ -47,7 +54,7 @@ public class ChatService {
         log.info("Creating new chat");
         Long first = Math.min(userId1, userId2);
         Long second = Math.max(userId1, userId2);
-        if (first == second) {
+        if (first.equals(second)) {
             log.warn("First and Second chat id {} are the same", first);
             throw new IllegalArgumentException("first and second are the same");
         }
@@ -86,12 +93,18 @@ public class ChatService {
      * Retrieves the list of messages in a given chat.
      *
      * @param chatId ID of the chat
+     * @param page   page number for pagination
+     * @param size   number of messages per page
      * @return list of {@link ChatMessage} in the chat
      */
-    public List<ChatMessage> getMessagesById(final Long chatId) {
+    public List<ChatMessage> getMessagesById(final Long chatId, final int page, final int size) {
         log.info("Getting history for chat {}", chatId);
-        Chat chat = getById(chatId);
-        return chat.getMessages();
+
+        if (!existById(chatId)) {
+            throw new NotFoundException("Chat with id " + chatId + " not found");
+        }
+
+        return chatMessageRepository.findByChatId(chatId, page, size);
     }
 
     /**
@@ -131,10 +144,12 @@ public class ChatService {
      * Retrieves all chats that a user participates in.
      *
      * @param userId ID of the user
+     * @param page   page number for pagination
+     * @param size   number of chats per page
      * @return list of {@link Chat} entities
      */
-    public List<Chat> getByUserId(final Long userId) {
-        return chatRepository.findByUserId(userId);
+    public List<Chat> getByUserId(final Long userId, final int page, final int size) {
+        return chatRepository.findByUserId(userId, page, size);
     }
     /**
      * Retrieves a chat between two users if it exists.

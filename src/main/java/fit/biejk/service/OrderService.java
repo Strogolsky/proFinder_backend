@@ -11,7 +11,6 @@ import jakarta.transaction.Transactional;
 import jakarta.ws.rs.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -47,6 +46,10 @@ public class OrderService {
      */
     @Inject
     private OrderProposalService orderProposalService;
+
+    /** Service for handling business logic related to specialists. */
+    @Inject
+    private SpecialistService specialistService;
 
     /**
      * Service for user identity validation.
@@ -85,7 +88,8 @@ public class OrderService {
         log.info("Update order: orderId={}, newDescription={}", orderId, order.getDescription());
         Order old = getById(orderId);
         if (!authService.isCurrentUser(old.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}", orderId, old.getClient().getId());
+            log.error("User is not the owner of this order. orderId={}, clientId={}",
+                    orderId, old.getClient().getId());
             throw new IllegalArgumentException();
         }
         old.setServiceOfferings(order.getServiceOfferings());
@@ -168,11 +172,13 @@ public class OrderService {
     /**
      * Retrieves all orders.
      *
+     * @param page page number for pagination
+     * @param size number of orders per page
      * @return list of orders
      */
-    public List<Order> getAll() {
+    public List<Order> getAll(final int page, final int size) {
         log.info("Get all orders");
-        List<Order> orders = orderRepository.listAll();
+        List<Order> orders = orderRepository.findAll().page(page, size).list();
         log.debug("Found {} orders", orders.size());
         return orders;
     }
@@ -181,11 +187,12 @@ public class OrderService {
      * Adds a new proposal to an order.
      *
      * @param orderId  ID of the order
+     * @param specialistId ID of the specialist
      * @param proposal proposal entity
      * @return created proposal
      */
     @Transactional
-    public OrderProposal proposal(final Long orderId, final OrderProposal proposal) {
+    public OrderProposal proposal(final Long orderId, final Long specialistId, final OrderProposal proposal) {
         log.info("Create proposal: orderId={}, specialistId={}", orderId, proposal.getSpecialist().getId());
         Order order = getById(orderId);
         if (haveSpecialistProposal(order, proposal)) {
@@ -194,6 +201,10 @@ public class OrderService {
             throw new IllegalArgumentException("Order proposal already exists");
         }
         proposal.setOrder(order);
+
+        Specialist specialist = specialistService.getById(specialistId);
+        proposal.setSpecialist(specialist);
+
         orderProposalService.create(proposal);
         order.getOrderProposals().add(proposal);
         order.setStatus(order.getStatus().transitionTo(OrderStatus.CLIENT_PENDING));
@@ -233,16 +244,18 @@ public class OrderService {
      * </p>
      *
      * @param userId ID of the client
+     * @param page   page number for pagination
+     * @param size   number of orders per page
      * @return list of orders belonging to the client
      * @throws IllegalArgumentException if the current user is not the same as the client
      */
-    public List<Order> getByClientId(final Long userId) {
+    public List<Order> getByClientId(final Long userId, final int page, final int size) {
         log.info("Get orders by clientId={}", userId);
         if (!authService.isCurrentUser(userId)) {
             log.warn("User is not logged in");
             throw new IllegalArgumentException("User is not logged in");
         } // todo delete, when admin system will be created
-        return orderRepository.findByClientId(userId);
+        return orderRepository.findByClientId(userId, page, size);
     }
 
     /**
@@ -252,51 +265,19 @@ public class OrderService {
      * </p>
      *
      * @param specialistId ID of the specialist
+     * @param page         page number for pagination
+     * @param size         number of orders per page
      * @return list of orders currently assigned to the specialist
      * @throws IllegalArgumentException if the current user is not the same as the specialist
      */
-    public List<Order> getBySpecialistId(final Long specialistId) {
+    public List<Order> getBySpecialistId(final Long specialistId, final int page, final int size) {
         log.info("Get orders by specialistId={}", specialistId);
         if (!authService.isCurrentUser(specialistId)) {
             log.warn("User is not logged in");
             throw new IllegalArgumentException("User is not logged in");
         }
-        return orderRepository.findBySpecialistId(specialistId);
+        return orderRepository.findBySpecialistId(specialistId, page, size);
     }
 
-    /**
-     * Confirms a proposal, updates the related order with final price and deadline,
-     * changes the order status, and rejects all other proposals.
-     *
-     * @param orderId    the ID of the order
-     * @param proposalId the ID of the approved proposal
-     * @param price      the agreed final price
-     * @param deadline   the agreed final deadline
-     * @return the updated order
-     * @throws IllegalArgumentException if the current user is not the order's client
-     */
-    @Transactional
-    public Order confirm(final Long orderId, final Long proposalId, final int price, final LocalDateTime deadline) {
-        Order order = getById(orderId);
-        if (!authService.isCurrentUser(order.getClient().getId())) {
-            log.error("User is not the owner of this order. orderId={}, clientId={}",
-                    order.getId(), order.getClient().getId());
-            throw new IllegalArgumentException();
-        }
-        order.setPrice(price);
-        order.setDeadline(deadline);
-        log.info("Before transition: orderId={}, currentStatus={}", order.getId(), order.getStatus());
-        orderProposalService.approveProposal(order.getId(), proposalId);
-        order.setStatus(order.getStatus().transitionTo(OrderStatus.COMPLETED));
-        log.info("After transition: orderId={}, currentStatus={}", order.getId(), order.getStatus());
-
-        orderRepository.persist(order);
-
-        OrderSearchDto dto = orderSearchMapper.toDto(order);
-        orderSearchService.save(dto);
-
-        log.debug("Order confirmed with ID={}", order.getId());
-        return order;
-    }
 
 }

@@ -5,6 +5,7 @@
 ## 📖 Table of Contents
 
 - [Service Overview](#-service-overview)
+- [Documentation](#-documentation)
 - [Technology Stack](#-technology-stack)
 - [Architecture & Features](#-architecture--features)
 
@@ -15,6 +16,17 @@
 The platform enables clients to post job listings for various tasks and connect with qualified professionals. Specialists can showcase their expertise, browse available opportunities, and apply for projects that match their skills.
 
 This backend service powers the core functionality including user management, job postings, search capabilities, real-time communication, and transaction processing.
+
+## 📚 Documentation
+
+Full design and architecture documentation is in [`docs/`](docs/) (start at
+[`docs/Home.md`](docs/Home.md)), synced both ways with the
+[GitHub Wiki](https://github.com/Strogolsky/proFinder_backend/wiki).
+
+Those documents describe the **target architecture** — a set of microservices on a
+RabbitMQ event bus. This repository is currently a single Quarkus module that
+implements a subset of it; where the two disagree, the docs are the intended
+design. See [`.github/wiki-sync.md`](.github/wiki-sync.md) for how the sync works.
 
 ## 🛠 Technology Stack
 

@@ -2,8 +2,11 @@
 
 > Landing page of the project [Wiki](https://github.com/Strogolsky/proFinder_backend/wiki).
 > These pages live in [`docs/`](https://github.com/Strogolsky/proFinder_backend/tree/develop/docs)
-> and are synced with the Wiki automatically — see
-> [`docs/README.md`](https://github.com/Strogolsky/proFinder_backend/blob/develop/docs/README.md).
+> and are synced with the Wiki both ways — see
+> [`.github/wiki-sync.md`](https://github.com/Strogolsky/proFinder_backend/blob/develop/.github/wiki-sync.md).
+>
+> Files 1–15 are the **target architecture**. Where the current code disagrees with
+> them, these documents are the intended design.
 
 ## Documents
 

@@ -1,9 +1,9 @@
 # ProFinder — Permission Matrix
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** One table of who can do what — roles × actions, plus the account-status and ownership conditions layered on top. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 ("permission matrix (role × action)").
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** One table of who can do what — roles × actions, plus the account-status and ownership conditions layered on top. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 ("permission matrix (role × action)").
 
 **Sources:** [2 - Requirements.md § FR-Auth / FR-Moderator / FR-Admin](2%20-%20Requirements.md), [4 - Business logic.md § Authentication & Registration / § Report System](4%20-%20Business%20logic.md), [8 - API Specification.md](8%20-%20API%20Specification.md) (per-endpoint auth column), [6 - Database Schema.md § Enums](6%20-%20Database%20Schema.md).
 

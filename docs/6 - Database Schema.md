@@ -1,9 +1,9 @@
 # ProFinder — Database Schema
 
-**Version:** 1.3
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** Full relational schema — tables, columns, types, constraints, indexes, enums. Every decision here traces back to [4 - Business logic.md](4%20-%20Business%20logic.md) and [5 - State Machines.md](5%20-%20State%20Machines.md); no new business decisions are made in this file, only translated into DDL-shaped tables.
+- **Version:** 1.3
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** Full relational schema — tables, columns, types, constraints, indexes, enums. Every decision here traces back to [4 - Business logic.md](4%20-%20Business%20logic.md) and [5 - State Machines.md](5%20-%20State%20Machines.md); no new business decisions are made in this file, only translated into DDL-shaped tables.
 
 Referenced from [Documentation Roadmap.md](Documentation%20Roadmap.md) (Block B, Tier 1 — "Database Schema / ERD").
 

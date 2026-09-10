@@ -1,9 +1,9 @@
 # ProFinder — State Machines
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** Mermaid `stateDiagram-v2` state machines for every entity that has one — Order, Professional Profile, Account, Report, Ban Appeal, Review.
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** Mermaid `stateDiagram-v2` state machines for every entity that has one — Order, Professional Profile, Account, Report, Ban Appeal, Review.
 
 Most logic here was already decided prose in [4 - Business logic.md](4%20-%20Business%20logic.md) and [2 - Requirements.md](2%20-%20Requirements.md); two gaps found while diagramming (professional profile category/city floor, `PENDING_VERIFICATION` ban/suspend) were decided on 2026-09-04 and folded back into file 4. Referenced from [Documentation Roadmap.md](Documentation%20Roadmap.md) (Block C, "State" row).
 

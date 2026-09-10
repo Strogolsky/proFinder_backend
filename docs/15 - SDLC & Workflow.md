@@ -1,9 +1,9 @@
 # ProFinder — SDLC & Development Workflow
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Draft
-**Purpose:** The Software Development Lifecycle for ProFinder — repository structure, development workflow, environments, CI/CD pipeline, and how Claude integrates. Partially delivers Documentation Roadmap Tier 3 (docker-compose, CI/CD, testing strategy, environments, git workflow).
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Draft
+- **Purpose:** The Software Development Lifecycle for ProFinder — repository structure, development workflow, environments, CI/CD pipeline, and how Claude integrates. Partially delivers Documentation Roadmap Tier 3 (docker-compose, CI/CD, testing strategy, environments, git workflow).
 
 ---
 
@@ -16,7 +16,7 @@ ProFinder uses a **monorepo** with 5 microservices, docker-compose for local dev
 ## 1. Repository Structure (Monorepo)
 ---
 
-```
+```text
 profinder/
 ├── .claude/
 │   ├── config.json              ← Claude Code configuration
@@ -105,7 +105,7 @@ profinder/
 ### **Step 1: GitHub Issue Created**
 ---
 
-```
+```text
 Title: "[Service] Feature/Bug: Brief description"
 
 Body:
@@ -237,7 +237,7 @@ git push origin feature/auth-email-verification
 ---
 
 **On PR creation, GitHub Actions runs:**
-```
+```text
 ✓ Compile (all services)
 ✓ Run unit tests (JUnit 5)
 ✓ Run integration tests (Testcontainers)
@@ -264,12 +264,12 @@ Status: ✅ All checks passed → Ready to review
 - Code quality & design
 - Adherence to patterns from docs/CODE_PATTERNS.md
 - Test coverage & quality
-- Compliance with [13 - Validation Rules.md]
+- Compliance with [13 - Validation Rules.md](13%20-%20Validation%20Rules.md)
 - No breaking API changes
 - No hardcoded secrets
 
 **Approval:**
-```
+```text
 Approved by: reviewer
 Comment: "Looks good, follows the transactional outbox pattern correctly"
 ```
@@ -297,7 +297,7 @@ git push origin develop
 **Triggered by:** Merge to develop
 
 **What happens (GitHub Actions):**
-```
+```text
 1. Trigger GitHub Actions deploy.yml workflow
 2. Build Docker images for changed services
 3. Tag images: latest, short-sha, timestamp
@@ -325,7 +325,7 @@ git push origin develop
 - File uploads work (MinIO)
 
 **If issues found:**
-```
+```text
 Create new issue or bug report
 Link to PR and staging deployment
 Developer fixes → new PR → repeat workflow
@@ -367,7 +367,7 @@ git push origin main --tags
 ```
 
 **Or use GitHub UI:**
-```
+```text
 Create Release from GitHub → specify tag v1.2.0 → write release notes → publish
 ```
 
@@ -385,7 +385,7 @@ Create Release from GitHub → specify tag v1.2.0 → write release notes → pu
 **Triggered by:** Git tag created (v1.2.0)
 
 **What happens (GitHub Actions):**
-```
+```text
 1. Trigger deploy.yml for production environment
 2. Re-run all tests + quality checks
 3. Build final Docker images
@@ -491,18 +491,15 @@ Rollback: Possible via kubectl rollout
 ### **Branch Structure**
 ---
 
-```
-main (production)
-  ↑
-  └─── (tagged releases: v1.2.0, v1.2.1, ...)
-
-develop (staging)
-  ↑
-  └─── feature/auth-email-verification
-  └─── feature/order-cancellation
-  └─── bugfix/search-filter-crash
-  └─── refactor/optimize-queries
-  └─── docs/update-api-docs
+```mermaid
+flowchart BT
+    F1["feature/auth-email-verification"] --> D
+    F2["feature/order-cancellation"] --> D
+    F3["bugfix/search-filter-crash"] --> D
+    F4["refactor/optimize-queries"] --> D
+    F5["docs/update-api-docs"] --> D
+    D["develop (staging)"] -->|release PR| M["main (production)"]
+    M -.->|tagged| T["releases: v1.2.0, v1.2.1, ..."]
 ```
 
 ### **Branch Naming**
@@ -518,12 +515,12 @@ develop (staging)
 ---
 
 **Single-line commits** (for small changes):
-```
+```text
 [ServiceName] Action: Brief description
 ```
 
 **Multi-line commits** (for larger changes):
-```
+```text
 [ServiceName] Action: Brief one-liner
 
 Detailed explanation of what and why.
@@ -558,9 +555,9 @@ Before approving a PR, verify:
 - [ ] No hardcoded secrets (API keys, passwords)
 - [ ] No breaking API changes (or documented)
 - [ ] Follows code patterns from docs/CODE_PATTERNS.md
-- [ ] Adheres to [13 - Validation Rules.md]
+- [ ] Adheres to [13 - Validation Rules.md](13%20-%20Validation%20Rules.md)
 - [ ] Database schema changes have Flyway migrations
-- [ ] New events documented in [9 - Event Catalog.md]
+- [ ] New events documented in [9 - Event Catalog.md](9%20-%20Event%20Catalog.md)
 - [ ] Commit messages are clear & reference docs
 - [ ] PR description explains what & why
 
@@ -858,9 +855,9 @@ class OrderE2ETest {
 ---
 
 **Must follow:**
-- Transactional outbox for events (see [9 - Event Catalog.md])
+- Transactional outbox for events (see [9 - Event Catalog.md](9%20-%20Event%20Catalog.md))
 - Testcontainers for integration tests (not mocks)
-- Jakarta validation annotations (see [13 - Validation Rules.md])
+- Jakarta validation annotations (see [13 - Validation Rules.md](13%20-%20Validation%20Rules.md))
 - Optimistic locking for concurrent updates
 - No hardcoded SQL (use ORM)
 
@@ -898,7 +895,7 @@ class OrderE2ETest {
 ### **Claude's Task Loop**
 ---
 
-```
+```text
 1. Read GitHub Issue
    → Understand requirements, acceptance criteria, linked docs
 
@@ -1031,7 +1028,7 @@ git push --tags
 ### **GitHub Projects Board**
 ---
 
-```
+```text
 Columns:
 - Backlog (not started)
 - In Progress (assigned, being worked on)
@@ -1043,7 +1040,7 @@ Columns:
 ### **Slack Notifications**
 ---
 
-```
+```text
 @channel: Deploy started: v1.2.0 → staging
 @channel: Deploy complete: v1.2.0 → production
 @channel: Deployment failed: core-api rolled back to v1.1.0

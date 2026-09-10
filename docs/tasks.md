@@ -1,9 +1,9 @@
 # ProFinder — Design and Documentation Tasks
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Superseded
-**Purpose:** The original 57-item design-task taxonomy. Kept for reference — live status now lives in [Documentation Roadmap.md](Documentation%20Roadmap.md). Most Phase 1–3 items are done (files 1–15); the checkboxes below are **not** kept current.
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Superseded
+- **Purpose:** The original 57-item design-task taxonomy. Kept for reference — live status now lives in [Documentation Roadmap.md](Documentation%20Roadmap.md). Most Phase 1–3 items are done (files 1–15); the checkboxes below are **not** kept current.
 
 ---
 

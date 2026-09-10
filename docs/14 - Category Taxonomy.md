@@ -1,9 +1,9 @@
 # ProFinder — Category Taxonomy
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** The concrete list of service categories to seed the `categories` table with at launch. The model (flat list, admin-managed CRUD) is defined in [6 - Database Schema.md](6%20-%20Database%20Schema.md) and [7 - Application Classes.md](7%20-%20Application%20Classes.md); this file supplies the **data**. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 "Category taxonomy — seed set".
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** The concrete list of service categories to seed the `categories` table with at launch. The model (flat list, admin-managed CRUD) is defined in [6 - Database Schema.md](6%20-%20Database%20Schema.md) and [7 - Application Classes.md](7%20-%20Application%20Classes.md); this file supplies the **data**. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 "Category taxonomy — seed set".
 
 **Design constraints (already decided):**
 - **Flat list, no hierarchy** — no `parent_id`, no parent/leaf matching ([A4](Documentation%20Roadmap.md)). An order's `category_id` matches a professional only on exact equality.

@@ -1,56 +1,52 @@
 # ProFinder — System Design
 
-**Version:** 1.4
-**Date:** 2026-09-10
-**Status:** Approved
-**Purpose:** Service topology, per-service responsibilities, infrastructure, inter-service communication, the RabbitMQ exchange/queue layout, and deployment/scaling.
+- **Version:** 1.4
+- **Date:** 2026-09-10
+- **Status:** Approved
+- **Purpose:** Service topology, per-service responsibilities, infrastructure, inter-service communication, the RabbitMQ exchange/queue layout, and deployment/scaling.
 
 ---
 
 ## High-Level Architecture
 ---
 
-```
-┌────────────────────────────────────┐
-│   Clients (Web, Mobile)            │
-└──────────────┬─────────────────────┘
-               │
-      ┌────────▼────────┐
-      │ Nginx Gateway   │ (Port 80/443)
-      │ Load Balancing  │
-      └────────┬────────┘
-               │
-   ┌───────────┼───────────┬───────────┬──────────────┐
-   │           │           │           │              │
-   ▼           ▼           ▼           ▼              ▼
-Core API   Auth Service Messaging   Notification   Moderation
-(8080)     (8081)       Service     Service        Service
-Orders     JWT/OAuth    (8082)      (8083)         (8084)
-Users                   WebSocket   Async Tasks    Content Check
-Reviews                                            Rules Engine
+```mermaid
+flowchart TD
+    Clients["Clients (Web, Mobile)"] --> GW["Nginx Gateway<br/>Port 80/443 · Load Balancing"]
 
-   │           │           │           │
-   └───────────┼───────────┴───────────┘
-               │
-   ┌───────────┴───────────┐
-   │                       │
-   ▼                       ▼
-Message Queue           PostgreSQL
-(RabbitMQ)              (Shared)
-   │
-   ├─→ Notification Service (in-app + push + email)
-   ├─→ Core API indexing consumer (Elasticsearch upsert)
-   └─→ Moderation Workers (async checks — Phase 2)
+    GW --> Core & Auth & Msg & Notif & Mod
 
-Infrastructure Layers:
-   ┌──────────┬──────────┬──────────┬──────────────┬──────────┐
-   │          │          │          │              │          │
-   ▼          ▼          ▼          ▼              ▼          ▼
-PostgreSQL Elasticsearch  Redis   MinIO      RabbitMQ    ML Models
-(Data)     (Search)     (Cache)  (Files)   (Messages)  (Phase 2 —
-                                                       external:
-                                                       Google Cloud,
-                                                       AWS Rekognition)
+    Core["Core API :8080<br/>Orders · Users · Reviews"]
+    Auth["Auth Service :8081<br/>JWT / OAuth"]
+    Msg["Messaging Service :8082<br/>WebSocket"]
+    Notif["Notification Service :8083<br/>Async Tasks"]
+    Mod["Moderation Service :8084<br/>Content Check · Rules Engine"]
+
+    Core --> MQ & PG
+    Auth --> MQ & PG
+    Msg --> MQ & PG
+    Notif --> PG
+    Mod --> MQ & PG
+
+    MQ["Message Queue<br/>(RabbitMQ)"]
+    PG[("PostgreSQL<br/>(shared)")]
+
+    MQ --> C1["Notification Service<br/>in-app + push + email"]
+    MQ --> C2["Core API indexing consumer<br/>Elasticsearch upsert"]
+    MQ --> C3["Moderation Workers<br/>async checks — Phase 2"]
+
+    subgraph Infra["Infrastructure Layers"]
+        direction LR
+        I1[("PostgreSQL<br/>Data")]
+        I2[("Elasticsearch<br/>Search")]
+        I3[("Redis<br/>Cache")]
+        I4[("MinIO<br/>Files")]
+        I5["RabbitMQ<br/>Messages"]
+        I6["ML Models<br/>Phase 2 — external:<br/>Google Cloud, AWS Rekognition"]
+    end
+
+    classDef phase2 fill:#f4f4f4,stroke:#999,color:#888;
+    class Mod,C3,I6 phase2;
 ```
 
 > **MVP note:** `Moderation Workers` and the external `ML Models` box are **Phase 2**. In the MVP,
@@ -346,7 +342,7 @@ Executed immediately when content is submitted. Must complete in < 200ms.
 4. **Rate Limiting** - Detect user spamming (same content repeated)
 
 **Request/Response Example:**
-```
+```text
 POST /moderation/check-text
 {
   "text": "Check out my review...",
@@ -374,7 +370,7 @@ Executed in background after content is stored. Runs via RabbitMQ workers.
 4. **Deep Content Analysis** - Custom ML models (1-2s)
 
 **Workflow:**
-```
+```text
 1. User creates review with photo
    POST /reviews → Core API
    
@@ -463,7 +459,7 @@ moderation_rules:
 ### Metrics & Analytics
 ---
 
-```
+```text
 GET /moderation/analytics
 {
   "period": "2026-08-01 to 2026-08-16",

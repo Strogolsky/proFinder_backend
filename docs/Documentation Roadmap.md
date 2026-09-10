@@ -1,9 +1,9 @@
 # ProFinder — Documentation Roadmap
 
-**Version:** 3.0
-**Date:** 2026-09-10
-**Status:** Living
-**Purpose:** Track everything still needed to make the project fully documented before implementation.
+- **Version:** 3.0
+- **Date:** 2026-09-10
+- **Status:** Living
+- **Purpose:** Track everything still needed to make the project fully documented before implementation.
 
 This file complements [tasks.md](tasks.md) (the original 57-item design-task checklist). The detailed
 business-logic questions that used to live in a separate "5 - Questions for Complete Business Logic"

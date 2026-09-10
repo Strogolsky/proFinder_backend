@@ -1,9 +1,9 @@
 # ProFinder — Elasticsearch Mapping
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** The two Elasticsearch indexes — `professionals` and `orders` — their field mappings, analyzers, how each document is assembled from PostgreSQL, and how the queries behind [FR-Search](2%20-%20Requirements.md) map onto them. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 "Elasticsearch mapping".
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** The two Elasticsearch indexes — `professionals` and `orders` — their field mappings, analyzers, how each document is assembled from PostgreSQL, and how the queries behind [FR-Search](2%20-%20Requirements.md) map onto them. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 "Elasticsearch mapping".
 
 **Sources:** [4 - Business logic.md § Search and Discovery / § Professional Rating / § Elasticsearch Sync](4%20-%20Business%20logic.md), [2 - Requirements.md § FR-Search](2%20-%20Requirements.md), [6 - Database Schema.md](6%20-%20Database%20Schema.md), [8 - API Specification.md § Search](8%20-%20API%20Specification.md), [9 - Event Catalog.md](9%20-%20Event%20Catalog.md) (`search.professional_reindex`, `search.order_reindex`), [7 - Application Classes.md § 1.5 Search](7%20-%20Application%20Classes.md) (`SearchIndexConsumer`, `SearchService`).
 
@@ -140,7 +140,7 @@ The API returns **only** these fields to `SearchResultCardDto` ([FR-Search-10](2
 ### 3.4 Document assembly — `SearchIndexConsumer` on `search.professional_reindex`
 ---
 
-```
+```text
 on message { professional_id, version, reason }:
     dedupe: INSERT processed_events (event_id, "search-indexer") -- skip if present
 
@@ -242,7 +242,7 @@ Backs the professional's "browse open orders" screen (`GET /orders?category_id=&
 ### 4.2 Document assembly — `SearchIndexConsumer` on `search.order_reindex`
 ---
 
-```
+```text
 on message { order_id, version, reason }:
     dedupe on (event_id, "search-indexer")
 
@@ -268,7 +268,7 @@ on message { order_id, version, reason }:
 
 Professional browsing open orders:
 
-```
+```text
 bool:
   filter:
     - term  category_id = {category_id}        # constrained to one of the pro's own categories

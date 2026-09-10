@@ -1,9 +1,9 @@
 # ProFinder — Application Classes (MVC)
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** Every application-layer class to build, grouped by microservice (see [3 - System Design.md](3%20-%20System%20Design.md)) and then by domain module within each service. Layers: **Entity → Repository → Service → Controller → DTO**.
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** Every application-layer class to build, grouped by microservice (see [3 - System Design.md](3%20-%20System%20Design.md)) and then by domain module within each service. Layers: **Entity → Repository → Service → Controller → DTO**.
 
 **Conventions:**
 - **Entity** rows only name the class and which table it maps to — columns are **not** repeated here, see [6 - Database Schema.md](6%20-%20Database%20Schema.md).

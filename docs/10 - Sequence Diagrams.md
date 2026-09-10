@@ -1,9 +1,9 @@
 # ProFinder — Sequence Diagrams
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** Mermaid `sequenceDiagram` for every cross-service flow that isn't obvious from a single endpoint — the choreography between Client, the 5 services, and the infrastructure (PostgreSQL, Redis, Elasticsearch, MinIO, RabbitMQ, FCM, SMTP, Google). [Documentation Roadmap.md](Documentation%20Roadmap.md) Block C "Sequence" row.
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** Mermaid `sequenceDiagram` for every cross-service flow that isn't obvious from a single endpoint — the choreography between Client, the 5 services, and the infrastructure (PostgreSQL, Redis, Elasticsearch, MinIO, RabbitMQ, FCM, SMTP, Google). [Documentation Roadmap.md](Documentation%20Roadmap.md) Block C "Sequence" row.
 
 **Sources:** [3 - System Design.md](3%20-%20System%20Design.md), [4 - Business logic.md](4%20-%20Business%20logic.md), [7 - Application Classes.md](7%20-%20Application%20Classes.md), [8 - API Specification.md](8%20-%20API%20Specification.md), [9 - Event Catalog.md](9%20-%20Event%20Catalog.md).
 

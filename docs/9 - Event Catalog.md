@@ -1,9 +1,9 @@
 # ProFinder — Event Catalog
 
-**Version:** 1.3
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** Every asynchronous domain event on the RabbitMQ bus — routing key, producer, trigger, consumers, payload schema, and idempotency contract. Tier 1 item from [Documentation Roadmap.md](Documentation%20Roadmap.md) (Block B → "Event Catalog + payload schemas").
+- **Version:** 1.3
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** Every asynchronous domain event on the RabbitMQ bus — routing key, producer, trigger, consumers, payload schema, and idempotency contract. Tier 1 item from [Documentation Roadmap.md](Documentation%20Roadmap.md) (Block B → "Event Catalog + payload schemas").
 
 **Sources reconciled here:**
 [3 - System Design.md § Core API → RabbitMQ / § RabbitMQ Queues & Exchanges](3%20-%20System%20Design.md),

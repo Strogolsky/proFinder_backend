@@ -1,9 +1,9 @@
 # ProFinder — Business Logic
 
-**Version:** 3.6
-**Date:** 2026-09-10
-**Status:** In Progress
-**Purpose:** The authoritative business rules — order lifecycle, reviews, ratings, reports/appeals, auth, profiles, search, messaging, notifications, account deletion, concurrency, caching. All the "why", not the wire format.
+- **Version:** 3.6
+- **Date:** 2026-09-10
+- **Status:** In Progress
+- **Purpose:** The authoritative business rules — order lifecycle, reviews, ratings, reports/appeals, auth, profiles, search, messaging, notifications, account deletion, concurrency, caching. All the "why", not the wire format.
 
 ---
 
@@ -13,20 +13,22 @@
 ### Three Core Statuses
 ---
 
-```
-    ┌──────────┐
-    │  DRAFT   │ (unpublished, editable, hard-deletable)
-    └────┬─────┘
-         │
-         ▼
-    ┌──────────┐
-    │  ACTIVE  │ (published, open for responses)
-    └────┬─────┘
-         │
-         ▼
-    ┌──────────┐
-    │  CLOSED  │ (completed, final — no reopening)
-    └──────────┘
+```mermaid
+stateDiagram-v2
+    [*] --> DRAFT
+    DRAFT --> ACTIVE
+    ACTIVE --> CLOSED
+    CLOSED --> [*]
+
+    note left of DRAFT
+        unpublished, editable, hard-deletable
+    end note
+    note left of ACTIVE
+        published, open for responses
+    end note
+    note left of CLOSED
+        completed, final — no reopening
+    end note
 ```
 
 There is no "delete" action for published orders and no soft-delete/recovery mechanism. A customer's only way to end an order is to **close** it. CLOSED is final — an order can never go back to ACTIVE.

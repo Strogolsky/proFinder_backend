@@ -1,9 +1,9 @@
 # ProFinder — Validation Rules
 
-**Version:** 1.2
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** One consolidated table of every API input field — type, whether it's required, its constraints (length / range / format / allowed values), and the error it raises. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 "Validation rules".
+- **Version:** 1.2
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** One consolidated table of every API input field — type, whether it's required, its constraints (length / range / format / allowed values), and the error it raises. [Documentation Roadmap.md](Documentation%20Roadmap.md) Tier 2 "Validation rules".
 
 **Mechanism:** Jakarta Bean Validation ([2 § Tech Stack](2%20-%20Requirements.md)) on request DTOs. A failure returns `400 VALIDATION_ERROR` with `details` as a `{field: reason}` map ([8 § Response Envelope](8%20-%20API%20Specification.md)). Domain rules that need a DB lookup (uniqueness, existence, cross-row invariants) are checked in the service layer and may raise a domain-specific code.
 

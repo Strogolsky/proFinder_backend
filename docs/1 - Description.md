@@ -1,9 +1,9 @@
 # ProFinder — Project Overview
 
-**Version:** 1.1
-**Date:** 2026-09-10
-**Status:** In Development
-**Purpose:** One-page description of what ProFinder is, who it serves, and its core feature set.
+- **Version:** 1.1
+- **Date:** 2026-09-10
+- **Status:** In Development
+- **Purpose:** One-page description of what ProFinder is, who it serves, and its core feature set.
 
 ---
 

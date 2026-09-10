@@ -1,9 +1,9 @@
 # ProFinder — Requirements
 
-**Version:** 1.6
-**Date:** 2026-09-10
-**Status:** In Development
-**Purpose:** Complete MVP requirements — functional requirements, non-functional requirements, use cases, scope, and the technology stack. Backend focus.
+- **Version:** 1.6
+- **Date:** 2026-09-10
+- **Status:** In Development
+- **Purpose:** Complete MVP requirements — functional requirements, non-functional requirements, use cases, scope, and the technology stack. Backend focus.
 
 ---
 
@@ -708,7 +708,7 @@ ProFinder is a free marketplace platform that connects customers with profession
 | CI/CD | **GitHub Actions** | Automated | Test, build, scan, deploy |
 
 **Test Execution:**
-```
+```text
 1. Unit tests (fast, isolated)
 2. Integration tests (with real DB via Testcontainers)
 3. Code coverage check (80%+ required)
@@ -763,7 +763,7 @@ ProFinder is a free marketplace platform that connects customers with profession
 | Registry | **GitHub Container Registry** | Private image storage |
 
 **Docker Setup:**
-```
+```text
 Development: docker-compose up
 Production: Single server with Docker
 Scaling: Add Kubernetes in Phase 2

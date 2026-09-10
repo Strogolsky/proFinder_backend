@@ -1,9 +1,9 @@
 # ProFinder — API Specification
 
-**Version:** 1.8
-**Date:** 2026-09-10
-**Status:** Stable
-**Purpose:** Every REST endpoint across the 5 services (path, method, auth, request/response shape) plus the Error Catalog those endpoints reference. The Error Catalog lives here (not as its own file) because error codes only exist to serve API responses.
+- **Version:** 1.8
+- **Date:** 2026-09-10
+- **Status:** Stable
+- **Purpose:** Every REST endpoint across the 5 services (path, method, auth, request/response shape) plus the Error Catalog those endpoints reference. The Error Catalog lives here (not as its own file) because error codes only exist to serve API responses.
 
 Referenced from [Documentation Roadmap.md](Documentation%20Roadmap.md) (Block B, Tier 1 — "API Specification" + "Error Catalog", now one item). Endpoints are organized by service (Core API, Auth, Messaging, Notification, Moderation), matching [3 - System Design.md](3%20-%20System%20Design.md) and the Controller classes in [7 - Application Classes.md](7%20-%20Application%20Classes.md).
 

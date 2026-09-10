@@ -5,8 +5,8 @@ both ways** with the [GitHub Wiki](https://github.com/Strogolsky/proFinder_backe
 
 ## How the sync works
 
-The [`.github/workflows/wiki-sync.yml`](../.github/workflows/wiki-sync.yml) workflow
-uses [`newrelic/wiki-sync-action`](https://github.com/newrelic/wiki-sync-action):
+The [`.github/workflows/wiki-sync.yml`](https://github.com/Strogolsky/proFinder_backend/blob/develop/.github/workflows/wiki-sync.yml)
+workflow uses [`newrelic/wiki-sync-action`](https://github.com/newrelic/wiki-sync-action):
 
 | Trigger | Direction |
 | --- | --- |
@@ -18,42 +18,33 @@ pages directly in the browser — the other side is updated within a minute.
 
 ## File / page naming
 
-GitHub Wiki maps file names to page titles:
+GitHub Wiki maps file names to page titles 1:1 (the sync action does **not** rename
+files or rewrite links):
 
 * `Home.md` is the Wiki landing page — keep it.
-* `Some-Page.md` becomes the page **"Some Page"** at `.../wiki/Some-Page`.
 * `_Sidebar.md` / `_Footer.md` render as the Wiki sidebar / footer.
-* Use `[[Page Title]]` or `[[text|Page-Name]]` for links between Wiki pages;
-  they also work as relative links when browsed in the repo.
+* `1 - Description.md` becomes the page **"1 - Description"**; cross-links use the
+  URL-encoded relative form `[Description](1%20-%20Description.md)` — literally
+  `%20` for each space. Heading anchors (`#some-heading`) use GitHub's slug rules
+  and work on both sides.
+* Subfolders are flattened into the page name by the action, so keep `docs/` flat.
 
-Subfolders are supported but flattened into the page name by the action, so prefer
-a flat layout with `-` separated names.
+## Migrated from Obsidian
 
-## Migrating from Obsidian
+The pages here came from an Obsidian vault. What was done / to keep in mind:
 
-Mostly works, because both Obsidian and GitHub Wiki understand `[[wikilinks]]`.
-Watch out for the following and fix them before / during the move:
-
-* **Flatten the vault.** Put every note directly in `docs/` with unique,
-  `Kebab-Case` names. GitHub Wiki is effectively flat and the sync action
-  flattens subfolders into the page name.
-* **Rename files with spaces.** `My Note.md` &rarr; `My-Note.md`. Update the
-  `[[links]]` to match (or keep `[[My Note]]` — Wiki resolves by title, but be
-  consistent).
-* **Embeds are not supported.** `![[Other Note]]` transclusion does not render on
-  GitHub Wiki — inline the content or replace with a plain `[[Other Note]]` link.
-* **Images / attachments.** Move them into `docs/` (e.g. `docs/img/`) and use
-  standard Markdown: `![alt](img/diagram.png)`. `![[diagram.png]]` will not render.
-* **Strip YAML frontmatter** (`---` blocks) or expect it to show up as a table at
-  the top of the Wiki page.
-* **Callouts** `> [!NOTE]` render as GitHub alerts in the repo but not on the Wiki
-  (they degrade to a normal blockquote — acceptable).
-* **Plugin syntax** (Dataview, Tasks, Templater, Mermaid via plugin, etc.) will not
-  execute. Plain ```mermaid``` fenced blocks do render on GitHub.
-* Keep one **`Home.md`** as the landing page.
-
-A safe path: copy the vault into `docs/`, do the renames and link fixes locally,
-open a PR, review the rendered Markdown on GitHub, then merge.
+* File names were kept as-is (numbered `N - Title.md`) so the ~400 existing
+  cross-links keep working. Links use the plain Markdown link form with
+  `%20`-encoded spaces in the target — no Obsidian `[[wikilinks]]` or `![[embeds]]` were used,
+  so nothing to convert.
+* No YAML frontmatter in these files — nothing to strip.
+* Fenced `mermaid` code blocks (files 5, 6, 10) render natively on GitHub in both
+  the repo and the Wiki.
+* The Excalidraw file (`*.excalidraw.md`) was **excluded** — it only renders inside
+  Obsidian. Export diagrams to SVG/PNG into `docs/img/` and embed them with a
+  standard Markdown image tag if they are needed.
+* Obsidian callouts `> [!NOTE]` would degrade to a plain blockquote on the Wiki
+  (acceptable) — none are currently used.
 
 ## One-time setup (already done, kept here for reference)
 

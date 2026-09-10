@@ -7,8 +7,6 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/wiki-sync.yml'
-  # Wiki -> docs/
-  gollum:
 
 defaults:
   run:
@@ -33,22 +31,3 @@ jobs:
           token: ${{ secrets.WIKI_ACTION_TOKEN }}
           gitAuthorName: ${{ github.actor }}
           gitAuthorEmail: ${{ github.actor }}@users.noreply.github.com
-  # -------------------------------------------------------------
-  wiki-to-docs:
-    if: github.event_name == 'gollum'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.WIKI_ACTION_TOKEN }}
-
-      - name: Sync Wiki to docs/
-        uses: newrelic/wiki-sync-action@main
-        with:
-          source: wiki
-          destination: docs
-          token: ${{ secrets.WIKI_ACTION_TOKEN }}
-          branch: develop
-          gitAuthorName: ${{ github.actor }}
-          gitAuthorEmail: ${{ github.actor }}@users.noreply.github.com
-          commitMessage: 'docs: sync from wiki'

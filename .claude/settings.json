@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "bash:mvn",
+      "bash:./mvnw",
+      "bash:git",
+      "bash:docker",
+      "bash:docker-compose",
+      "bash:find",
+      "bash:grep",
+      "bash:cat",
+      "bash:ls"
+    ]
+  },
+  "hooks": {
+    "post-edit-file": [
+      {
+        "extensions": [".java"],
+        "command": "mvn -B checkstyle:checkstyle --fail-at-end 2>&1 | grep -E '(ERROR|\\[ERROR\\])' || true"
+      }
+    ]
+  }
+}

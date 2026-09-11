@@ -15,6 +15,11 @@
         <quarkus.platform.version>3.18.3</quarkus.platform.version>
         <skipITs>true</skipITs>
         <surefire-plugin.version>3.5.2</surefire-plugin.version>
+
+        <!-- SonarQube Configuration -->
+        <sonar.organization>${env.SONAR_ORGANIZATION}</sonar.organization>
+        <sonar.projectKey>${env.SONAR_PROJECT_KEY}</sonar.projectKey>
+        <sonar.host.url>${env.SONAR_HOST_URL}</sonar.host.url>
     </properties>
 
     <dependencyManagement>

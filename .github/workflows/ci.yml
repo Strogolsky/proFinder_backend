@@ -92,6 +92,14 @@ jobs:
       - name: Run Checkstyle
         run: mvn -B checkstyle:checkstyle
 
+      - name: Upload Checkstyle Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checkstyle-report
+          path: target/checkstyle-result.xml
+          retention-days: 7
+
   # ========== SONARQUBE ==========
   sonarqube:
     runs-on: ubuntu-latest
@@ -111,14 +119,15 @@ jobs:
         run: mvn -B clean verify sonar:sonar
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-        continue-on-error: true
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
 
       - name: Check SonarQube quality gate
         uses: sonarsource/sonarqube-quality-gate-action@v1.2.0
         env:
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-        continue-on-error: true
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
   # ========== OWASP DEPENDENCY CHECK ==========
   owasp:
@@ -134,5 +143,6 @@ jobs:
           cache: maven
 
       - name: OWASP Dependency Check
-        run: mvn -B org.owasp:dependency-check-maven:check
-        continue-on-error: true
+        run: mvn -B org.owasp:dependency-check-maven:check -Ddependency-check.nvd.api.key=${{ secrets.NVD_API_KEY }}
+        env:
+          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}

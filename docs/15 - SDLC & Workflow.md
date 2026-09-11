@@ -568,26 +568,29 @@ Before approving a PR, verify:
 ### **Workflows**
 ---
 
-CI/CD is split into 4 separate workflows for clarity and efficiency:
+CI/CD is split into 3 separate workflows:
 
-| Workflow | Trigger | Purpose | Duration |
-|----------|---------|---------|----------|
-| **test.yml** | Push + PR (all branches) | Unit + Integration tests | ~3-5 min |
-| **quality.yml** | PR only | Checkstyle + SonarQube + OWASP | ~5-10 min |
-| **e2e.yml** | Push to develop | Full E2E tests (docker-compose) | ~10-20 min |
-| **deploy.yml** | Git tags (v*) | Build + Push Docker + Deploy | ~5-10 min |
+| Workflow | Trigger | Purpose | Duration | Jobs |
+|----------|---------|---------|----------|------|
+| **ci.yml** | Push + PR (all branches) | Build → Test → Quality (3 sequential jobs) | ~10-15 min | build, test, quality |
+| **e2e.yml** | Push to develop | Full E2E tests (docker-compose) | ~10-20 min | e2e |
+| **deploy.yml** | Git tags (v*) | Build + Push Docker + Deploy | ~5-10 min | deploy |
 
 ---
 
-#### **test.yml** — Runs on every push/PR
+#### **ci.yml** — Build + Test + Quality (3 Sequential Jobs)
 ---
 
 **Triggers:** `on: [push, pull_request]`
 
-**Runs:** Compile + Unit tests + Integration tests (with real PostgreSQL, Redis, Elasticsearch)
+**Runs:** Three sequential jobs:
+1. **build** — compile sources (~2 min)
+2. **test** — unit + integration tests (~5 min)
+3. **quality** — checkstyle + sonarqube (~5 min)
 
 ```yaml
-name: Test
+name: CI
+
 on:
   push:
     branches: [ '**' ]
@@ -595,22 +598,44 @@ on:
     branches: [ '**' ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: password
-      rabbitmq:
-        image: rabbitmq:3.12
-      redis:
-        image: redis:7
-      elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:8.9.0
-        env:
-          discovery.type: single-node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          cache: maven
+      - run: mvn -B clean test-compile -Dmaven.test.skip=true
+      - run: mvn -B clean verify
+      - run: mvn -B checkstyle:checkstyle
+```
 
+**What it does:**
+- Compiles all sources
+- Runs unit + integration tests (with real PostgreSQL, Redis, Elasticsearch)
+- Runs checkstyle checks
+- Runs SonarQube analysis
+- Uploads coverage to Codecov
+
+---
+
+#### **e2e.yml** — End-to-End Tests on Develop
+---
+
+**Triggers:** `on: [push]` to `develop` branch only
+
+**Runs:** Full E2E tests using docker-compose
+
+```yaml
+name: E2E Tests
+on:
+  push:
+    branches: [ develop ]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
